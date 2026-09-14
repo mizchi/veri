@@ -11,6 +11,13 @@ test "persistent list operations preserve their inputs" {
 }
 
 ///|
+test "length handles a long list without recursive call-stack growth" {
+  let values = Array::makei(20000, i => i)
+  let xs = @list.from_array(values)
+  assert_eq(@list.length(xs), values.length())
+}
+
+///|
 test "quickcheck: persistent list append and reverse agree with arrays" {
   @quickcheck.check(
     (input : (Array[Int], Array[Int])) => {

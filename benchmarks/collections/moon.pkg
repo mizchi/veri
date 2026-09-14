@@ -1,0 +1,15 @@
+import {
+  "moonbitlang/core/bench",
+  "moonbitlang/core/list" @core_list,
+  "moonbitlang/core/queue" @core_queue,
+  "moonbitlang/core/priority_queue" @core_pqueue,
+  "moonbitlang/core/immut/priority_queue" @core_immut_pqueue,
+  "moonbitlang/core/immut/sorted_set" @core_set,
+  "moonbitlang/core/cmp",
+  "mizchi/veri/runtime/list" @linked,
+  "mizchi/veri/runtime/stack",
+  "mizchi/veri/runtime/queue",
+  "mizchi/veri/runtime/pqueue",
+  "mizchi/veri/runtime/bintree" @tree,
+  "mizchi/veri/runtime/bintree/search",
+} for "wbtest"

@@ -2,21 +2,28 @@
 package "mizchi/veri/runtime/bintree/search"
 
 import {
-  "mizchi/veri/runtime/bintree",
+  "mizchi/veri/bintree",
 }
 
 // Values
-pub fn contains(@bintree.Tree[Int], Int) -> Bool
+pub fn contains(SearchTree, Int) -> Bool
 
-pub fn empty() -> @bintree.Tree[Int]
+pub fn empty() -> SearchTree
 
-pub fn insert(@bintree.Tree[Int], Int) -> @bintree.Tree[Int]
+pub fn insert(SearchTree, Int) -> SearchTree
 
-pub fn valid(@bintree.Tree[Int]) -> Bool
+pub fn model(SearchTree) -> @bintree.Tree[Int]
+
+pub fn to_array(SearchTree) -> Array[Int]
+
+pub fn valid(SearchTree) -> Bool
 
 // Errors
 
 // Types and methods
+pub struct SearchTree {
+  // private fields
+}
 
 // Type aliases
 

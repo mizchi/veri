@@ -1,9 +1,11 @@
 ///|
+#valtype
 pub struct Stack[T] {
   priv contents : @linked.List[T]
 }
 
 ///|
+#inline
 pub fn[T] empty() -> Stack[T] where {
   proof_ensure: result => @logic_list.is_empty(model(result)),
 } {
@@ -11,6 +13,8 @@ pub fn[T] empty() -> Stack[T] where {
 }
 
 ///|
+#owned(stack, value)
+#inline
 pub fn[T] push(
   stack : Stack[T],
   value : T,
@@ -23,6 +27,8 @@ pub fn[T] push(
 }
 
 ///|
+#owned(stack)
+#inline
 pub fn[T] pop(
   stack : Stack[T],
 ) -> (T, Stack[T])? where {
@@ -34,13 +40,14 @@ pub fn[T] pop(
     }
   },
 } {
-  match @linked.uncons(stack.contents) {
-    None => None
-    Some((value, rest)) => Some((value, { contents: rest, }))
+  match stack.contents {
+    Nil => None
+    Cons(value, rest) => Some((value, { contents: rest, }))
   }
 }
 
 ///|
+#inline
 pub fn[T] peek(
   stack : Stack[T],
 ) -> T? where {
@@ -53,13 +60,14 @@ pub fn[T] peek(
     }
   },
 } {
-  match @linked.uncons(stack.contents) {
-    None => None
-    Some((value, _)) => Some(value)
+  match stack.contents {
+    Nil => None
+    Cons(value, _) => Some(value)
   }
 }
 
 ///|
+#inline
 pub fn[T] is_empty(
   stack : Stack[T],
 ) -> Bool where {

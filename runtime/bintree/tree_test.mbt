@@ -87,3 +87,15 @@ test "quickcheck: binary tree traversal matches the recursive array model" {
     seed=20260914,
   )
 }
+
+///|
+test "inorder handles a deep left spine without repeated concatenation" {
+  let mut tree : @bintree.Tree[Int] = @bintree.Empty
+  for value in 0..<20000 {
+    tree = @bintree.Node(tree, value, @bintree.Empty)
+  }
+  assert_eq(
+    @linked.to_array(@bintree.inorder(tree)),
+    Array::makei(20000, i => i),
+  )
+}

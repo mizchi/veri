@@ -70,3 +70,17 @@ test "quickcheck: minimum queue traces agree with sorting and core PriorityQueue
     seed=20260914,
   )
 }
+
+///|
+test "ascending insertion scales without a linear recursive spine" {
+  let mut queue = @pqueue.empty()
+  for value in 0..<12000 {
+    queue = @pqueue.push(queue, value)
+  }
+  for value in 0..<12000 {
+    let (actual, rest) = @pqueue.pop(queue).unwrap()
+    assert_eq(actual, value)
+    queue = rest
+  }
+  assert_true(@pqueue.is_empty(queue))
+}

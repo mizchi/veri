@@ -1,28 +1,56 @@
 ///|
-predicate all_lt(tree : @tree.Tree[Int], value : Int) {
-  ∀ other : Int, @logic_tree.mem(other, @tree.model(tree)) → other < value
-}
-
-///|
-predicate all_gt(tree : @tree.Tree[Int], value : Int) {
-  ∀ other : Int, @logic_tree.mem(other, @tree.model(tree)) → value < other
-}
-
-///|
-/// Strict search-tree order, with no duplicates. No balancing invariant.
-pub predicate valid(tree : @tree.Tree[Int]) {
+fn node_model(tree : Node) -> @logic_tree.Tree[Int] {
   match tree {
-    Empty => true
-    Node(left, value, right) => valid(left) && valid(right) && all_lt(left, value) && all_gt(right, value)
+    Empty => @logic_tree.empty()
+    Branch(_color, left, key, right) => @logic_tree.node(node_model(left), key, node_model(right))
   }
 }
 
 ///|
-fn expected_member(tree : @tree.Tree[Int], value : Int, other : Int) -> Bool {
-  other == value || @logic_tree.mem(other, @tree.model(tree))
+pub fn model(tree : SearchTree) -> @logic_tree.Tree[Int] {
+  node_model(tree.root)
 }
 
 ///|
-predicate inserted(before : @tree.Tree[Int], value : Int, after : @tree.Tree[Int]) {
-  ∀ other : Int, @logic_tree.mem(other, @tree.model(after)) == expected_member(before, value, other)
+predicate all_lt(tree : Node, value : Int) {
+  ∀ other : Int, @logic_tree.mem(other, node_model(tree)) → other < value
+}
+
+///|
+predicate all_gt(tree : Node, value : Int) {
+  ∀ other : Int, @logic_tree.mem(other, node_model(tree)) → value < other
+}
+
+///|
+predicate ordered(tree : Node) {
+  match tree {
+    Empty => true
+    Branch(_color, left, value, right) => ordered(left) && ordered(right) && all_lt(left, value) && all_gt(right, value)
+  }
+}
+
+///|
+/// Strict search order, with no duplicates. Color balance is checked in tests.
+pub predicate valid(tree : SearchTree) {
+  ordered(tree.root)
+}
+
+///|
+predicate same_members(before : Node, after : Node) {
+  ∀ other : Int, @logic_tree.mem(other, node_model(after)) == @logic_tree.mem(other, node_model(before))
+}
+
+///|
+fn expected_member(tree : Node, value : Int, other : Int) -> Bool {
+  other == value || @logic_tree.mem(other, node_model(tree))
+}
+
+///|
+predicate inserted_node(before : Node, value : Int, after : Node) {
+  ∀ other : Int, @logic_tree.mem(other, node_model(after)) == expected_member(before, value, other)
+}
+
+///|
+predicate inserted(before : SearchTree, value : Int, after : SearchTree) {
+  inserted_node(before.root, value, after.root)
 }

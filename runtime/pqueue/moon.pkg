@@ -1,6 +1,6 @@
 import {
-  "mizchi/veri/runtime/list" @linked,
   "mizchi/veri/bag",
+  "mizchi/veri/integer",
 }
 
 import {

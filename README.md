@@ -21,10 +21,14 @@ To run individual checks:
 just prove         # Prove both workspace modules: MoonBit → Why3 → SMT
 just prove-machine # Prove bounds, runtime bridges, and their example with machine integers
 just prove-collections-machine # Prove collection implementations and clients with machine integers
+just core-capabilities # Probe direct calls to core from contracted functions
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just negative      # Check that deliberately false claims in each model are not proved
 just test js       # Run runtime checks
 just quickcheck js # Run only the QuickCheck properties
+just bench native # Compare collections with core; save timings and ratios
+just bench-backends # Run the comparisons sequentially on all four backends
+just bench-check native 1.0 # Fail unless both measurement orders meet the ratio limit
 just test-backends # JS / wasm / wasm-gc / native
 just test-release  # Run the same checks in optimized builds
 just fp-capabilities # Report native Float/Double proof-lowering support
@@ -130,9 +134,9 @@ An incorrect zero sign or a difference of even 1 ULP in a finite value fails the
 
 ## QuickCheck properties
 
-The 32 positive properties under `bounds/` and `runtime/` use
+The 33 positive properties under `bounds/` and `runtime/` use
 `moonbitlang/core/quickcheck`, each running 1,000 accepted cases with seed
-`20260914`. Generated sizes grow up to 64, or 128 for operation traces. They run
+`20260914`. Generated sizes grow up to 64, or 128 for operation traces and red-black balance. They run
 with `just quickcheck js` (or `wasm`, `wasm-gc`, `native`) and are also included
 in `just test`, `just test-backends`, `just test-release`, and `just verify`.
 
@@ -182,8 +186,56 @@ minimal counterexample for every property.
 
 A separate regression test uses `@quickcheck.report` on the deliberately false
 claim that all pushed values are less than 3, then checks that the report contains
-`counterexample=[Push(3)]`. This is the 33rd `quickcheck:*` test and verifies the
+`counterexample=[Push(3)]`. This is an intentionally false `quickcheck:*` test and verifies the
 failure/shrinking path; it is not counted as a successful 1,000-case property.
+
+## Collection benchmarks
+
+`benchmarks/collections` uses [MoonBit's benchmark API](https://docs.moonbitlang.com/en/latest/language/benchmarks.html)
+through `moon bench --release --no-parallelize`. It measures 12 workloads at
+256 and 2,048 elements, producing 30 comparisons per backend. Each implementation
+runs in two opposite orders with five calibrated batches per pass. Results are
+kept with `Bench.keep`, and exact output equality is checked before timing on
+the same optimized backend. Empty inputs and repeated calls are also tested.
+
+| Workload | Core comparison | Timed work |
+| --- | --- | --- |
+| List | `core/list` | Reverse/append followed by array conversion; length |
+| Stack | `core/list`, built-in `Array` | Push all elements, then drain into a fresh array |
+| Queue | `core/queue` | Push and drain; repeated peek on a prebuilt queue |
+| Minimum priority queue | `core/immut/priority_queue`, `core/priority_queue`, both using `Reverse[Int]` | Push and drain, including duplicates, shuffled and ascending inputs |
+| BST | `core/immut/sorted_set` | Insert, then query every key and equally many missing keys, with shuffled and ascending insertion |
+| Binary-tree traversal | `core/immut/sorted_set` | Materialize the same ordered unique contents from balanced and left-skewed trees |
+
+The generic binary tree has no direct core counterpart here; its comparator
+performs ordered enumeration, not arbitrary-shape tree manipulation. Mutable
+baselines are used with one current state and no retained snapshots; no copying
+is charged to simulate persistence. Input generation and read-only fixture
+construction are outside timing; build/drain and build/find workloads include
+their own fresh construction and output work. Repeated peek uses the same queue
+without popping; the updated queue normalizes on mutation and avoids repeated reversal. A compiler may
+hoist repeated reads; these are timings of the optimized workload, not isolated
+function-call latency.
+
+`just bench native` (or `js`, `wasm`, `wasm-gc`) saves raw output, JSON summaries,
+and a Markdown comparison under `_build/benchmarks/collections-<target>.*`.
+The report records toolchain, CPU, OS, repository revision, and a fingerprint of
+the installed core sources, plus separate SHA-256 hashes of runtime and benchmark sources. Times are the mean of the two batch medians in
+microseconds; the ratio is **veri/core**, so values above 1 mean slower. The
+paired ratio range describes order variation and is not a confidence interval.
+Missing results, invalid timings, and failed benchmark processes fail reporting.
+
+`just bench-check native 1.0` performs a fresh measurement and exits nonzero if
+any comparison exceeds the supplied limit in either order. Results straddling
+the limit are inconclusive and also fail this check. Benchmarks are separate
+from `just verify`, since timing depends on hardware and system load.
+
+The [recorded measurements](benchmarks/collections/RESULTS.md) show that the
+current implementations **do not meet a universal no-slowdown target**. These
+comparisons include representation, allocation, and algorithm differences; they
+do not isolate proof-contract overhead. Proof-only `seq/list/bag/fmap/bintree`
+bindings have no runtime operations to benchmark. Rerun on your deployment
+backend and workload before relying on a performance comparison.
 
 ## Collection models and implementations
 
@@ -204,27 +256,60 @@ index. `fmap.find` is meaningful only when `mem(key, map)` holds. These logical
 operations do not perform runtime bounds checks; values outside their specified
 domains are unspecified.
 
-The runtime packages implement persistent data structures. Recursive models
+**`runtime/*` contains independent contracted implementations, not aliases of core.**
+The packages implement persistent data structures. Recursive models
 connect their actual constructors to Why3 lists, bags, and trees. The stack and
 queue APIs follow Why3's LIFO/FIFO specifications; the priority queue follows
 the minimum/multiplicity specification. Why3's abstract mutable `val` APIs are
 not imported as executable implementations.
 
+Direct wrappers around core were also tested. With the installed toolchain,
+`core/list.length`, `core/queue.peek`, `core/immut/priority_queue.push`, and
+`core/immut/sorted_set.contains` fail with `Error 4207` inside contracted bodies.
+`just core-capabilities` reproduces this and first checks ordinary type correctness.
+[MoonBit verification](https://docs.moonbitlang.com/en/latest/language/verification.html)
+restricts calls from contracted bodies. `#proof_import` connects logical operations;
+it does not prove the corresponding core implementation. Direct reuse with a
+correspondence proof needs proof-callable contracts in core or compiler support.
+These contracts have not been replaced with `#proof_axiomatized` assumptions.
+
+
 | Runtime package | Operations and representation | Cost |
 | --- | --- | --- |
 | `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`; immutable linked spine | Basic operations O(1); append/reverse/length O(n) |
 | `runtime/stack` | `empty/push/pop/peek/is_empty`; linked list | O(1) |
-| `runtime/queue` | `empty/push/pop/peek/is_empty`; front list and reversed back list | Push O(1), pop/peek O(n) worst case |
-| `runtime/pqueue` | `empty/push/pop/peek/is_empty`; sorted Int list, duplicates retained | Push O(n), pop/peek O(1) |
-| `runtime/bintree` | `empty/node/inorder`; generic binary tree | Constructors O(1); inorder O(n²) worst case with list append |
-| `runtime/bintree/search` | `empty/insert/contains`; strict Int BST without duplicates | O(height); no balancing |
+| `runtime/queue` | `empty/push/pop/peek/is_empty`; front list and reversed back list | Push/peek O(1); pop amortized O(1), worst-case O(n) |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`; Int skew heap, duplicates retained | Push/pop amortized O(log n), peek O(1) |
+| `runtime/bintree` | `empty/node/inorder`; generic binary tree | Constructors O(1); inorder O(n) |
+| `runtime/bintree/search` | `empty/insert/contains`; Int red-black tree without duplicates | Insert/contains O(log n) |
 
-Costs describe the implementations and are not formally proved. The two-list
-queue has amortized O(1) push/pop along a single linear history; branching
-from persistent snapshots or repeatedly peeking can repeat reversal work. The priority queue is an
-initial verified sorted-list implementation, not a logarithmic heap. BST callers
-must satisfy `valid(tree)`; `empty` establishes it and `insert` preserves it.
-Deletion and balancing are not implemented.
+Costs describe states built through the public APIs and are not formally proved. Queue updates
+normalize the front list, so repeated peeks do not repeat reversal. Amortized costs
+for the queue and skew heap apply to a single update history; branching from old
+snapshots can repeat work. The heap follows
+[Sleator–Tarjan](https://www.cs.cmu.edu/~sleator/papers/Adjusting-Heaps.htm), and the tree follows
+[Okasaki's insertion algorithm](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/redblack-trees-in-a-functional-setting/62BC5EA75A2C95E3F6EE95AE3DADF0E5).
+These differ from core's complete binary heap and size-balanced search tree.
+
+BST `valid(tree)` retains its strict search-order meaning: `empty` establishes it
+and `insert` preserves it. Insertion, including rotations, and lookup have proofs
+of order, membership preservation, and search results. Red-black invariants
+(black root, no red-red edge, equal black heights) are checked by shrinking
+QuickCheck properties and long ascending/descending tests. Formal proofs of color
+balance and complexity, and deletion, are not implemented.
+
+The search-tree API now uses an opaque `@search.SearchTree` with internal colors.
+Code passing `@tree.Tree[Int]` directly must instead construct a search tree with
+`@search.empty()` and `insert`, enumerate with `@search.to_array(tree)`, and use
+`@search.model` in contracts. The generic `runtime/bintree.Tree[T]` remains available
+for arbitrary shapes. List length uses tail recursion; tree inorder uses a
+continuation list for linear traversal. Its left branch is tail-recursive, while
+its right branch and List append still use the call stack.
+Stack/Queue/PriorityQueue/SearchTree use `#valtype` wrappers, and small operations
+use `#inline` to reduce wrapper allocations. Updates also use `#owned` to avoid
+unnecessary reference-count operations without changing the existing content/order
+contracts. `proof_require`, `proof_ensure`, `proof_assert`, and `.mbtp` specifications
+are not runtime checks.
 
 `pop/uncons/peek` return `None` for empty inputs. List `length` requires its
 mathematical result to fit in an Int (at most 2,147,483,647), including under

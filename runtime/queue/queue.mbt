@@ -1,11 +1,13 @@
 ///|
 /// Persistent two-list FIFO. Back is stored in reverse insertion order.
+#valtype
 pub struct Queue[T] {
   priv front : @linked.List[T]
   priv back : @linked.List[T]
 }
 
 ///|
+#inline
 pub fn[T] empty() -> Queue[T] where {
   proof_ensure: result => @logic_list.is_empty(model(result)),
 } {
@@ -13,6 +15,8 @@ pub fn[T] empty() -> Queue[T] where {
 }
 
 ///|
+#owned(queue, value)
+#inline
 pub fn[T] push(
   queue : Queue[T],
   value : T,
@@ -27,10 +31,19 @@ pub fn[T] push(
     )
   },
 } {
-  { front: queue.front, back: @linked.cons(value, queue.back), }
+  let ready = normalize(queue)
+  match ready.front {
+    Nil => {
+      proof_assert @logic_list.is_empty(model(queue))
+      { front: @linked.cons(value, @linked.empty()), back: @linked.empty(), }
+    }
+    Cons(_, _) => { front: ready.front, back: @linked.cons(value, ready.back), }
+  }
 }
 
 ///|
+#owned(queue)
+#inline
 fn[T] normalize(
   queue : Queue[T],
 ) -> Queue[T] where {
@@ -47,6 +60,8 @@ fn[T] normalize(
 }
 
 ///|
+#owned(queue)
+#inline
 pub fn[T] pop(
   queue : Queue[T],
 ) -> (T, Queue[T])? where {
@@ -66,7 +81,7 @@ pub fn[T] pop(
         @linked.model(ready.front),
         @logic_list.cons(value, @linked.model(rest)),
       )
-      let result = { front: rest, back: ready.back, }
+      let result = normalize({ front: rest, back: ready.back, })
       proof_assert @logic_list.eq(
         model(result),
         @logic_list.append(
@@ -91,6 +106,7 @@ pub fn[T] pop(
 }
 
 ///|
+#inline
 pub fn[T] peek(
   queue : Queue[T],
 ) -> T? where {
@@ -103,9 +119,38 @@ pub fn[T] peek(
     }
   },
 } {
-  match pop(queue) {
-    None => None
-    Some((value, _)) => Some(value)
+  match queue.front {
+    Nil => {
+      let front = @linked.reverse(queue.back)
+      match front {
+        Nil => None
+        Cons(value, rest) => {
+          proof_assert @logic_list.eq(
+            @linked.model(front),
+            @logic_list.cons(value, @linked.model(rest)),
+          )
+          proof_assert @logic_list.eq(model(queue), @linked.model(front))
+          Some(value)
+        }
+      }
+    }
+    Cons(value, rest) => {
+      proof_assert @logic_list.eq(
+        @linked.model(queue.front),
+        @logic_list.cons(value, @linked.model(rest)),
+      )
+      proof_assert @logic_list.eq(
+        model(queue),
+        @logic_list.cons(
+          value,
+          @logic_list.append(
+            @linked.model(rest),
+            @logic_list.reverse(@linked.model(queue.back)),
+          ),
+        ),
+      )
+      Some(value)
+    }
   }
 }
 

@@ -42,6 +42,21 @@ test target="js":
 quickcheck target="js":
     moon test --target {{target}} --filter 'quickcheck:*'
 
+# Compare collection workloads with core and save unrounded results and ratios.
+bench target="native":
+    node tools/bench-collections.mjs {{target}}
+
+# Fail unless every comparison is within the limit in both measurement orders.
+bench-check target="native" max_ratio="1.0":
+    node tools/bench-collections.mjs {{target}} --max-ratio {{max_ratio}}
+
+# Keep targets sequential to avoid competition for CPU during measurement.
+bench-backends:
+    just bench native
+    just bench js
+    just bench wasm
+    just bench wasm-gc
+
 test-backends:
     moon test --target js
     moon test --target wasm
@@ -61,6 +76,10 @@ test-tools:
 fp-capabilities:
     node tools/check-fp-capabilities.mjs
 
+# Check whether contracts can directly call the installed core collections.
+core-capabilities:
+    node tools/check-core-capabilities.mjs
+
 # Fail unless deliberately false statements in each model remain unproved.
 negative:
     node tools/check-negative.mjs
@@ -77,4 +96,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: doctor check test-tools fp-capabilities prove prove-machine prove-collections-machine negative smt vectors-check test-backends test-release
+verify: doctor check test-tools fp-capabilities core-capabilities prove prove-machine prove-collections-machine negative smt vectors-check test-backends test-release

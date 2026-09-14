@@ -21,10 +21,14 @@ just verify       # 形式検証、負例、参照値、各バックエンドの
 just prove        # MoonBit → Why3 → SMT。workspace の両モジュールを証明
 just prove-machine # 機械整数 prelude で bounds・実行時ブリッジ・利用例を証明
 just prove-collections-machine # コレクションの実装・利用例を機械整数で証明
+just core-capabilities # core の関数を契約内から直接呼べるかを調査
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just test js      # 実行時検査
 just quickcheck js # QuickCheck の性質テストだけを実行
+just bench native # core とコレクションを比較し、時間と比率を保存
+just bench-backends # 全4バックエンドを順番に計測
+just bench-check native 1.0 # 両方の測定順で比率の上限を満たさなければ失敗
 just test-backends # JS / wasm / wasm-gc / native
 just test-release # 最適化したビルドでも同じ検査
 just fp-capabilities # Float/Double の証明変換の対応状況を確認
@@ -129,9 +133,9 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 
 ## QuickCheck による性質テスト
 
-`bounds/` と `runtime/` の32個の正例の性質を `moonbitlang/core/quickcheck` で、
+`bounds/` と `runtime/` の33個の正例の性質を `moonbitlang/core/quickcheck` で、
 固定 seed `20260914` でそれぞれ1,000件の有効入力に対して検査する。
-生成サイズは最大64、操作列は最大128。`just quickcheck js`（または `wasm`、
+生成サイズは最大64、操作列と赤黒木の平衡検査は最大128。`just quickcheck js`（または `wasm`、
 `wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
 `just test-release`・`just verify` にも含まれる。
 
@@ -179,8 +183,53 @@ Push の値を縮める。二分木には、部分木への置き換えと内部
 
 別の回帰テストでは「Push される値はすべて3未満」という意図的に偽の性質を
 `@quickcheck.report` に渡し、`counterexample=[Push(3)]` まで縮小されたことを
-検査する。これは33個目の `quickcheck:*` テストで、失敗と縮小の経路を確認するもの。
+検査する。これは意図的に偽の `quickcheck:*` テストで、失敗と縮小の経路を確認するもの。
 1,000件成功する正例の性質には数えない。
+
+## コレクションのベンチマーク
+
+`benchmarks/collections` で [MoonBit のベンチマーク API](https://docs.moonbitlang.com/ja/latest/language/benchmarks.html)
+を使い、`moon bench --release --no-parallelize` で計測する。
+12種類の処理を256要素と2,048要素で実行し、各バックエンドで30組を比較する。
+実装の測定順を逆転した2回の測定を行い、各回は自動調整した5バッチ。
+`Bench.keep` で結果を保持し、同じ最適化済みバックエンド上で、計測前に正確な
+出力の一致を確認する。空入力と繰り返し実行も別途テストする。
+
+| 処理 | core の比較対象 | 計測する範囲 |
+| --- | --- | --- |
+| List | `core/list` | 反転・連結と配列への変換、長さ |
+| Stack | `core/list`・組み込み `Array` | 全要素の push と、新しい配列への取り出し |
+| Queue | `core/queue` | 投入と取り出し、構築済みキューへの連続 peek |
+| 最小優先キュー | `core/immut/priority_queue`・`core/priority_queue` に `Reverse[Int]` を指定 | 重複を含む入力の push と取り出し。シャッフル順・昇順 |
+| BST | `core/immut/sorted_set` | 挿入後、全キーと同数の存在しないキーを検索。シャッフル順・昇順 |
+| 二分木の走査 | `core/immut/sorted_set` | 平衡した木・左に偏った木から、同じ整列済みの一意な値を配列化 |
+
+汎用二分木には直接対応する core の型がないため、走査の比較対象は整列した値の
+列挙であり、任意の形状の木の操作ではない。可変の比較対象は現在の状態だけを使い、
+スナップショット保持を模擬するためのコピーは加えない。入力の生成と読み取り用の
+構造の準備は計測外に置き、build/drain・build/find では毎回の構築と出力処理を含める。
+連続 peek は pop せず同じキューを読む。更新時に正規化する現実装では、反転を繰り返さない。
+コンパイラが反復する読み取りをループ外へ移す場合もあり、個々の関数呼び出しの
+遅延ではなく、最適化後の処理全体の時間を表す。
+
+`just bench native`（または `js`・`wasm`・`wasm-gc`）で、生の出力・JSON の統計・
+Markdown の比較表を `_build/benchmarks/collections-<target>.*` に保存する。
+ツールチェイン、CPU、OS、リポジトリのリビジョン、インストール済み core ソースの
+ハッシュも記録する。実行時実装とベンチマークのソースにも別々の SHA-256 を記録する。時間は2回のバッチ中央値の平均で、単位はマイクロ秒。
+比率は **veri/core** なので、1を超えると veri が遅い。2回の比率の範囲は測定順に
+よる変動を示すもので、信頼区間ではない。結果の欠落、不正な時間、計測プロセスの
+失敗は、レポート生成を失敗させる。
+
+`just bench-check native 1.0` は新しく計測し、いずれかの比較が片方の測定順でも
+指定した上限を超えれば非ゼロで終了する。上限をまたぐ結果は判定保留として扱い、
+このチェックでは失敗にする。時間は環境負荷やハードウェアに依存するため、
+ベンチマークは `just verify` から独立させている。
+
+[記録した測定結果](benchmarks/collections/RESULTS.md) では、現実装は
+**一律に core より遅くならないという目標を満たしていない**。
+表現・確保・アルゴリズムの違いを含む比較であり、証明契約だけの追加コストを
+切り分けるものではない。証明専用の `seq/list/bag/fmap/bintree` バインディングには
+計測対象となる実行時の操作がない。利用するバックエンドと処理内容で再測定する。
 
 ## コレクションのモデルと実装
 
@@ -200,25 +249,54 @@ Push の値を縮める。二分木には、部分木への置き換えと内部
 `fmap.find` は `mem(key, map)` が成立するキーを前提とする。
 これらは実行時の境界検査ではなく、規定された範囲外の値は未規定。
 
-実行時パッケージは永続データ構造を実装し、実際のコンストラクターと Why3 の
+**`runtime/*` は core のエイリアスではなく、契約付きの独立実装。**
+永続データ構造を実装し、実際のコンストラクターと Why3 の
 リスト・多重集合・木を再帰的なモデルで結ぶ。Stack / Queue は Why3 の LIFO / FIFO、
 優先キューは最小値と重複数の仕様に対応する。Why3 の可変データ構造の抽象的な
 `val` API を実行可能な実装として取り込むものではない。
+
+core を直接呼ぶラッパーに契約を付ける方法も調査した。現在のツールチェインでは
+`core/list.length`、`core/queue.peek`、`core/immut/priority_queue.push`、
+`core/immut/sorted_set.contains` は契約付き関数から呼ぶと `Error 4207` になる。
+`just core-capabilities` で再現でき、通常の型検査が通ることも確認する。
+[MoonBit の検証仕様](https://docs.moonbitlang.com/en/latest/language/verification.html)
+では契約内からの呼び出しに制限がある。`#proof_import` は論理演算の接続であり、
+core の実装本体の正しさを証明するものではない。core に証明可能な契約を追加するか、
+コンパイラ側で対応することが、直接再利用と実装の対応証明を両立するために必要。
+`#proof_axiomatized` に置き換えて対応を仮定する方法は採用していない。
+
 
 | 実行時パッケージ | 操作と表現 | 計算量 |
 | --- | --- | --- |
 | `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`。不変の連結構造 | 基本操作 O(1)、連結・反転・長さ O(n) |
 | `runtime/stack` | `empty/push/pop/peek/is_empty`。連結リスト | O(1) |
-| `runtime/queue` | `empty/push/pop/peek/is_empty`。前方リストと逆順の後方リスト | Push O(1)、pop/peek は最悪 O(n) |
-| `runtime/pqueue` | `empty/push/pop/peek/is_empty`。Int の整列リストで重複を保持 | Push O(n)、pop/peek O(1) |
-| `runtime/bintree` | `empty/node/inorder`。汎用二分木 | 構築 O(1)、inorder はリスト連結により最悪 O(n²) |
-| `runtime/bintree/search` | `empty/insert/contains`。重複のない Int の BST | O(高さ)、平衡化なし |
+| `runtime/queue` | `empty/push/pop/peek/is_empty`。前方リストと逆順の後方リスト | Push/peek O(1)、pop は償却 O(1)・最悪 O(n) |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`。Int の skew heap で重複を保持 | Push/pop は償却 O(log n)、peek O(1) |
+| `runtime/bintree` | `empty/node/inorder`。汎用二分木 | 構築 O(1)、inorder O(n) |
+| `runtime/bintree/search` | `empty/insert/contains`。重複のない Int の赤黒木 | Insert/contains O(log n) |
 
-計算量は実装の説明であり、形式証明の対象にはしていない。2リスト Queue の push/pop は
-一直線の利用履歴では償却 O(1) だが、永続スナップショットからの分岐や peek で反転を
-繰り返す場合がある。優先キューは最初の検証済み整列リスト実装で、ヒープではない。
-BST の呼び出し側には `valid(tree)` が必要で、`empty` が確立し `insert` が保存する。
-削除と平衡化は未実装。
+計算量は公開 API から構築した状態での実装の説明であり、形式証明の対象にはしていない。Queue は更新後の前方リストを
+正規化し、繰り返しの peek で反転しない。Queue と skew heap の償却計算量は、単一の
+更新履歴に対するもの。古いスナップショットから分岐すると同じ処理を繰り返す場合がある。
+Skew heap は [Sleator–Tarjan のアルゴリズム](https://www.cs.cmu.edu/~sleator/papers/Adjusting-Heaps.htm)、
+赤黒木は [Okasaki の挿入アルゴリズム](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/redblack-trees-in-a-functional-setting/62BC5EA75A2C95E3F6EE95AE3DADF0E5)
+に基づく。core の完全二分ヒープ・サイズ平衡木とは実装が異なる。
+
+BST の `valid(tree)` は従来と同じ厳密な探索順序を表し、`empty` が確立して `insert` が保存する。
+回転を含む挿入・探索について、順序・要素の保存と検索結果を証明する。赤黒の不変条件
+（黒い根、赤の連続禁止、等しい黒高さ）は shrinking 付き QuickCheck と長い昇順・降順の
+テストで検査する。色の不変条件の保存と計算量の形式証明、削除は未実装。
+
+探索木の型は、色を内部に持つ `@search.SearchTree` に変更した。
+`@tree.Tree[Int]` を直接渡すコードは `@search.empty()` と `insert` で構築し、列挙には
+`@search.to_array(tree)` を使う。仕様側のモデルは `@tree.model` から `@search.model` に移る。
+汎用の `runtime/bintree.Tree[T]` は引き続き任意形状の木に使う。
+List の長さは末尾再帰、木の inorder は継続リストを使う線形走査とした。
+inorder は左の枝を末尾再帰にするが、右の枝と List の append は呼び出しスタックを使う。
+Stack/Queue/PriorityQueue/SearchTree のラッパーは `#valtype`、小さな操作は `#inline` で
+余分なラッパー確保を抑える。更新には `#owned` も使い、不要な参照カウント操作を減らす。
+これらは実行時コードの最適化であり、既存の内容・順序の契約を変更しない。
+`proof_require`・`proof_ensure`・`proof_assert` と `.mbtp` は実行時の検査ではない。
 
 `pop/uncons/peek` は空入力に `None` を返す。リストの `length` は数学的な長さが
 Int に収まること（最大 2,147,483,647）を要求し、機械整数 prelude でも確認する。

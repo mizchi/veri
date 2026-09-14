@@ -15,6 +15,8 @@ pub fn[T] empty() -> List[T] where {
 }
 
 ///|
+#owned(value, xs)
+#inline
 pub fn[T] cons(
   value : T,
   xs : List[T],
@@ -39,6 +41,7 @@ pub fn[T] is_empty(
 }
 
 ///|
+#inline
 pub fn[T] uncons(
   xs : List[T],
 ) -> (T, List[T])? where {
@@ -113,7 +116,6 @@ pub fn[T] reverse(
 pub fn[T] length(
   xs : List[T],
 ) -> Int where {
-  proof_decrease: xs,
   proof_require: @integer.le(
     @logic_list.length(model(xs)),
     @integer.from_int(2147483647),
@@ -122,9 +124,30 @@ pub fn[T] length(
     @integer.eq(@integer.from_int(result), @logic_list.length(model(xs)))
   },
 } {
+  length_from(xs, 0)
+}
+
+///|
+fn[T] length_from(
+  xs : List[T],
+  count : Int,
+) -> Int where {
+  proof_decrease: xs,
+  proof_require: 0 <= count,
+  proof_require: @integer.le(
+    @integer.add(@integer.from_int(count), @logic_list.length(model(xs))),
+    @integer.from_int(2147483647),
+  ),
+  proof_ensure: result => {
+    @integer.eq(
+      @integer.from_int(result),
+      @integer.add(@integer.from_int(count), @logic_list.length(model(xs))),
+    )
+  },
+} {
   match xs {
-    Nil => 0
-    Cons(_, rest) => 1 + length(rest)
+    Nil => count
+    Cons(_, rest) => length_from(rest, count + 1)
   }
 }
 

@@ -32,14 +32,30 @@ pub fn[T] node(
 pub fn[T] inorder(
   tree : Tree[T],
 ) -> @linked.List[T] where {
-  proof_decrease: tree,
   proof_ensure: result => {
     @logic_list.eq(@linked.model(result), @logic_tree.inorder(model(tree)))
   },
 } {
+  inorder_into(tree, @linked.empty())
+}
+
+///|
+/// Prepend the traversal to its continuation, allocating each output cell once.
+fn[T] inorder_into(
+  tree : Tree[T],
+  acc : @linked.List[T],
+) -> @linked.List[T] where {
+  proof_decrease: tree,
+  proof_ensure: result => {
+    @logic_list.eq(
+      @linked.model(result),
+      @logic_list.append(@logic_tree.inorder(model(tree)), @linked.model(acc)),
+    )
+  },
+} {
   match tree {
-    Empty => @linked.empty()
+    Empty => acc
     Node(left, value, right) =>
-      @linked.append(inorder(left), @linked.cons(value, inorder(right)))
+      inorder_into(left, @linked.cons(value, inorder_into(right, acc)))
   }
 }
