@@ -1,0 +1,5 @@
+///|
+pub lemma negative_control(x : Float32) where {
+  proof_require: is_nan(x),
+  proof_ensure: eq(x, x),
+} {}

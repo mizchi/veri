@@ -1,7 +1,6 @@
 import {
+  "mizchi/veri/runtime/float32",
+  "mizchi/veri/runtime/float64",
   "moonbitlang/core/float",
-}
-
-import {
   "moonbitlang/core/quickcheck",
 } for "test"

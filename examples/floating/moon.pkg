@@ -1,0 +1,4 @@
+import {
+  "mizchi/veri/runtime/float32",
+  "mizchi/veri/runtime/float64",
+} for "test"

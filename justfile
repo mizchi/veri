@@ -32,6 +32,10 @@ prove-machine: prover-config
 test target="js":
     moon test --target {{target}}
 
+# Run only the reproducible QuickCheck properties (also included in normal tests).
+quickcheck target="js":
+    moon test --target {{target}} --filter 'quickcheck:*'
+
 test-backends:
     moon test --target js
     moon test --target wasm
@@ -47,6 +51,10 @@ test-release:
 test-tools:
     node --test tools/*.test.mjs
 
+# Report compiler support separately from IEEE correctness.
+fp-capabilities:
+    node tools/check-fp-capabilities.mjs
+
 # Fail unless deliberately false statements in each model remain unproved.
 negative:
     node tools/check-negative.mjs
@@ -56,11 +64,11 @@ smt:
     node tools/check-smt.mjs
 
 vectors:
-    node tools/generate-float64.mjs
+    node tools/generate-floats.mjs
     node tools/generate-runtime.mjs
 
 vectors-check:
-    node tools/generate-float64.mjs --check
+    node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: doctor check test-tools prove prove-machine negative smt vectors-check test-backends test-release
+verify: doctor check test-tools fp-capabilities prove prove-machine negative smt vectors-check test-backends test-release

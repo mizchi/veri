@@ -1,0 +1,60 @@
+///|
+#proof_import("ieee_float.Float32")
+pub fn zero() -> Float32 = "zeroF"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn add(mode : @ieee754.RoundingMode, x : Float32, y : Float32) -> Float32 = "add"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn sub(mode : @ieee754.RoundingMode, x : Float32, y : Float32) -> Float32 = "sub"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn mul(mode : @ieee754.RoundingMode, x : Float32, y : Float32) -> Float32 = "mul"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn div(mode : @ieee754.RoundingMode, x : Float32, y : Float32) -> Float32 = "div"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn sqrt(mode : @ieee754.RoundingMode, x : Float32) -> Float32 = "sqrt"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn fma(mode : @ieee754.RoundingMode, x : Float32, y : Float32, z : Float32) -> Float32 = "fma"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn neg(x : Float32) -> Float32 = "neg"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn abs(x : Float32) -> Float32 = "abs"
+
+///| IEEE equality: NaN is unequal to itself; +0 and -0 compare equal.
+#proof_import("ieee_float.Float32")
+pub fn eq(x : Float32, y : Float32) -> Bool = "eq"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn le(x : Float32, y : Float32) -> Bool = "le"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn is_nan(x : Float32) -> Bool = "is_nan"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn is_infinite(x : Float32) -> Bool = "is_infinite"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn is_zero(x : Float32) -> Bool = "is_zero"
+
+///|
+pub predicate is_finite(x : Float32) {
+  is_nan(x) == false && is_infinite(x) == false
+}

@@ -1,0 +1,10 @@
+; a = 2^24, b = -2^24, c = 0.5. Replayed by runtime/float32 tests.
+(set-logic QF_FP)
+(define-fun a () (_ FloatingPoint 8 24) ((_ to_fp 8 24) #x4b800000))
+(define-fun b () (_ FloatingPoint 8 24) ((_ to_fp 8 24) #xcb800000))
+(define-fun c () (_ FloatingPoint 8 24) ((_ to_fp 8 24) #x3f000000))
+(define-fun left () (_ FloatingPoint 8 24) (fp.add RNE (fp.add RNE a b) c))
+(define-fun right () (_ FloatingPoint 8 24) (fp.add RNE a (fp.add RNE b c)))
+(assert (not (fp.eq left right)))
+(check-sat)
+(get-value (left right))

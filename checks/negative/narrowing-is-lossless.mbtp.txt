@@ -1,0 +1,8 @@
+///| Finite Double values can lose precision when narrowed to binary32.
+pub lemma negative_control(value : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(value),
+  proof_ensure: @ieee754.eq(
+    widen(@ieee754.nearest_even(), narrow(@ieee754.nearest_even(), value)),
+    value,
+  ),
+} {}

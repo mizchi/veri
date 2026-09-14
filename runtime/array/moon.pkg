@@ -3,6 +3,10 @@ import {
   "mizchi/veri/integer",
 }
 
+import {
+  "moonbitlang/core/quickcheck",
+} for "test"
+
 options(
   "proof-enabled": true,
 )

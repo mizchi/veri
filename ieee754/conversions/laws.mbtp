@@ -1,0 +1,24 @@
+///|
+/// SMT value identity preserves the zero sign. NaN payloads are not modeled.
+pub lemma widening_roundtrip(value : @fp32.Float32) where {
+  proof_ensure: same(
+    narrow(@ieee754.nearest_even(), widen(@ieee754.nearest_even(), value)),
+    value,
+  ),
+} {}
+
+///|
+pub lemma widening_preserves_nan(value : @fp32.Float32) where {
+  proof_ensure: @ieee754.is_nan(widen(@ieee754.nearest_even(), value)) == @fp32.is_nan(value),
+} {}
+
+///|
+pub lemma narrowing_preserves_nan(value : @ieee754.Float64) where {
+  proof_ensure: @fp32.is_nan(narrow(@ieee754.nearest_even(), value)) == @ieee754.is_nan(value),
+} {}
+
+///|
+pub lemma finite_widening_is_finite(value : @fp32.Float32) where {
+  proof_require: @fp32.is_finite(value),
+  proof_ensure: @ieee754.is_finite(widen(@ieee754.nearest_even(), value)),
+} {}

@@ -29,3 +29,18 @@ test "binary64 addition is not associative" {
   assert_eq(a + b + c, 0.5)
   assert_eq(a + (b + c), 0.0)
 }
+
+///|
+test "binary64 runtime facade preserves IEEE division and signed zero" {
+  let one = @float64.from_bits(0x3ff0000000000000UL)
+  let negative_zero = @float64.from_bits(0x8000000000000000UL)
+  assert_eq(
+    @float64.to_bits(@float64.div(one, negative_zero)),
+    0xfff0000000000000UL,
+  )
+  assert_eq(
+    @float64.to_bits(@float64.sqrt(negative_zero)),
+    0x8000000000000000UL,
+  )
+  assert_true(@float64.matches(@float64.div(0.0, 0.0), AnyNaN))
+}

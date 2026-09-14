@@ -6,7 +6,35 @@ import {
 }
 
 // Values
+pub fn abs(Double) -> Double
+
+pub fn add(Double, Double) -> Double
+
+pub fn div(Double, Double) -> Double
+
+pub fn eq(Double, Double) -> Bool
+
+pub fn from_bits(UInt64) -> Double
+
+pub fn is_infinite(Double) -> Bool
+
+pub fn is_nan(Double) -> Bool
+
+pub fn less(Double, Double) -> Bool
+
 pub fn matches(Double, Expected) -> Bool
+
+pub fn mul(Double, Double) -> Double
+
+pub fn neg(Double) -> Double
+
+pub fn sqrt(Double) -> Double
+
+pub fn sub(Double, Double) -> Double
+
+pub fn to_bits(Double) -> UInt64
+
+pub fn to_float(Double) -> Float
 
 // Errors
 

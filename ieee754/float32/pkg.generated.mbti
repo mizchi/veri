@@ -1,0 +1,60 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/ieee754/float32"
+
+import {
+  "mizchi/veri/ieee754",
+}
+
+// Values
+pub fn abs(Float32) -> Float32
+
+pub fn abs_preserves_nan(Float32) -> Unit
+
+pub fn add(@ieee754.RoundingMode, Float32, Float32) -> Float32
+
+pub fn div(@ieee754.RoundingMode, Float32, Float32) -> Float32
+
+pub fn eq(Float32, Float32) -> Bool
+
+pub fn finite_self_subtraction_is_zero(Float32, @ieee754.RoundingMode) -> Unit
+
+pub fn fma(@ieee754.RoundingMode, Float32, Float32, Float32) -> Float32
+
+pub fn is_finite(Float32) -> Bool
+
+pub fn is_infinite(Float32) -> Bool
+
+pub fn is_nan(Float32) -> Bool
+
+pub fn is_zero(Float32) -> Bool
+
+pub fn le(Float32, Float32) -> Bool
+
+pub fn mul(@ieee754.RoundingMode, Float32, Float32) -> Float32
+
+pub fn nan_is_not_equal(Float32) -> Unit
+
+pub fn neg(Float32) -> Float32
+
+pub fn neg_preserves_nan(Float32) -> Unit
+
+pub fn non_nan_is_equal(Float32) -> Unit
+
+pub fn signed_zeros_compare_equal() -> Unit
+
+pub fn sqrt(@ieee754.RoundingMode, Float32) -> Float32
+
+pub fn sub(@ieee754.RoundingMode, Float32, Float32) -> Float32
+
+pub fn zero() -> Float32
+
+pub fn zero_divided_by_zero_is_nan(@ieee754.RoundingMode) -> Unit
+
+// Errors
+
+// Types and methods
+pub type Float32
+
+// Type aliases
+
+// Traits

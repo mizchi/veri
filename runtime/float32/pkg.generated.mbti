@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/float32"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn abs(Float) -> Float
+
+pub fn add(Float, Float) -> Float
+
+pub fn div(Float, Float) -> Float
+
+pub fn eq(Float, Float) -> Bool
+
+pub fn from_bits(UInt) -> Float
+
+pub fn is_infinite(Float) -> Bool
+
+pub fn is_nan(Float) -> Bool
+
+pub fn less(Float, Float) -> Bool
+
+pub fn matches(Float, Expected) -> Bool
+
+pub fn mul(Float, Float) -> Float
+
+pub fn neg(Float) -> Float
+
+pub fn sqrt(Float) -> Float
+
+pub fn sub(Float, Float) -> Float
+
+pub fn to_bits(Float) -> UInt
+
+pub fn to_double(Float) -> Double
+
+// Errors
+
+// Types and methods
+pub(all) enum Expected {
+  Bits(UInt)
+  AnyNaN
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,13 @@
+///|
+/// Proof-only format conversion. Widening is exact for finite binary32 values.
+#proof_import("ieee_float.FloatConverter")
+pub fn widen(mode : @ieee754.RoundingMode, value : @fp32.Float32) -> @ieee754.Float64 = "to_float64"
+
+///|
+/// Proof-only format conversion, including rounding, overflow, and underflow.
+#proof_import("ieee_float.FloatConverter")
+pub fn narrow(mode : @ieee754.RoundingMode, value : @ieee754.Float64) -> @fp32.Float32 = "to_float32"
+
+///|
+#proof_import("ieee_float.Float32")
+fn same(left : @fp32.Float32, right : @fp32.Float32) -> Bool = "(=)"

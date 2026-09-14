@@ -68,5 +68,15 @@
     "fixture": "sub-is-add64.mbt.txt",
     "machine": true,
     "claim": "UInt64 subtraction implements bitvector addition"
+  },
+  {
+    "package": "ieee754/float32",
+    "fixture": "nan-reflexive32.mbtp.txt",
+    "claim": "binary32 NaN reflexivity"
+  },
+  {
+    "package": "ieee754/conversions",
+    "fixture": "narrowing-is-lossless.mbtp.txt",
+    "claim": "binary64 narrowing and widening is lossless for every finite value"
   }
 ]

@@ -4,7 +4,7 @@ English | [日本語](README.ja.md)
 
 A small foundation for formal verification in MoonBit, with reusable logical models and lemmas, implementations with contracts, and runtime differential checks.
 
-Proof bindings cover finite sets, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, this repository starts by checking execution results for **binary64 / roundTiesToEven (RNE)** and proving properties in Why3's IEEE model. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
+Proof bindings cover finite sets, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, the repository checks **binary32 and binary64 / roundTiesToEven (RNE)** execution results and proves properties in Why3's IEEE models. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
 
 ## Running
 
@@ -23,8 +23,10 @@ just prove-machine # Prove bounds, runtime bridges, and their example with machi
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just negative      # Check that deliberately false claims in each model are not proved
 just test js       # Run runtime checks
+just quickcheck js # Run only the QuickCheck properties
 just test-backends # JS / wasm / wasm-gc / native
 just test-release  # Run the same checks in optimized builds
+just fp-capabilities # Report native Float/Double proof-lowering support
 just vectors       # Regenerate expected results from Z3
 just vectors-check # Compare checked-in reference values with the current Z3 results
 just fmt           # Format sources and generate public interfaces
@@ -42,7 +44,8 @@ Use `just prove`: bare `moon prove` uses only the default encoding and can time 
 | --- | --- | --- |
 | `bounds` | Clamp to a half-open interval | Given valid bounds, the result lies within the interval and preserves inputs already in range |
 | `fset` | Bindings to Why3's finite-set model | Lemmas for empty sets, insertion, and union |
-| `ieee754` | Logical binary64 values and rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
+| `ieee754` / `ieee754/float32` | Logical binary64 / binary32 values and shared rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
+| `ieee754/conversions` | Logical widening and narrowing | Binary32 widening roundtrip and preservation of NaN classification |
 | `bv32` / `bv64` | Why3 fixed-size bitvector bindings | Operations and modular integer conversions |
 | `bv32/laws` / `bv64/laws` | Bitvector lemmas, with integer laws in `laws/integers` | Bitwise laws, conversions in both directions, and unsigned value bounds |
 | `arrays` | Total maps with select/store | Read after write, unchanged other keys, and last-write-wins |
@@ -53,7 +56,9 @@ Use `just prove`: bare `moon prove` uses only the default encoding and can time 
 | `runtime/array` | FixedArray model and safe reads | Bounds checks and agreement with the model’s selected cell |
 | `runtime/text` | Validated SMT-compatible text | Code point length, char_at, and substring checked against Z3 |
 | `examples/bridges` | Runtime bridge clients | Contracts compose across module boundaries |
-| `runtime/float64` | Result comparisons and reference cases | Four arithmetic operations and sqrt compared against Z3's IEEE FP theory |
+| `runtime/float32` / `runtime/float64` | Runtime FP APIs and exact reference comparisons | Arithmetic, sqrt, neg/abs, comparisons, classification, and non-NaN bit roundtrips |
+| `runtime/float_conversions` | Precision conversion checks | Float ↔ Double compared against Z3, including rounding boundaries |
+| `examples/floating` | Runtime FP usage | Different rounding precision in Float and Double |
 | `checks/` | SMT-LIB 2 checks for FP, bitvectors, arrays, and strings | Properties over all inputs and counterexamples with fixed inputs |
 | `checks/negative` | Deliberately false lemmas | False claims must not be reported as successfully proved |
 
@@ -72,11 +77,12 @@ veri/
 ├── fset/
 ├── ieee754/
 ├── integer/
-├── runtime/                 # uint32, uint64, array, text, float64
+├── runtime/                 # uint32, uint64, array, text, float32, float64, float_conversions
 └── examples/
     ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.1.0
     ├── models/
-    └── bridges/
+    ├── bridges/
+    └── floating/
 ```
 
 Workspace resolution uses the local library without downloading it from the registry.
@@ -87,7 +93,7 @@ Proof reports are written under each module's `_build/verif/` directory.
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.
-The abstract types in `fset`, `ieee754`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Their bindings do not establish a correspondence with MoonBit runtime values.
+The abstract types in `fset`, `ieee754`, `ieee754/float32`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Their bindings do not establish a correspondence with MoonBit runtime values.
 
 A minimal example:
 
@@ -105,6 +111,44 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 At runtime, use `@float64.matches(actual, Bits(expected_bits))` for exact bit matching,
 or `@float64.matches(actual, AnyNaN)` to check NaN classification.
 An incorrect zero sign or a difference of even 1 ULP in a finite value fails the bit comparison.
+
+## QuickCheck properties
+
+`moonbitlang/core/quickcheck` is imported only by tests. The 26 properties in
+`bounds/properties_test.mbt` and `runtime/*/properties_test.mbt` each run 1,000
+accepted cases with seed `20260914`. Collection sizes grow up to 64. They run
+with `just quickcheck js` (or `wasm`, `wasm-gc`, `native`) and are also included
+in `just test`, `just test-backends`, `just test-release`, and `just verify`.
+
+The properties cover clamp bounds and monotonicity; wrapping integer arithmetic
+and order; array reads before and after writes; the SMT Unicode alphabet and
+scalar indexing; FP bit encodings, classification, sign operations, arithmetic
+identities, and precision roundtrips. Text operations are compared with a
+separate scalar-iteration reference. FP inputs come from arbitrary `UInt` /
+`UInt64` encodings so exceptional values and the full exponent range are
+reachable. Non-NaN comparisons retain the sign of zero; NaNs are compared by
+classification, without requiring payload preservation.
+
+For example, with `mizchi/veri/runtime/uint32` and
+`moonbitlang/core/quickcheck` imported `for "test"`:
+
+```moonbit
+test "quickcheck: wrapping roundtrip" {
+  @quickcheck.check(
+    (input : (UInt, UInt)) => {
+      let (value, delta) = input
+      @uint32.sub(@uint32.add(value, delta), delta) == value
+    },
+    count=1000,
+    seed=20260914,
+  )
+}
+```
+
+QuickCheck reports a shrunk counterexample on failure. Rerun the same property
+with its seed to reproduce it; change the seed to explore another deterministic
+sample. These are sampled runtime properties, alongside the Z3 reference cases
+and formal proofs. They do not establish universal IEEE conformance.
 
 ## Binding architecture
 
@@ -157,7 +201,7 @@ only establish that the false claims were not proved; the direct SAT checks supp
 | `Int` / `UInt`, `Int64` / `UInt64` | Their 32-/64-bit encodings | 48 Z3 reference cases for native add/sub/mul, bitwise operations, signed/unsigned order, and valid shifts; also check the wrapping adapters |
 | `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]`, plus `a.length()` | `get` proves Some exactly in bounds with the selected model value, and None otherwise, under both preludes |
 | `String` | `@text.from_string(s)` → `@text.Text?` | Validate UTF-16 and the shared alphabet; 72 Z3 reference cases for length, char_at, substring |
-| `Double` | binary64 encoding | Existing 86 Z3 FP reference cases; no universal proof of native operations |
+| `Float` / `Double` | binary32 / binary64 encoding | 122 operation cases per format plus 62 precision conversion cases against Z3; native FP operations still lack a universal correspondence proof |
 
 `Integer` is an abstract, unbounded **proof-only** type. It stays mathematical even when runtime `Int`
 uses the checked machine prelude. These projections are logical functions, not runtime numeric casts.
@@ -229,12 +273,38 @@ incorrectly specified as addition, to detect a proof path accepting invalid corr
 
 ## Scope of IEEE 754 verification
 
-**Runtime checks** compare results against expected values for boundary inputs and reproducible samples.
-There are currently 86 cases: 46 boundary cases and 40 samples. They cover rounding halfway cases,
-subnormals, the smallest normal value, overflow, ±0, ±∞, NaN, and sqrt.
-Inputs are specified as bit patterns. Expected values are generated with Z3's FP operations,
-without using the host's JavaScript floating-point arithmetic.
+**Runtime checks** compare results against Z3 for **122 cases per format** (82 directed cases and
+40 reproducible samples), plus **62 Float ↔ Double conversion cases**. Each operation case checks
+both the runtime wrapper and the corresponding native expression. The corpus covers four arithmetic
+operations, sqrt, negation, absolute value, IEEE equality/order, and NaN/infinity classification.
+It also checks non-NaN encoding roundtrips. Cases include halfway rounding, subnormals, the smallest
+normal value, overflow, ±0, ±∞, and NaN. Expected results come from Z3, not host floating-point arithmetic.
 These checks do not enumerate all inputs.
+
+| Purpose | Float API | Double API |
+| --- | --- | --- |
+| Bit representation | `@float32.from_bits(UInt)`, `to_bits(Float)` | `@float64.from_bits(UInt64)`, `to_bits(Double)` |
+| Operations | `add/sub/mul/div/sqrt/neg/abs` | Same names |
+| Comparisons / classification | `eq/less/is_nan/is_infinite` | Same names |
+| Precision conversion | `@float32.to_double(Float)` | `@float64.to_float(Double)` |
+| Reference matching | `matches(value, Bits(UInt))` or `AnyNaN` | `matches(value, Bits(UInt64))` or `AnyNaN` |
+
+```moonbit
+// Import mizchi/veri/runtime/float32 and mizchi/veri/runtime/float64.
+test {
+  let one = @float32.from_bits(0x3f800000U)
+  let half_ulp = @float32.from_bits(0x33800000U)
+  assert_true(@float32.matches(@float32.add(one, half_ulp), Bits(0x3f800000U)))
+  let wide = @float32.to_double(one)
+  assert_true(@float64.matches(wide, Bits(0x3ff0000000000000UL)))
+}
+```
+
+The logical API is separate: `ieee754.Float64`, `ieee754/float32.Float32`, and
+`ieee754/conversions.widen/narrow`. Both logical formats share `ieee754.RoundingMode`.
+The conversion laws prove the binary32 → binary64 → binary32 roundtrip with RNE, including zero's sign
+and abstract NaN identity. The reverse roundtrip loses precision for some finite binary64 values;
+`checks/fp32/narrowing-loss.smt2` provides a concrete SAT witness. No runtime NaN payload preservation is claimed.
 
 **Formal verification in the model** proves properties for every model value satisfying the stated preconditions.
 Examples include “x - x is zero for finite x” and “negating a NaN produces a NaN.”
@@ -249,25 +319,27 @@ a + (b + c) = 0.0
 
 This counterexample is reproduced in both SMT and MoonBit.
 
-**Connecting the model to actual MoonBit Double operations** requires further work.
-In the tested toolchain, placing a Double comparison directly in `proof_ensure` produces
-`unsupported primitive operator in logic body`.
-The IEEE model can be imported with `#proof_external` / `#proof_import`, using the same mechanism as FSet,
-but importing it does not prove that MoonBit's runtime operations agree with the model.
-At this stage, differential tests check that agreement on selected inputs.
+**Connecting these models to native Float / Double operations is still blocked by compiler support.**
+In the tested toolchain, native FP arithmetic in a contracted function body produces
+`unsupported primitive operator in contracted function body`. Comparisons in logic bodies are also unsupported.
+`just fp-capabilities` reproduces this in fresh temporary modules and records `_build/fp-capabilities.json`.
+It reports compiler capability separately from IEEE correctness: accepting arithmetic lowering in a future
+compiler would still require checking the generated IEEE types, rounding rules, and proving the correspondence.
+The runtime FP APIs therefore have no proof contracts or assumed `model(Float/Double)` coercion.
+The Why3 logical laws and runtime differential tests are both available; a theorem connecting the two remains future work.
 
 ## Trusted boundary and limitations
 
 - The type mappings, argument order, and Why3 symbol mappings in `#proof_external` / `#proof_import`, along with Why3, the solver, and MoonBit's translation, are trusted. No custom `proof_axiomatized` declarations are used.
 - Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads, and the bridge example are also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
-- The runtime check profile is binary64 with RNE. The logical API exposes five rounding modes, but runtime configuration and testing of all modes are not implemented.
-- NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, binary32, runtime FMA, and floating-point string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
+- The runtime check profile is binary32 and binary64 with RNE. The logical API exposes five rounding modes, but runtime configuration and testing of all modes are not implemented.
+- NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, runtime FMA, and floating-point string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
 - Transcendental functions such as `sin` / `exp`, and proofs of error bounds relative to real-valued algorithms, require separate work.
 - `unknown` and timeouts mean unproved; they do not establish truth or falsity. Positive SMT checks fail unless the expected `unsat` result is returned. The negative control only checks that a false theorem remains unproved; it does not claim that the solver produced a counterexample.
 - Use `just prove` to verify both workspace modules, rather than relying only on targeted proofs that assume dependency packages.
 - The project currently uses the local toolchain. Pinning toolchain distributions and solver versions for shared CI remains future work.
 
-Possible extensions include binary32, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
+Possible extensions include compiler support for native FP proof lowering, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
 additional runtime bridge contracts, regular expressions, and Seq / finite-map models.
 TestFloat / SoftFloat are not integrated into this repository yet.
 

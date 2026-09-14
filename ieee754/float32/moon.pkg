@@ -1,6 +1,6 @@
 import {
-  "moonbitlang/core/quickcheck",
-} for "test"
+  "mizchi/veri/ieee754",
+}
 
 options(
   "proof-enabled": true,

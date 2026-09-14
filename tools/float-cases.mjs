@@ -1,6 +1,6 @@
 // Input encodings only. Expected results are computed independently by Z3.
 // RNE is the initial runtime profile. NaN payloads and exception flags are excluded.
-const bits = {
+const bits64 = {
   zero: "0000000000000000", negZero: "8000000000000000",
   one: "3ff0000000000000", negOne: "bff0000000000000",
   two: "4000000000000000", three: "4008000000000000", four: "4010000000000000",
@@ -10,6 +10,25 @@ const bits = {
   max: "7fefffffffffffff", negMax: "ffefffffffffffff",
   inf: "7ff0000000000000", negInf: "fff0000000000000", nan: "7ff8000000000001",
 };
+const bits32 = {
+  zero: "00000000", negZero: "80000000",
+  one: "3f800000", negOne: "bf800000",
+  two: "40000000", three: "40400000", four: "40800000",
+  halfUlp: "33800000", nextOne: "3f800001",
+  minSub: "00000001", negMinSub: "80000001",
+  maxSub: "007fffff", minNormal: "00800000",
+  max: "7f7fffff", negMax: "ff7fffff",
+  inf: "7f800000", negInf: "ff800000", nan: "7fc00001",
+};
+
+export const formats = {
+  32: {width: 32, exponent: 8, precision: 24, suffix: "U", type: "Float", uint: "uint", bits: bits32},
+  64: {width: 64, exponent: 11, precision: 53, suffix: "UL", type: "Double", uint: "uint64", bits: bits64},
+};
+
+export function casesFor(width) {
+  const bits = formats[width]?.bits;
+  if (!bits) throw new Error("Unsupported FP width: " + width);
 const cases = [];
 function add(op, a, b) {
   cases.push({name: op + "/" + a + (b ? "/" + b : ""), op,
@@ -38,6 +57,9 @@ for (const [op, a, b] of [
 for (const a of ["zero", "negZero", "one", "two", "four", "negOne",
   "minSub", "maxSub", "minNormal", "max", "inf", "nan"]) add("sqrt", a);
 
+// Sign operations have no rounding mode; include zeros, infinities, and NaNs.
+for (const op of ["neg", "abs"]) for (const a of Object.keys(bits)) add(op, a);
+
 // Small reproducible sample across all bit encodings; this is not exhaustive.
 let state = 0x6a09e667f3bcc909n;
 function nextBits() {
@@ -45,7 +67,7 @@ function nextBits() {
   state ^= state >> 7n;
   state ^= state << 17n;
   state = BigInt.asUintN(64, state);
-  return state.toString(16).padStart(16, "0");
+  return BigInt.asUintN(width, state).toString(16).padStart(width / 4, "0");
 }
 for (const op of ["add", "sub", "mul", "div", "sqrt"]) {
   for (let index = 0; index < 8; index++) {
@@ -53,4 +75,5 @@ for (const op of ["add", "sub", "mul", "div", "sqrt"]) {
       ...(op === "sqrt" ? {} : {b: nextBits()})});
   }
 }
-export { cases };
+return cases;
+}

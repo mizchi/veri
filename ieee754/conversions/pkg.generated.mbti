@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/ieee754/conversions"
+
+import {
+  "mizchi/veri/ieee754",
+  "mizchi/veri/ieee754/float32",
+}
+
+// Values
+pub fn finite_widening_is_finite(@float32.Float32) -> Unit
+
+pub fn narrow(@ieee754.RoundingMode, @ieee754.Float64) -> @float32.Float32
+
+pub fn narrowing_preserves_nan(@ieee754.Float64) -> Unit
+
+pub fn widen(@ieee754.RoundingMode, @float32.Float32) -> @ieee754.Float64
+
+pub fn widening_preserves_nan(@float32.Float32) -> Unit
+
+pub fn widening_roundtrip(@float32.Float32) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -9,6 +9,12 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
   proof_ensure: @ieee754.is_nan(@ieee754.add(@ieee754.nearest_even(), x, y)),
 } {}
 
+///| Binary32 uses the same rounding-mode type as the binary64 API.
+lemma binary32_adding_nan_is_nan(x : @fp32.Float32, y : @fp32.Float32) where {
+  proof_require: @fp32.is_nan(x),
+  proof_ensure: @fp32.is_nan(@fp32.add(@ieee754.nearest_even(), x, y)),
+} {}
+
 ///| Clear the lowest set bit using modular arithmetic, including x = 0.
 lemma clear_lowest_bit_never_increases(x : @bv32.Bv32) where {
   proof_ensure: @bv32.ule(@bv32.bw_and(x, @bv32.sub(x, @bv32.one())), x),

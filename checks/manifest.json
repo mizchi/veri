@@ -38,5 +38,21 @@
   {
     "file": "strings/codepoint-length.smt2",
     "expected": "unsat"
+  },
+  {
+    "file": "fp32/finite-self-subtraction.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "fp32/non-associative.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "fp32/precision-roundtrip.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "fp32/narrowing-loss.smt2",
+    "expected": "sat"
   }
 ]

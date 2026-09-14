@@ -4,7 +4,7 @@
 
 MoonBit の形式検証を使うための小さな基盤。再利用する論理モデル・補題、契約付き実装、実行時の差分検査を用意する。
 
-有限集合・固定幅 bitvector・全域 array・string・IEEE 浮動小数点の証明用バインディングを提供する。IEEE 754 についてはまず **binary64 / roundTiesToEven (RNE)** の実行結果を検査し、Why3 の IEEE モデル上の性質を証明する。規格全体への適合認証や、MoonBit コンパイラ・CPU の正しさの証明を提供するものではない。
+有限集合・固定幅 bitvector・全域 array・string・IEEE 浮動小数点の証明用バインディングを提供する。IEEE 754 については **binary32・binary64 / roundTiesToEven (RNE)** の実行結果を検査し、Why3 の IEEE モデル上の性質を証明する。規格全体への適合認証や、MoonBit コンパイラ・CPU の正しさの証明を提供するものではない。
 
 ## 実行
 
@@ -23,8 +23,10 @@ just prove-machine # 機械整数 prelude で bounds・実行時ブリッジ・�
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just test js      # 実行時検査
+just quickcheck js # QuickCheck の性質テストだけを実行
 just test-backends # JS / wasm / wasm-gc / native
 just test-release # 最適化したビルドでも同じ検査
+just fp-capabilities # Float/Double の証明変換の対応状況を確認
 just vectors      # Z3 から期待値を再生成
 just vectors-check # 生成済み期待値と現在の Z3 の結果を照合
 just fmt          # フォーマット・公開インターフェース生成
@@ -42,7 +44,8 @@ just fmt          # フォーマット・公開インターフェース生成
 | --- | --- | --- |
 | `bounds` | 半開区間への clamp | 有効な上下限に対し結果が区間内に入り、元から区間内の値を保存する |
 | `fset` | Why3 の有限集合への接続 | 空集合・要素追加・和集合の補題 |
-| `ieee754` | 論理上の binary64 と丸めモード | NaN、符号付きゼロ、有限値の自己減算などの補題 |
+| `ieee754` / `ieee754/float32` | 論理上の binary64 / binary32 と共通の丸めモード | NaN、符号付きゼロ、有限値の自己減算などの補題 |
+| `ieee754/conversions` | 論理上の拡幅・縮幅 | binary32 の拡幅往復と NaN 分類の保存 |
 | `bv32` / `bv64` | Why3 の固定幅 bitvector への接続 | 各演算と、剰余を取る整数変換 |
 | `bv32/laws` / `bv64/laws` | bitvector の補題。整数の補題は `laws/integers` | ビット演算則、双方向の変換、符号なし数値の範囲 |
 | `arrays` | select/store を持つ全域写像 | 更新後の読み出し、別キーの保存、最後の更新の優先 |
@@ -53,7 +56,9 @@ just fmt          # フォーマット・公開インターフェース生成
 | `runtime/array` | FixedArray のモデルと安全な読み取り | 境界検査とモデル内の要素との一致 |
 | `runtime/text` | 検証済み入力を持つ SMT 互換文字列 | コードポイント単位の長さ・char_at・substring を Z3 と照合 |
 | `examples/bridges` | 実行時ブリッジの利用例 | 別モジュールから契約を組み合わせた証明 |
-| `runtime/float64` | 実行結果の比較と参照ケース | 4 演算と sqrt の結果を Z3 の IEEE FP 理論と照合 |
+| `runtime/float32` / `runtime/float64` | 実行時 FP API と参照値比較 | 算術・sqrt・neg/abs・比較・分類・非 NaN のビット往復を照合 |
+| `runtime/float_conversions` | 精度変換の検査 | Float ↔ Double を丸め境界を含めて Z3 と照合 |
+| `examples/floating` | 実行時 FP の利用例 | Float と Double での丸め精度の違い |
 | `checks/` | FP・bitvector・array・string の SMT-LIB 2 検査 | 全入力に対する性質と、固定入力の反例 |
 | `checks/negative` | 意図的に誤った補題 | 誤った主張を検証経路が成功扱いしないこと |
 
@@ -72,11 +77,12 @@ veri/
 ├── fset/
 ├── ieee754/
 ├── integer/
-├── runtime/                 # uint32, uint64, array, text, float64
+├── runtime/                 # uint32, uint64, array, text, float32, float64, float_conversions
 └── examples/
     ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.1.0 に依存
     ├── models/
-    └── bridges/
+    ├── bridges/
+    └── floating/
 ```
 
 workspace 内の依存はローカルの本体へ解決され、レジストリから取得しない。
@@ -86,7 +92,7 @@ workspace 内の依存はローカルの本体へ解決され、レジストリ�
 証明結果は各モジュールの `_build/verif/` 配下に出力される。
 
 `.mbt` が実装・型・契約、`.mbtp` が論理モデル・補題。`pkg.generated.mbti` で公開 API を確認できる。
-`fset`・`ieee754`・`bv32`・`bv64`・`arrays`・`strings` の抽象型は **証明専用**。バインディングだけで MoonBit の実行時の値との対応が保証されるわけではない。
+`fset`・`ieee754`・`ieee754/float32`・`bv32`・`bv64`・`arrays`・`strings` の抽象型は **証明専用**。バインディングだけで MoonBit の実行時の値との対応が保証されるわけではない。
 
 最小の利用例:
 
@@ -104,6 +110,44 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 実行時は `@float64.matches(actual, Bits(expected_bits))` でビット一致、
 `@float64.matches(actual, AnyNaN)` で NaN 分類を検査する。
 符号付きゼロを取り違えたり、有限値に 1 ULP の差があればビット一致は失敗する。
+
+## QuickCheck による性質テスト
+
+`moonbitlang/core/quickcheck` をテスト専用で import する。
+`bounds/properties_test.mbt` と `runtime/*/properties_test.mbt` の26個の性質を、
+固定 seed `20260914` でそれぞれ1,000件の有効入力に対して検査する。
+コレクションの生成サイズは最大64。`just quickcheck js`（または `wasm`、
+`wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
+`just test-release`・`just verify` にも含まれる。
+
+検査対象は clamp の範囲と単調性、整数の循環演算と順序、配列の読み取りと更新、
+SMT の文字集合とコードポイント単位の位置、浮動小数点のビット表現・分類・
+符号操作・演算の恒等則・精度変換の往復。
+文字列の操作はスカラー値を順番に走査する独立の参照処理と照合する。
+浮動小数点は `UInt` / `UInt64` のビット列から生成し、特殊値と指数の全範囲を
+生成対象にする。非 NaN はゼロの符号も含めて比較し、NaN は分類だけを比較する。
+NaN ペイロードの保存は要求しない。
+
+例えば `mizchi/veri/runtime/uint32` と `moonbitlang/core/quickcheck` を
+`for "test"` で import すると、次のように書ける。
+
+```moonbit
+test "quickcheck: wrapping roundtrip" {
+  @quickcheck.check(
+    (input : (UInt, UInt)) => {
+      let (value, delta) = input
+      @uint32.sub(@uint32.add(value, delta), delta) == value
+    },
+    count=1000,
+    seed=20260914,
+  )
+}
+```
+
+失敗時は QuickCheck が縮小した反例を出力する。同じ性質と seed で再実行すると
+再現でき、seed を変えると別の再現可能な標本を検査できる。
+これは実行時の標本検査であり、Z3 の参照値テストや形式証明と併用する。
+IEEE 全入力への適合証明を与えるものではない。
 
 ## バインディングの接続先
 
@@ -155,7 +199,7 @@ MoonBit の実行時の UTF-16 長とは異なる。`char_at` の返り値は文
 | `Int` / `UInt`・`Int64` / `UInt64` | 32 / 64 bit のビット表現 | 組み込みの加減乗算・ビット演算・符号付き/符号なし比較・有効なシフトと循環演算アダプターを Z3 の 48 ケースで照合 |
 | `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]` と `a.length()` | `get` が範囲内でモデルの要素を Some で返し、範囲外では None を返すことを両モデルで証明 |
 | `String` | `@text.from_string(s)` → `@text.Text?` | UTF-16 と共通の文字集合を検査し、長さ・char_at・substring を Z3 の 72 ケースで照合 |
-| `Double` | binary64 のビット表現 | 既存の Z3 FP 参照 86 ケース。実演算全体の一致証明は未対応 |
+| `Float` / `Double` | binary32 / binary64 のビット表現 | 各型 122 演算ケースと精度変換 62 ケースを Z3 と照合。実演算との全入力の一致証明は未対応 |
 
 `Integer` は上限のない **証明専用** の抽象型。機械整数 prelude を選んでも数学的整数として扱える。
 射影は論理関数であり、実行時の数値キャストではない。
@@ -228,11 +272,36 @@ JS / wasm / wasm-gc / native の debug・release で実行時検査を行う。
 
 ## IEEE 754 をどこまで検査できるか
 
-**実行結果の検査**は、境界入力と再現可能なサンプルについて期待値との一致を確認する。
-現在は 46 境界ケースと 40 サンプルの計 86 ケース。丸めの中間点、subnormal、最小 normal、
-オーバーフロー、±0、±∞、NaN、sqrt を含む。入力はビット列で指定し、期待値にはホストの
-JavaScript 浮動小数点演算を使わず、Z3 の FP 演算から生成する。
-全入力を列挙する検査ではない。
+**実行結果の検査**は、**各型 122 ケース**（境界などの指定入力 82 ケースと再現可能なサンプル 40 ケース）、
+**Float ↔ Double の精度変換 62 ケース**を Z3 と照合する。各演算ケースでラッパーと組み込み式の両方を確認する。
+対象は4演算、sqrt、符号反転、絶対値、IEEE の等値・順序比較、NaN・無限大の分類と、非 NaN のビット表現の往復。
+丸めの中間点、subnormal、最小 normal、オーバーフロー、±0、±∞、NaN を含む。
+期待値にはホストの浮動小数点演算を使わず、Z3 の FP 演算から生成する。全入力を列挙する検査ではない。
+
+| 用途 | Float API | Double API |
+| --- | --- | --- |
+| ビット表現 | `@float32.from_bits(UInt)`・`to_bits(Float)` | `@float64.from_bits(UInt64)`・`to_bits(Double)` |
+| 演算 | `add/sub/mul/div/sqrt/neg/abs` | 同じ名前 |
+| 比較・分類 | `eq/less/is_nan/is_infinite` | 同じ名前 |
+| 精度変換 | `@float32.to_double(Float)` | `@float64.to_float(Double)` |
+| 参照値の比較 | `matches(value, Bits(UInt))` または `AnyNaN` | `matches(value, Bits(UInt64))` または `AnyNaN` |
+
+```moonbit
+// mizchi/veri/runtime/float32 と mizchi/veri/runtime/float64 を import する。
+test {
+  let one = @float32.from_bits(0x3f800000U)
+  let half_ulp = @float32.from_bits(0x33800000U)
+  assert_true(@float32.matches(@float32.add(one, half_ulp), Bits(0x3f800000U)))
+  let wide = @float32.to_double(one)
+  assert_true(@float64.matches(wide, Bits(0x3ff0000000000000UL)))
+}
+```
+
+論理 API は `ieee754.Float64`・`ieee754/float32.Float32` と `ieee754/conversions.widen/narrow`。
+両形式で `ieee754.RoundingMode` を共有する。変換の補題では RNE の binary32 → binary64 → binary32 が
+符号付きゼロや抽象的な NaN の同一性を含めて元に戻ることを証明する。
+逆方向の往復は有限の binary64 値でも精度を失い、`checks/fp32/narrowing-loss.smt2` に具体的な SAT の反例がある。
+実行時の NaN ペイロード保存は保証しない。
 
 **モデル上の形式検証**は、指定した前提を満たすすべてのモデル値について性質を証明する。
 例えば「有限な x について x - x はゼロ」や「NaN の符号を反転しても NaN」。
@@ -247,25 +316,27 @@ a + (b + c) = 0.0
 
 この反例は SMT と MoonBit の両方で再現する。
 
-**実際の MoonBit Double 演算との接続**には追加の仕事が必要。
-確認したツールチェインでは Double 比較を直接 proof_ensure に置くと
-`unsupported primitive operator in logic body` になる。
-FSet と同じ `#proof_external` / `#proof_import` により IEEE モデルを利用できるが、
-これだけで MoonBit の実演算とモデルが等しいと証明したことにはならない。
-現段階ではその間を差分テストで検査する。
+**実際の Float / Double 演算との接続には、コンパイラ側の対応が必要。**
+確認したツールチェインでは契約付き関数の本体に FP 算術を置くと
+`unsupported primitive operator in contracted function body` になり、論理内の比較も未対応。
+`just fp-capabilities` で新しい一時モジュール内に再現し、`_build/fp-capabilities.json` に対応状況を記録する。
+これはコンパイラの変換能力を調べる検査であり、IEEE の正しさの証明とは別。
+将来変換が通るようになっても、生成される IEEE 型・丸め規則を確認し、対応を証明する必要がある。
+そのため実行時 FP API には証明契約や、仮定による `model(Float/Double)` 変換を付けていない。
+Why3 モデル上の証明と実行時の差分検査を用意し、その両者を結ぶ全入力の定理は今後の対象とする。
 
 ## 信頼する境界と未対応
 
 - `#proof_external` / `#proof_import` の型・引数順・Why3 記号の対応、Why3、ソルバー、MoonBit の変換処理を信頼する。独自の `proof_axiomatized` は使わない。
 - 通常の整数証明は数学的整数モデル。bounds・循環演算・FixedArray の読み取り・ブリッジの利用例は同梱の機械整数モデルでも別途証明する。`lower < upper` は呼び出し側の事前条件であり、実行時の入力検査ではない。
-- 実行時の検査プロファイルは binary64 の RNE。論理 API は 5 丸めモードを持つが、実行時に全モードを設定・検査する機能はない。
-- NaN ペイロード、signaling / quiet NaN、例外フラグ、trap、decimal、binary32、実行時 FMA、浮動小数点の文字列変換は未検査。SMT-LIB の FP 理論自体も signaling / quiet NaN を区別しない。
+- 実行時の検査プロファイルは binary32・binary64 の RNE。論理 API は 5 丸めモードを持つが、実行時に全モードを設定・検査する機能はない。
+- NaN ペイロード、signaling / quiet NaN、例外フラグ、trap、decimal、実行時 FMA、浮動小数点の文字列変換は未検査。SMT-LIB の FP 理論自体も signaling / quiet NaN を区別しない。
 - 超越関数の `sin` / `exp` などや、実数アルゴリズムに対する誤差上限の証明は別途必要。
 - `unknown` / timeout は未証明。真偽の結論にはしない。SMT の正例チェックは期待した `unsat` 以外で失敗する。負例チェックは偽命題が未証明になることを確認するだけで、ソルバーが反例を出したとは主張しない。
 - 依存パッケージを仮定する対象指定の証明だけに頼らず、`just prove` で workspace の両モジュールを証明する。
 - 現在はローカルツールチェインを利用する。共有 CI のための配布物・ソルバーのバージョン固定は今後の課題。
 
-次は binary32、Berkeley TestFloat / SoftFloat のケース取り込み、bitvector の切り出し・拡張、
+次はコンパイラの実演算 FP 証明変換、Berkeley TestFloat / SoftFloat のケース取り込み、bitvector の切り出し・拡張、
 実行時のブリッジ契約の拡充、正規表現、Seq / 有限 Map のモデルを拡張できる。
 TestFloat / SoftFloat はこのリポジトリにはまだ組み込んでいない。
 
