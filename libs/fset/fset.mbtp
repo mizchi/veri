@@ -1,0 +1,34 @@
+///|
+#proof_import("set.Fset")
+pub fn[T] empty() -> Fset[T] = "empty"
+
+///|
+#proof_import("set.Fset")
+pub fn[T] mem(value : T, set : Fset[T]) -> Bool = "mem"
+
+///|
+#proof_import("set.Fset")
+pub fn[T] add(value : T, set : Fset[T]) -> Fset[T] = "add"
+
+///|
+#proof_import("set.Fset")
+pub fn[T] union(left : Fset[T], right : Fset[T]) -> Fset[T] = "union"
+
+///|
+#proof_import("set.Fset")
+pub fn[T] subset(left : Fset[T], right : Fset[T]) -> Bool = "subset"
+
+///|
+pub lemma empty_has_no_member(value : Int) where {
+  proof_ensure: mem(value, empty()) == false,
+} {}
+
+///|
+pub lemma add_contains(value : Int, set : Fset[Int]) where {
+  proof_ensure: mem(value, add(value, set)),
+} {}
+
+///|
+pub lemma union_contains_left(left : Fset[Int], right : Fset[Int]) where {
+  proof_ensure: subset(left, union(left, right)),
+} {}

@@ -1,0 +1,14 @@
+[
+  {
+    "file": "finite-self-subtraction.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "negation-preserves-nan.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "non-associative.smt2",
+    "expected": "sat"
+  }
+]

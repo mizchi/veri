@@ -1,0 +1,4 @@
+///| Deliberately false; this package must never verify.
+lemma negative_control() where {
+  proof_ensure: eq(div(nearest_even(), zero(), zero()), div(nearest_even(), zero(), zero())),
+} {}

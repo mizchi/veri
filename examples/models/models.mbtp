@@ -1,0 +1,10 @@
+///| A downstream proof can use the finite-set model.
+lemma singleton_contains(value : Int) where {
+  proof_ensure: @fset.mem(value, @fset.add(value, @fset.empty())),
+} {}
+
+///| A downstream proof can use IEEE operations without assuming real arithmetic.
+lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
+  proof_require: @ieee754.is_nan(x),
+  proof_ensure: @ieee754.is_nan(@ieee754.add(@ieee754.nearest_even(), x, y)),
+} {}

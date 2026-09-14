@@ -1,0 +1,80 @@
+///|
+#proof_import("ieee_float.RoundingMode")
+pub fn nearest_even() -> RoundingMode = "RNE"
+
+///|
+#proof_import("ieee_float.RoundingMode")
+pub fn nearest_away() -> RoundingMode = "RNA"
+
+///|
+#proof_import("ieee_float.RoundingMode")
+pub fn toward_positive() -> RoundingMode = "RTP"
+
+///|
+#proof_import("ieee_float.RoundingMode")
+pub fn toward_negative() -> RoundingMode = "RTN"
+
+///|
+#proof_import("ieee_float.RoundingMode")
+pub fn toward_zero() -> RoundingMode = "RTZ"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn zero() -> Float64 = "zeroF"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn add(mode : RoundingMode, x : Float64, y : Float64) -> Float64 = "add"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn sub(mode : RoundingMode, x : Float64, y : Float64) -> Float64 = "sub"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn mul(mode : RoundingMode, x : Float64, y : Float64) -> Float64 = "mul"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn div(mode : RoundingMode, x : Float64, y : Float64) -> Float64 = "div"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn sqrt(mode : RoundingMode, x : Float64) -> Float64 = "sqrt"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn fma(mode : RoundingMode, x : Float64, y : Float64, z : Float64) -> Float64 = "fma"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn neg(x : Float64) -> Float64 = "neg"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn abs(x : Float64) -> Float64 = "abs"
+
+///| IEEE equality: NaN is unequal to itself; +0 and -0 compare equal.
+#proof_import("ieee_float.Float64")
+pub fn eq(x : Float64, y : Float64) -> Bool = "eq"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn le(x : Float64, y : Float64) -> Bool = "le"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn is_nan(x : Float64) -> Bool = "is_nan"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn is_infinite(x : Float64) -> Bool = "is_infinite"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn is_zero(x : Float64) -> Bool = "is_zero"
+
+///|
+pub predicate is_finite(x : Float64) {
+  is_nan(x) == false && is_infinite(x) == false
+}

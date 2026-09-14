@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/float64"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn matches(Double, Expected) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) enum Expected {
+  Bits(UInt64)
+  AnyNaN
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

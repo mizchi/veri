@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri/libs/fset",
+  "mizchi/veri/libs/ieee754",
+}
+
+options(
+  "proof-enabled": true,
+)

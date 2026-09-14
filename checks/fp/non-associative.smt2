@@ -1,0 +1,10 @@
+; A concrete finite witness, replayed by MoonBit's runtime tests.
+(set-logic QF_FP)
+(define-fun a () (_ FloatingPoint 11 53) ((_ to_fp 11 53) #x4340000000000000))
+(define-fun b () (_ FloatingPoint 11 53) ((_ to_fp 11 53) #xc340000000000000))
+(define-fun c () (_ FloatingPoint 11 53) ((_ to_fp 11 53) #x3fe0000000000000))
+(define-fun left () (_ FloatingPoint 11 53) (fp.add RNE (fp.add RNE a b) c))
+(define-fun right () (_ FloatingPoint 11 53) (fp.add RNE a (fp.add RNE b c)))
+(assert (not (fp.eq left right)))
+(check-sat)
+(get-value (left right))
