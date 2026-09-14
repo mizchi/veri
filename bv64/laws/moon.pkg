@@ -1,0 +1,7 @@
+import {
+  "mizchi/veri/bv64",
+}
+
+options(
+  "proof-enabled": true,
+)

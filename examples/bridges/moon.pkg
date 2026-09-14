@@ -1,0 +1,11 @@
+import {
+  "mizchi/veri/arrays",
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/array" @runtime_array,
+  "mizchi/veri/runtime/uint32",
+  "mizchi/veri/runtime/uint64",
+}
+
+options(
+  "proof-enabled": true,
+)

@@ -1,0 +1,4 @@
+///| Deliberately false: storing one replaces the zero at this key.
+lemma negative_control() where {
+  proof_ensure: select(store(const_array(0), 0, 1), 0) == 0,
+} {}

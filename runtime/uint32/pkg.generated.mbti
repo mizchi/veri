@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/uint32"
+
+import {
+  "mizchi/veri/bv32",
+}
+
+// Values
+pub fn add(UInt, UInt) -> UInt
+
+pub fn less(UInt, UInt) -> Bool
+
+pub fn model(UInt) -> @bv32.Bv32
+
+pub fn model_preserves_value(UInt) -> Unit
+
+pub fn sub(UInt, UInt) -> UInt
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

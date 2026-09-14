@@ -1,0 +1,72 @@
+[
+  {
+    "package": "ieee754",
+    "fixture": "nan-reflexive.mbtp.txt",
+    "claim": "NaN reflexivity"
+  },
+  {
+    "package": "bv32",
+    "fixture": "unsigned-increment.mbtp.txt",
+    "claim": "unsigned increment always grows (32-bit)"
+  },
+  {
+    "package": "bv64",
+    "fixture": "unsigned-increment.mbtp.txt",
+    "claim": "unsigned increment always grows (64-bit)"
+  },
+  {
+    "package": "arrays",
+    "fixture": "store-ignored.mbtp.txt",
+    "claim": "store leaves the written cell unchanged"
+  },
+  {
+    "package": "strings",
+    "fixture": "concat-commutative.mbtp.txt",
+    "claim": "string concatenation commutes"
+  },
+  {
+    "package": "runtime/uint32",
+    "fixture": "naive-uint32-wrap.mbt.txt",
+    "claim": "mathematical UInt addition wraps without an implementation"
+  },
+  {
+    "package": "runtime/uint32",
+    "fixture": "naive-uint32-wrap.mbt.txt",
+    "machine": true,
+    "claim": "checked UInt addition permits overflow"
+  },
+  {
+    "package": "runtime/uint64",
+    "fixture": "naive-uint64-wrap.mbt.txt",
+    "machine": true,
+    "claim": "checked UInt64 addition permits overflow"
+  },
+  {
+    "package": "runtime/array",
+    "fixture": "ignore-array-cell.mbt.txt",
+    "machine": true,
+    "claim": "every in-bounds array cell is zero"
+  },
+  {
+    "package": "bv32",
+    "fixture": "integer-conversion-unbounded.mbtp.txt",
+    "claim": "32-bit conversion preserves every unbounded integer"
+  },
+  {
+    "package": "runtime/uint32",
+    "fixture": "sub-is-add32.mbt.txt",
+    "machine": true,
+    "claim": "UInt32 subtraction implements bitvector addition"
+  },
+  {
+    "package": "bv64",
+    "fixture": "integer-conversion-unbounded.mbtp.txt",
+    "claim": "64-bit conversion preserves every unbounded integer"
+  },
+  {
+    "package": "runtime/uint64",
+    "fixture": "sub-is-add64.mbt.txt",
+    "machine": true,
+    "claim": "UInt64 subtraction implements bitvector addition"
+  }
+]

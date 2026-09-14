@@ -1,0 +1,9 @@
+///|
+/// Elements of a FixedArray at the current program state. Only indices in
+/// [0, array.length()) correspond to runtime cells; other keys are unspecified.
+#proof_import("array.Array")
+pub fn[T] model(array : FixedArray[T]) -> @arrays.SmtArray[@integer.Integer, T] = "elts"
+
+///|
+#proof_import("map.Map")
+fn[T] same(left : T, right : T) -> Bool = "(=)"

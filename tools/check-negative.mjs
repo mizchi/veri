@@ -1,26 +1,46 @@
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
+import { configureWhy3 } from "./why3-config.mjs";
 
-// Isolate a false theorem so normal moon prove always checks only true claims.
-const directory = mkdtempSync(join(tmpdir(), "veri-negative-"));
-try {
-  cpSync(new URL("../libs/ieee754/", import.meta.url), directory, {recursive: true});
-  writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\n');
-  writeFileSync(join(directory, "negative.mbtp"),
-    readFileSync(new URL("../checks/negative/nan-reflexive.mbtp.txt", import.meta.url)));
-  const result = spawnSync("moon", ["prove"], {
-    cwd: directory, encoding: "utf8", timeout: 45_000,
-  });
-  if (result.error) throw result.error;
-  const report = JSON.parse(readFileSync(join(directory, "_build/verif/veri-negative.proof.json"), "utf8"));
-  if (result.status === 0 || report.result === "success" ||
-      !report.failures.some(failure => JSON.stringify(failure).includes("negative_control"))) {
-    throw new Error("False NaN reflexivity was not rejected as a proof obligation:\n" + result.stdout + result.stderr);
+const fixtures = new URL("../checks/negative/", import.meta.url);
+const checks = JSON.parse(readFileSync(new URL("manifest.json", fixtures), "utf8"));
+if (checks.length === 0) throw new Error("No negative proof controls configured");
+const config = configureWhy3();
+
+// Each false claim is isolated; ordinary moon prove contains only positive proofs.
+for (const check of checks) {
+  const directory = mkdtempSync(join(tmpdir(), "veri-negative-"));
+  try {
+    const source = new URL("../" + check.package + "/", import.meta.url);
+    // Copy just this package, not its child packages containing unrelated laws.
+    for (const entry of readdirSync(source, {withFileTypes: true})) {
+      if (entry.isFile()) copyFileSync(new URL(entry.name, source), join(directory, entry.name));
+    }
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\nimport { "mizchi/veri@0.1.0" }\n');
+    writeFileSync(join(directory, "moon.work"), 'members = [".", ' +
+      JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
+    const sourceName = check.fixture.endsWith('.mbt.txt') ? "negative.mbt" : "negative.mbtp";
+    writeFileSync(join(directory, sourceName), readFileSync(new URL(check.fixture, fixtures)));
+    const result = spawnSync("moon", ["prove", "--why3-config", config], {
+      cwd: directory, encoding: "utf8", timeout: 60_000,
+      env: {...process.env, ...(check.machine ? {
+        MOON_PROVE_PRELUDE_OVERRIDE: join(homedir(), ".moon/lib/prelude_proof_machine_int"),
+      } : {})},
+    });
+    if (result.error) throw result.error;
+    const report = JSON.parse(readFileSync(join(directory, "_build/verif/veri-negative.proof.json"), "utf8"));
+    if (result.status === 0 || report.result === "success" ||
+        !report.failures.some(failure => JSON.stringify(failure).includes("negative_control"))) {
+      throw new Error("False claim was not rejected as a proof obligation: " + check.claim +
+        "\n" + result.stdout + result.stderr);
+    }
+    console.log("Negative control (" + check.package + "): " + check.claim + " was not proved.");
+    console.log(result.stdout.trim());
+  } finally {
+    rmSync(directory, {recursive: true, force: true});
   }
-  console.log("Negative control: false NaN reflexivity was not proved.");
-  console.log(result.stdout.trim());
-} finally {
-  rmSync(directory, {recursive: true, force: true});
 }

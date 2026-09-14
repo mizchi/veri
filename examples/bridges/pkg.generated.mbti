@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/bridges"
+
+// Values
+pub fn first_or(FixedArray[Int], Int) -> Int
+
+pub fn restore32(UInt, UInt) -> UInt
+
+pub fn restore64(UInt64, UInt64) -> UInt64
+
+pub fn zero_after_max() -> UInt
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

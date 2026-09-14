@@ -1,0 +1,46 @@
+///|
+pub lemma concat_length(left : Text, right : Text) where {
+  proof_ensure: length(concat(left, right)) == length(left) + length(right),
+} {}
+
+///|
+pub lemma concat_empty(text : Text) where {
+  proof_ensure: eq(concat(text, empty()), text),
+  proof_ensure: eq(concat(empty(), text), text),
+} {}
+
+///|
+pub lemma length_nonnegative(text : Text) where {
+  proof_ensure: length(text) >= 0,
+} {}
+
+///|
+pub lemma concat_contains_parts(left : Text, right : Text) where {
+  proof_ensure: contains(concat(left, right), left),
+  proof_ensure: prefix_of(left, concat(left, right)),
+  proof_ensure: suffix_of(right, concat(left, right)),
+} {}
+
+///|
+pub lemma negative_start_is_empty(text : Text, count : Int) where {
+  proof_ensure: eq(substring(text, -1, count), empty()),
+  proof_ensure: eq(char_at(text, -1), empty()),
+} {}
+
+///|
+pub lemma missing_substring_index(text : Text, pattern : Text) where {
+  proof_require: contains(text, pattern) == false,
+  proof_ensure: index_of(text, pattern, 0) == -1,
+} {}
+
+///|
+pub lemma replace_empty_prepends(text : Text, replacement : Text) where {
+  proof_ensure: eq(replace(text, empty(), replacement), concat(replacement, text)),
+} {}
+
+///|
+pub lemma decimal_conversion() where {
+  proof_ensure: to_int(from_int(123)) == 123,
+  proof_ensure: eq(from_int(-1), empty()),
+  proof_ensure: to_int(empty()) == -1,
+} {}

@@ -1,0 +1,7 @@
+///|
+pub fn negative_control(x : UInt64) -> UInt64 where {
+  proof_require: x == 0xffffffffffffffffUL,
+  proof_ensure: result => result == 0UL,
+} {
+  x + 1UL
+}

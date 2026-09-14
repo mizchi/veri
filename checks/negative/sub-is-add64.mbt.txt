@@ -1,0 +1,8 @@
+///|
+pub fn negative_control(x : UInt64, y : UInt64) -> UInt64 where {
+  proof_require: 0UL <= x && x <= 0xffffffffffffffffUL,
+  proof_require: 0UL <= y && y <= 0xffffffffffffffffUL,
+  proof_ensure: result => @bv64.eq(model(result), @bv64.add(model(x), model(y))),
+} {
+  sub(x, y)
+}

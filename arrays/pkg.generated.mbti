@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/arrays"
+
+// Values
+pub fn[K, V] const_array(V) -> SmtArray[K, V]
+
+pub fn constant_reads(Int, Int) -> Unit
+
+pub fn[K, V] eq(SmtArray[K, V], SmtArray[K, V]) -> Bool
+
+pub fn last_write_wins(SmtArray[Int, Int], Int, Int, Int) -> Unit
+
+pub fn other_key_unchanged(SmtArray[Int, Int], Int, Int, Int) -> Unit
+
+pub fn read_after_write(SmtArray[Int, Int], Int, Int) -> Unit
+
+pub fn[K, V] select(SmtArray[K, V], K) -> V
+
+pub fn[K, V] store(SmtArray[K, V], K, V) -> SmtArray[K, V]
+
+pub fn write_back_unchanged(SmtArray[Int, Int], Int) -> Unit
+
+// Errors
+
+// Types and methods
+pub type SmtArray[K, V]
+
+// Type aliases
+
+// Traits

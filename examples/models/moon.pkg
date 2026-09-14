@@ -1,6 +1,10 @@
 import {
-  "mizchi/veri/libs/fset",
-  "mizchi/veri/libs/ieee754",
+  "mizchi/veri/arrays",
+  "mizchi/veri/bv32",
+  "mizchi/veri/bv64",
+  "mizchi/veri/fset",
+  "mizchi/veri/ieee754",
+  "mizchi/veri/strings",
 }
 
 options(

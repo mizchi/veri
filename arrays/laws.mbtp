@@ -1,0 +1,25 @@
+///|
+pub lemma read_after_write(a : SmtArray[Int, Int], key : Int, value : Int) where {
+  proof_ensure: select(store(a, key, value), key) == value,
+} {}
+
+///|
+pub lemma other_key_unchanged(a : SmtArray[Int, Int], key : Int, other : Int, value : Int) where {
+  proof_require: key != other,
+  proof_ensure: select(store(a, key, value), other) == select(a, other),
+} {}
+
+///|
+pub lemma last_write_wins(a : SmtArray[Int, Int], key : Int, first : Int, last : Int) where {
+  proof_ensure: eq(store(store(a, key, first), key, last), store(a, key, last)),
+} {}
+
+///|
+pub lemma write_back_unchanged(a : SmtArray[Int, Int], key : Int) where {
+  proof_ensure: eq(store(a, key, select(a, key)), a),
+} {}
+
+///|
+pub lemma constant_reads(key : Int, value : Int) where {
+  proof_ensure: select(const_array(value), key) == value,
+} {}

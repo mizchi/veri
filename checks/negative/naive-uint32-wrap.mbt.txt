@@ -1,0 +1,8 @@
+///| Wrong implementation: mathematical addition does not wrap, and checked
+///| machine addition rejects the overflow. Neither may prove this contract.
+pub fn negative_control(x : UInt) -> UInt where {
+  proof_require: x == 0xffffffffU,
+  proof_ensure: result => result == 0U,
+} {
+  x + 1U
+}

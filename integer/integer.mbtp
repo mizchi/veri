@@ -1,0 +1,36 @@
+///|
+#proof_import("moonbit_builtin_prelude.Int")
+pub fn from_int(value : Int) -> Integer = "model"
+
+///|
+#proof_import("moonbit_builtin_prelude.UInt")
+pub fn from_uint(value : UInt) -> Integer = "model"
+
+///|
+#proof_import("moonbit_builtin_prelude.Int64")
+pub fn from_int64(value : Int64) -> Integer = "model"
+
+///|
+#proof_import("moonbit_builtin_prelude.UInt64")
+pub fn from_uint64(value : UInt64) -> Integer = "model"
+
+///|
+#proof_import("int.Int")
+pub fn eq(left : Integer, right : Integer) -> Bool = "(=)"
+
+///|
+#proof_import("int.Int")
+pub fn le(left : Integer, right : Integer) -> Bool = "(<=)"
+
+///|
+#proof_import("int.Int")
+pub fn add(left : Integer, right : Integer) -> Integer = "(+)"
+
+///|
+#proof_import("int.Int")
+pub fn sub(left : Integer, right : Integer) -> Integer = "(-)"
+
+///|
+/// Euclidean remainder; use a strictly positive modulus.
+#proof_import("int.EuclideanDivision")
+pub fn modulo(value : Integer, modulus : Integer) -> Integer = "mod"

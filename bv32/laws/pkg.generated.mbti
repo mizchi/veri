@@ -1,0 +1,29 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bv32/laws"
+
+import {
+  "mizchi/veri/bv32",
+}
+
+// Values
+pub fn addition_wraps() -> Unit
+
+pub fn de_morgan(@bv32.Bv32, @bv32.Bv32) -> Unit
+
+pub fn oversized_shifts() -> Unit
+
+pub fn signed_unsigned_differ() -> Unit
+
+pub fn subtraction_inverts_addition(@bv32.Bv32, @bv32.Bv32) -> Unit
+
+pub fn unsigned_division_by_zero(@bv32.Bv32) -> Unit
+
+pub fn xor_self_is_zero(@bv32.Bv32) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

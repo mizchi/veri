@@ -1,0 +1,4 @@
+///| Deliberately false: the strings "12" and "21" are different.
+lemma negative_control() where {
+  proof_ensure: eq(concat(from_int(1), from_int(2)), concat(from_int(2), from_int(1))),
+} {}

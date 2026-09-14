@@ -1,0 +1,7 @@
+///|
+pub fn negative_control(array : FixedArray[Int], index : Int) -> Int where {
+  proof_require: 0 <= index && index < array.length(),
+  proof_ensure: result => result == @arrays.select(model(array), @integer.from_int(index)),
+} {
+  0
+}

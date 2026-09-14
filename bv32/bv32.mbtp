@@ -1,0 +1,95 @@
+///|
+#proof_import("bv.BV32")
+pub fn zero() -> Bv32 = "zeros"
+
+///|
+#proof_import("bv.BV32")
+pub fn one() -> Bv32 = "one"
+
+///|
+#proof_import("bv.BV32")
+pub fn ones() -> Bv32 = "ones"
+
+///|
+#proof_import("bv.BV32")
+pub fn width() -> Bv32 = "size_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn bw_not(x : Bv32) -> Bv32 = "bw_not"
+
+///|
+#proof_import("bv.BV32")
+pub fn neg(x : Bv32) -> Bv32 = "neg"
+
+///|
+#proof_import("bv.BV32")
+pub fn add(x : Bv32, y : Bv32) -> Bv32 = "add"
+
+///|
+#proof_import("bv.BV32")
+pub fn sub(x : Bv32, y : Bv32) -> Bv32 = "sub"
+
+///|
+#proof_import("bv.BV32")
+pub fn mul(x : Bv32, y : Bv32) -> Bv32 = "mul"
+
+///|
+#proof_import("bv.BV32")
+pub fn udiv(x : Bv32, y : Bv32) -> Bv32 = "udiv"
+
+///|
+#proof_import("bv.BV32")
+pub fn urem(x : Bv32, y : Bv32) -> Bv32 = "urem"
+
+///|
+#proof_import("bv.BV32")
+pub fn sdiv(x : Bv32, y : Bv32) -> Bv32 = "sdiv"
+
+///|
+#proof_import("bv.BV32")
+pub fn srem(x : Bv32, y : Bv32) -> Bv32 = "srem"
+
+///|
+#proof_import("bv.BV32")
+pub fn bw_and(x : Bv32, y : Bv32) -> Bv32 = "bw_and"
+
+///|
+#proof_import("bv.BV32")
+pub fn bw_or(x : Bv32, y : Bv32) -> Bv32 = "bw_or"
+
+///|
+#proof_import("bv.BV32")
+pub fn bw_xor(x : Bv32, y : Bv32) -> Bv32 = "bw_xor"
+
+///|
+#proof_import("bv.BV32")
+pub fn eq(x : Bv32, y : Bv32) -> Bool = "(=)"
+
+///|
+#proof_import("bv.BV32")
+pub fn ult(x : Bv32, y : Bv32) -> Bool = "ult"
+
+///|
+#proof_import("bv.BV32")
+pub fn ule(x : Bv32, y : Bv32) -> Bool = "ule"
+
+///|
+#proof_import("bv.BV32")
+pub fn slt(x : Bv32, y : Bv32) -> Bool = "slt"
+
+///|
+#proof_import("bv.BV32")
+pub fn sle(x : Bv32, y : Bv32) -> Bool = "sle"
+
+///|
+#proof_import("bv.BV32")
+pub fn shl(x : Bv32, count : Bv32) -> Bv32 = "lsl_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn lshr(x : Bv32, count : Bv32) -> Bv32 = "lsr_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn ashr(x : Bv32, count : Bv32) -> Bv32 = "asr_bv"

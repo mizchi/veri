@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/text"
+
+// Values
+pub fn from_string(String) -> Text?
+
+// Errors
+
+// Types and methods
+pub struct Text {
+  // private fields
+}
+pub fn Text::char_at(Self, Int) -> Self
+pub fn Text::length(Self) -> Int
+pub fn Text::substring(Self, Int, Int) -> Self
+pub fn Text::to_string(Self) -> String
+
+// Type aliases
+
+// Traits

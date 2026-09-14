@@ -1,0 +1,7 @@
+import {
+  "mizchi/veri/integer",
+}
+
+options(
+  "proof-enabled": true,
+)

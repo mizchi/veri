@@ -1,0 +1,42 @@
+[
+  {
+    "file": "fp/finite-self-subtraction.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "fp/negation-preserves-nan.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "fp/non-associative.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "bv/modular-inverse.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "bv/signed-unsigned.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "arrays/read-after-write.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "arrays/store-changes-cell.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "strings/concat-length.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "strings/non-commutative.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "strings/codepoint-length.smt2",
+    "expected": "unsat"
+  }
+]

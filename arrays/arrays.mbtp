@@ -1,0 +1,15 @@
+///|
+#proof_import("map.Map")
+pub fn[K, V] select(array : SmtArray[K, V], key : K) -> V = "get"
+
+///|
+#proof_import("map.Map")
+pub fn[K, V] store(array : SmtArray[K, V], key : K, value : V) -> SmtArray[K, V] = "set"
+
+///|
+#proof_import("map.Const")
+pub fn[K, V] const_array(value : V) -> SmtArray[K, V] = "const"
+
+///| Extensional equality of total maps.
+#proof_import("map.Map")
+pub fn[K, V] eq(left : SmtArray[K, V], right : SmtArray[K, V]) -> Bool = "(=)"

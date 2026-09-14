@@ -13,13 +13,21 @@ check:
     moon fmt --check
     moon check --deny-warn
 
-# moon prove automatically uses ~/.moon/share/why3 in this toolchain.
-prove:
-    moon prove
+# Prove both workspace members using the bundled ~/.moon/share/why3 data.
+prover-config:
+    node tools/configure-why3.mjs
+
+prove: prover-config
+    moon prove --why3-config _build/why3/why3.conf
+    moon -C examples prove --why3-config ../_build/why3/why3.conf
 
 # The same integer contracts under the bundled machine-integer model.
-prove-machine:
-    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove libs/bounds --target-dir _build/machine
+prove-machine: prover-config
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove bounds --target-dir _build/machine
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/uint32 --target-dir _build/machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/uint64 --target-dir _build/machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/array --target-dir _build/machine
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove bridges --target-dir _build/machine --why3-config ../_build/why3/why3.conf
 
 test target="js":
     moon test --target {{target}}
@@ -37,20 +45,22 @@ test-release:
     moon test --release --target native
 
 test-tools:
-    node --test tools/solver.test.mjs
+    node --test tools/*.test.mjs
 
-# Fail unless a deliberately false IEEE statement is rejected by moon prove.
+# Fail unless deliberately false statements in each model remain unproved.
 negative:
     node tools/check-negative.mjs
 
-# UNSAT proofs and a concrete SAT counterexample in the IEEE FP model.
+# UNSAT proofs and concrete SAT witnesses for FP, bitvectors, arrays, and strings.
 smt:
-    node tools/check-fp.mjs
+    node tools/check-smt.mjs
 
 vectors:
     node tools/generate-float64.mjs
+    node tools/generate-runtime.mjs
 
 vectors-check:
     node tools/generate-float64.mjs --check
+    node tools/generate-runtime.mjs --check
 
 verify: doctor check test-tools prove prove-machine negative smt vectors-check test-backends test-release

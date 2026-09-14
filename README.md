@@ -4,7 +4,7 @@ English | [日本語](README.ja.md)
 
 A small foundation for formal verification in MoonBit, with reusable logical models and lemmas, implementations with contracts, and runtime differential checks.
 
-Tools can verify IEEE 754 properties. This repository starts by checking execution results for **binary64 / roundTiesToEven (RNE)** and proving properties in Why3's IEEE model. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
+Proof bindings cover finite sets, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, this repository starts by checking execution results for **binary64 / roundTiesToEven (RNE)** and proving properties in Why3's IEEE model. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
 
 ## Running
 
@@ -18,10 +18,10 @@ just verify        # Run proofs, negative controls, reference checks, and backen
 To run individual checks:
 
 ```sh
-just prove         # Prove the entire module: MoonBit → Why3 → SMT
-just prove-machine # Prove bounds contracts with the bundled machine-integer prelude
-just smt           # UNSAT proofs and a concrete SAT counterexample in the IEEE FP theory
-just negative      # Check that a deliberately false theorem is not proved
+just prove         # Prove both workspace modules: MoonBit → Why3 → SMT
+just prove-machine # Prove bounds, runtime bridges, and their example with machine integers
+just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
+just negative      # Check that deliberately false claims in each model are not proved
 just test js       # Run runtime checks
 just test-backends # JS / wasm / wasm-gc / native
 just test-release  # Run the same checks in optimized builds
@@ -32,28 +32,67 @@ just fmt           # Format sources and generate public interfaces
 
 The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, and Z3 4.16.0.
 In this toolchain, `moon prove` automatically uses `~/.moon/share/why3`. No separate Why3 installation is needed.
-The selected paths and solver are recorded in `_build/verif/why3.conf`; proof results appear in `*.proof.json` files under that directory.
+The `just` proof recipes generate `_build/why3/why3.conf` with native-BV and arithmetic encodings.
+Proof results appear in `*.proof.json` files under each module’s `_build/verif/` directory.
+Use `just prove`: bare `moon prove` uses only the default encoding and can time out on integer/BV bridge goals.
 
 ## Structure and guarantees
 
 | Path | Contents | What is checked |
 | --- | --- | --- |
-| `libs/bounds` | Clamp to a half-open interval | Given valid bounds, the result lies within the interval and preserves inputs already in range |
-| `libs/fset` | Bindings to Why3's finite-set model | Lemmas for empty sets, insertion, and union |
-| `libs/ieee754` | Logical binary64 values and rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
-| `examples/models` | Examples importing the libraries | Use of the set and IEEE models from another package |
+| `bounds` | Clamp to a half-open interval | Given valid bounds, the result lies within the interval and preserves inputs already in range |
+| `fset` | Bindings to Why3's finite-set model | Lemmas for empty sets, insertion, and union |
+| `ieee754` | Logical binary64 values and rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
+| `bv32` / `bv64` | Why3 fixed-size bitvector bindings | Operations and modular integer conversions |
+| `bv32/laws` / `bv64/laws` | Bitvector lemmas, with integer laws in `laws/integers` | Bitwise laws, conversions in both directions, and unsigned value bounds |
+| `arrays` | Total maps with select/store | Read after write, unchanged other keys, and last-write-wins |
+| `strings` | Logical SMT strings | Concatenation, length, substring, search, and replacement |
+| `examples/models` | Examples importing the libraries | Cross-module proofs, including arrays with bitvector keys and string values |
+| `integer` | Unbounded integers and runtime value projections | Shared contract vocabulary for Int / UInt / Int64 / UInt64 |
+| `runtime/uint32` / `runtime/uint64` | Wrapping add/sub implementations | Direct BV contracts for add/sub/less under both integer preludes; Z3 differential checks |
+| `runtime/array` | FixedArray model and safe reads | Bounds checks and agreement with the model’s selected cell |
+| `runtime/text` | Validated SMT-compatible text | Code point length, char_at, and substring checked against Z3 |
+| `examples/bridges` | Runtime bridge clients | Contracts compose across module boundaries |
 | `runtime/float64` | Result comparisons and reference cases | Four arithmetic operations and sqrt compared against Z3's IEEE FP theory |
-| `checks/fp` | Small SMT-LIB specification checks | Properties over all inputs and counterexamples with fixed inputs |
+| `checks/` | SMT-LIB 2 checks for FP, bitvectors, arrays, and strings | Properties over all inputs and counterexamples with fixed inputs |
 | `checks/negative` | Deliberately false lemmas | False claims must not be reported as successfully proved |
+
+The root is the `mizchi/veri` library module. `examples/` is a separate
+`mizchi/veri-examples` module that depends on it. `moon.work` registers both:
+
+```text
+veri/
+├── moon.mod                 # mizchi/veri
+├── moon.work                # members: ".", "examples"
+├── bounds/
+├── bv32/
+├── bv64/
+├── arrays/
+├── strings/
+├── fset/
+├── ieee754/
+├── integer/
+├── runtime/                 # uint32, uint64, array, text, float64
+└── examples/
+    ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.1.0
+    ├── models/
+    └── bridges/
+```
+
+Workspace resolution uses the local library without downloading it from the registry.
+Public package imports use paths such as `mizchi/veri/bounds`, `mizchi/veri/bv32`, and `mizchi/veri/arrays`.
+Run `just prove` to prove the library and examples. In this toolchain, `moon prove`
+on its own selects the current module; `moon -C examples prove` proves the examples.
+Proof reports are written under each module's `_build/verif/` directory.
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.
-The abstract types in `libs/fset` and `libs/ieee754` are **proof-only**. They are not runtime sets or `Double` values.
+The abstract types in `fset`, `ieee754`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Their bindings do not establish a correspondence with MoonBit runtime values.
 
 A minimal example:
 
 ```moonbit
-// Import mizchi/veri/libs/ieee754 and enable proof-enabled in moon.pkg.
+// Import mizchi/veri/ieee754 and enable proof-enabled in moon.pkg.
 // Place the following in a .mbtp file.
 lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
   proof_require: @ieee754.is_nan(x),
@@ -66,6 +105,127 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 At runtime, use `@float64.matches(actual, Bits(expected_bits))` for exact bit matching,
 or `@float64.matches(actual, AnyNaN)` to check NaN classification.
 An incorrect zero sign or a difference of even 1 ULP in a finite value fails the bit comparison.
+
+## Binding architecture
+
+The MoonBit API binds to **Why3 theories**. Why3's solver driver then maps supported operations to SMT-LIB 2:
+
+```text
+MoonBit contracts / .mbtp → Why3 theories → SMT-LIB 2 → Z3
+checks/**/*.smt2 ─────────────────────────→ SMT-LIB 2 → Z3
+```
+
+`#proof_external` maps a logical type; `#proof_import` maps a logical operation.
+The `.smt2` checks use a separate direct path, without going through MoonBit or Why3.
+These are proof APIs, not a runtime Z3 FFI or a general-purpose SMT-LIB 2 expression builder.
+
+| Package | Why3 theory | Main operations |
+| --- | --- | --- |
+| `bv32` / `bv64` | `bv.BV32` / `bv.BV64` | `add/sub/mul`, `udiv/urem`, `sdiv/srem`, `bw_and/or/xor/not`, `shl/lshr/ashr`, `ult/ule/slt/sle` |
+| `arrays` | `map.Map`, `map.Const` | `select`, `store`, `const_array`, extensional `eq` |
+| `strings` | `string.String` | `concat`, `length`, `char_at`, `substring`, `contains`, `prefix_of`, `suffix_of`, `index_of`, `replace`, `to_int/from_int`, `lt/le` |
+
+Bitvectors have a fixed width; the initial API provides 32- and 64-bit types.
+Signedness belongs to the operation, not the bit pattern. Addition, subtraction, and multiplication wrap modulo 2^width.
+Shift counts are bitvectors of the same width: counts at least as large as the width do not wrap around.
+`width()` returns the bitvector encoding of 32 or 64. `udiv(x, zero())` yields all ones in the SMT model;
+this is not a claim about runtime division. Arbitrary widths, extraction, and extension are not exposed yet.
+`of_integer` first reduces modulo 2^width, so it is defined for negative and oversized mathematical integers too.
+`to_integer` returns the unsigned value, `modulus()` is 2^width, and `in_range` recognizes unsigned values.
+The conversion laws prove `to_integer(of_integer(n)) = n mod 2^width` and `of_integer(to_integer(v)) = v`.
+
+`SmtArray[K, V]` is a total map from every key to a value. It has no length, bounds check, or mutation.
+`store` returns a new map. It can model memory, but does not by itself verify the bounds or behavior of a runtime array.
+
+`Text` uses the SMT string model, whose alphabet covers U+0000..U+2FFFF.
+Length counts code points, so an astral character within that alphabet has length one;
+this is not MoonBit's runtime UTF-16 length. `char_at` returns a string, and `substring` takes a start and count.
+Invalid positions produce empty strings, unsuccessful searches return -1, and `replace` changes the first occurrence.
+`to_int/from_int` follow SMT nonnegative decimal conversion semantics; their `Int` values use the default mathematical-integer proof model.
+There is no implicit conversion between `Text` and MoonBit `String`, and regex bindings are not included yet.
+
+See `examples/models/models.mbtp` for a proof combining `SmtArray[Bv64, Text]` with the bitvector and string bindings.
+`just smt` checks the corresponding theory laws and concrete witnesses. The per-model negative proof controls
+only establish that the false claims were not proved; the direct SAT checks supply concrete witnesses separately.
+
+## Correspondence with MoonBit runtime types
+
+| Runtime type | Model / adapter | Current guarantee |
+| --- | --- | --- |
+| `Int`, `UInt`, `Int64`, `UInt64` | `@integer.from_int/from_uint/from_int64/from_uint64` → `Integer` | Proof-only numerical projections from the selected MoonBit prelude |
+| `UInt`, `UInt64` | `runtime/uint32`, `runtime/uint64` | `model` encodes the value as Bv32/Bv64; add/sub/less prove direct agreement with BV operations under both integer preludes |
+| `Int` / `UInt`, `Int64` / `UInt64` | Their 32-/64-bit encodings | 48 Z3 reference cases for native add/sub/mul, bitwise operations, signed/unsigned order, and valid shifts; also check the wrapping adapters |
+| `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]`, plus `a.length()` | `get` proves Some exactly in bounds with the selected model value, and None otherwise, under both preludes |
+| `String` | `@text.from_string(s)` → `@text.Text?` | Validate UTF-16 and the shared alphabet; 72 Z3 reference cases for length, char_at, substring |
+| `Double` | binary64 encoding | Existing 86 Z3 FP reference cases; no universal proof of native operations |
+
+`Integer` is an abstract, unbounded **proof-only** type. It stays mathematical even when runtime `Int`
+uses the checked machine prelude. These projections are logical functions, not runtime numeric casts.
+The default prelude models even `UInt` as an unbounded integer, so the wrapping contracts explicitly
+require `0 <= x,y <= MAX`. All runtime values of the corresponding unsigned type satisfy those bounds.
+The machine prelude requires arithmetic to avoid intermediate overflow. The adapters meet that requirement
+by branching around overflow. The contracts retain the modulo specifications and additionally prove:
+
+```text
+model(add(x, y)) = bv.add(model(x), model(y))
+model(sub(x, y)) = bv.sub(model(x), model(y))
+less(x, y)       = bv.ult(model(x), model(y))
+```
+
+These hold for all unsigned runtime inputs, with explicit range preconditions in the mathematical model.
+`model_preserves_value` proves that the logical encoding preserves the unsigned numerical value.
+`model` is proof-only; the verified runtime entry points are `add`, `sub`, and `less`.
+The proofs concern these adapters and the trusted MoonBit/Why3 translation, not arbitrary native operations.
+
+Native bitwise primitive lowering is not fully supported in this toolchain's proof path.
+Their runtime correspondence is checked by differential tests; it is not asserted using `proof_axiomatized`.
+Shift references use counts in `[0, width)`. Native overshifts and division by zero are not equated with SMT semantics.
+Signed comparisons reinterpret the same bit patterns as `Int` / `Int64` before comparing.
+
+For arrays, only model indices in `[0, a.length())` denote runtime cells. The model is the array's
+contents at the current program state, not an immutable snapshot across mutations.
+There is no full `Array[T]` (growable array) bridge or general store/frame contract yet.
+
+The text adapter accepts well-formed UTF-16 containing scalar values at most U+2FFFF.
+It returns `None` for unpaired surrogates or higher code points, without replacement or normalization.
+This is the shared subset with the [SMT-LIB string alphabet](https://smt-lib.org/theories-UnicodeStrings.shtml).
+`length`, `char_at`, and `substring(start, count)` count code points, not UTF-16 units or graphemes.
+For example, `"A😀é".length()` is 4, while the adapter length is 3 and `char_at(1)` is `"😀"`.
+Out-of-range positions or nonpositive counts yield empty text; excessive counts truncate at the end.
+`runtime/text.Text` is a runtime wrapper distinct from the proof-only `strings.Text`; no proof coercion
+or universal correctness theorem for this adapter is claimed. Search, replacement, and regex adapters remain future work.
+
+```moonbit
+// Import mizchi/veri/runtime/uint32 and mizchi/veri/runtime/text.
+test {
+  assert_eq(@uint32.add(0xffffffffU, 1U), 0U)
+  let text = @text.from_string("A😀é").unwrap()
+  assert_eq(text.length(), 3)
+  assert_eq(text.substring(1, 2).to_string(), "😀é")
+}
+```
+
+`examples/bridges` demonstrates calling proved runtime functions from another module, including
+`sub(add(value, delta), delta) == value` for both widths even when addition wraps.
+`just vectors` regenerates both FP and runtime references; `just vectors-check` detects stale results.
+`just verify` also checks that overflow and ignored-array-cell mistakes are rejected in the proof path,
+and runs runtime tests on JS / wasm / wasm-gc / native in debug and release configurations.
+
+### Proof encodings and package boundaries
+
+`just prover-config` derives an arithmetic driver from the installed Why3 `z3_487.drv` and writes it
+under `_build/why3/`. It omits only the native-BV encoding imports, retaining the upstream arithmetic
+transformations and BV theory axioms. The installed files remain unchanged, and no new axioms are added.
+The generated `MoonBit_Auto` strategy tries both Z3 encodings: native bitvectors for bitwise laws,
+and the Why3 arithmetic model for integer/BV correspondence. Both encodings remain within the trusted Why3 boundary.
+The generator rejects unexpected upstream import layouts rather than silently deriving a different driver.
+
+Bindings stay in `bv32` / `bv64`; their public lemmas now live in `bv32/laws` / `bv64/laws`,
+with conversion lemmas in `bv32/laws/integers` / `bv64/laws/integers`.
+Import the corresponding law package when calling a lemma. Keeping unrelated lemmas out of a caller's
+proof context avoids expensive quantifier instantiation. `just prove` checks every package in both modules.
+Negative controls use the same two encodings and include unbounded conversion identity and subtraction
+incorrectly specified as addition, to detect a proof path accepting invalid correspondence claims.
 
 ## Scope of IEEE 754 verification
 
@@ -99,16 +259,16 @@ At this stage, differential tests check that agreement on selected inputs.
 ## Trusted boundary and limitations
 
 - The type mappings, argument order, and Why3 symbol mappings in `#proof_external` / `#proof_import`, along with Why3, the solver, and MoonBit's translation, are trusted. No custom `proof_axiomatized` declarations are used.
-- Default integer proofs use mathematical integers. The bounds package is also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
+- Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads, and the bridge example are also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
 - The runtime check profile is binary64 with RNE. The logical API exposes five rounding modes, but runtime configuration and testing of all modes are not implemented.
-- NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, binary32, runtime FMA, and string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
+- NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, binary32, runtime FMA, and floating-point string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
 - Transcendental functions such as `sin` / `exp`, and proofs of error bounds relative to real-valued algorithms, require separate work.
 - `unknown` and timeouts mean unproved; they do not establish truth or falsity. Positive SMT checks fail unless the expected `unsat` result is returned. The negative control only checks that a false theorem remains unproved; it does not claim that the solver produced a counterexample.
-- Use `just prove` to verify the entire module, rather than relying only on targeted proofs that assume dependency packages.
+- Use `just prove` to verify both workspace modules, rather than relying only on targeted proofs that assume dependency packages.
 - The project currently uses the local toolchain. Pinning toolchain distributions and solver versions for shared CI remains future work.
 
-Possible extensions include binary32, cases from Berkeley TestFloat / SoftFloat, verification of bit-vector representations,
-contracts connecting implementations to their models, and Seq / Map models alongside sets.
+Possible extensions include binary32, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
+additional runtime bridge contracts, regular expressions, and Seq / finite-map models.
 TestFloat / SoftFloat are not integrated into this repository yet.
 
 ## References
@@ -119,3 +279,7 @@ TestFloat / SoftFloat are not integrated into this repository yet.
 - [Why3 ieee_float](https://www.why3.org/stdlib/ieee_float.html): Logical IEEE types and operations.
 - [SMT-LIB FloatingPoint](https://smt-lib.org/theories-FloatingPoint.shtml): IEEE FP operations, rounding modes, and the scope of NaN representation.
 - [Berkeley TestFloat](https://www.jhauser.us/arithmetic/TestFloat.html) / [SoftFloat](https://www.jhauser.us/arithmetic/SoftFloat.html): Arithmetic conformance testing and a software reference implementation.
+
+- [Z3 Guide: Bitvectors](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/): Fixed widths, signed/unsigned operations, and modular arithmetic.
+- [Z3 Guide: Arrays](https://microsoft.github.io/z3guide/docs/theories/Arrays/): Select/store and extensional arrays.
+- [Z3 Guide: Strings](https://microsoft.github.io/z3guide/docs/theories/Strings/): String operations and Unicode semantics.

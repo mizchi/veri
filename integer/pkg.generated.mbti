@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/integer"
+
+// Values
+pub fn add(Integer, Integer) -> Integer
+
+pub fn eq(Integer, Integer) -> Bool
+
+pub fn from_int(Int) -> Integer
+
+pub fn from_int64(Int64) -> Integer
+
+pub fn from_uint(UInt) -> Integer
+
+pub fn from_uint64(UInt64) -> Integer
+
+pub fn le(Integer, Integer) -> Bool
+
+pub fn modulo(Integer, Integer) -> Integer
+
+pub fn sub(Integer, Integer) -> Integer
+
+// Errors
+
+// Types and methods
+pub type Integer
+
+// Type aliases
+
+// Traits

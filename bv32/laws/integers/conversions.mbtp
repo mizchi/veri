@@ -1,0 +1,23 @@
+///|
+pub lemma integer_roundtrip(value : @integer.Integer) where {
+  proof_ensure: @integer.eq(
+    @bv32.to_integer(@bv32.of_integer(value)),
+    @integer.modulo(value, @bv32.modulus()),
+  ),
+} {}
+
+///|
+pub lemma bitvector_roundtrip(value : @bv32.Bv32) where {
+  proof_ensure: @bv32.eq(@bv32.of_integer(@bv32.to_integer(value)), value),
+} {
+  proof_assert @bv32.in_range(@bv32.to_integer(value))
+  proof_assert @integer.eq(
+    @bv32.to_integer(@bv32.of_integer(@bv32.to_integer(value))),
+    @bv32.to_integer(value),
+  )
+}
+
+///|
+pub lemma unsigned_value_in_range(value : @bv32.Bv32) where {
+  proof_ensure: @bv32.in_range(@bv32.to_integer(value)),
+} {}

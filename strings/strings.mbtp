@@ -1,0 +1,59 @@
+///|
+#proof_import("string.String")
+pub fn empty() -> Text = "empty"
+
+///|
+#proof_import("string.String")
+pub fn eq(left : Text, right : Text) -> Bool = "(=)"
+
+///|
+#proof_import("string.String")
+pub fn concat(left : Text, right : Text) -> Text = "concat"
+
+///|
+#proof_import("string.String")
+pub fn length(text : Text) -> Int = "length"
+
+///|
+#proof_import("string.String")
+pub fn char_at(text : Text, index : Int) -> Text = "s_at"
+
+///|
+#proof_import("string.String")
+pub fn substring(text : Text, start : Int, count : Int) -> Text = "substring"
+
+///|
+#proof_import("string.String")
+pub fn index_of(text : Text, pattern : Text, start : Int) -> Int = "indexof"
+
+///|
+#proof_import("string.String")
+pub fn contains(text : Text, pattern : Text) -> Bool = "contains"
+
+///|
+#proof_import("string.String")
+pub fn prefix_of(prefix : Text, text : Text) -> Bool = "prefixof"
+
+///|
+#proof_import("string.String")
+pub fn suffix_of(suffix : Text, text : Text) -> Bool = "suffixof"
+
+///|
+#proof_import("string.String")
+pub fn replace(text : Text, pattern : Text, replacement : Text) -> Text = "replace"
+
+///|
+#proof_import("string.String")
+pub fn to_int(text : Text) -> Int = "to_int"
+
+///|
+#proof_import("string.String")
+pub fn from_int(value : Int) -> Text = "from_int"
+
+///|
+#proof_import("string.String")
+pub fn lt(left : Text, right : Text) -> Bool = "lt"
+
+///|
+#proof_import("string.String")
+pub fn le(left : Text, right : Text) -> Bool = "le"

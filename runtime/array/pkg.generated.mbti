@@ -1,0 +1,20 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/array"
+
+import {
+  "mizchi/veri/arrays",
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[T] get(FixedArray[T], Int) -> T?
+
+pub fn[T] model(FixedArray[T]) -> @arrays.SmtArray[@integer.Integer, T]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits
