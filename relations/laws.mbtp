@@ -1,0 +1,46 @@
+///|
+pub lemma[T] equality_from_order(rel : (T, T) -> Bool, x : T, y : T) where {
+  proof_require: total_order(rel),
+  proof_require: rel(x, y),
+  proof_require: rel(y, x),
+  proof_ensure: same(x, y),
+} {}
+
+///|
+pub lemma[A, B] lex_chain(first : (A, A) -> Bool, second : (B, B) -> Bool, x : (A, B), y : (A, B), z : (A, B)) where {
+  proof_require: total_order(first),
+  proof_require: total_order(second),
+  proof_require: lex_le(first, second, x, y),
+  proof_require: lex_le(first, second, y, z),
+  proof_ensure: lex_le(first, second, x, z),
+} {}
+
+///|
+pub lemma[A, B] lex_antisymmetric(first : (A, A) -> Bool, second : (B, B) -> Bool, x : (A, B), y : (A, B)) where {
+  proof_require: total_order(first),
+  proof_require: total_order(second),
+  proof_require: lex_le(first, second, x, y),
+  proof_require: lex_le(first, second, y, x),
+  proof_ensure: same(x, y),
+} {}
+
+///|
+pub lemma[T] reversed_chain(rel : (T, T) -> Bool, x : T, y : T, z : T) where {
+  proof_require: transitive(rel),
+  proof_require: reverse(rel, x, y),
+  proof_require: reverse(rel, y, z),
+  proof_ensure: reverse(rel, x, z),
+} {}
+
+///|
+pub lemma[T] order_chain(rel : (T, T) -> Bool, x : T, y : T, z : T) where {
+  proof_require: total_preorder(rel),
+  proof_require: rel(x, y),
+  proof_require: rel(y, z),
+  proof_ensure: rel(x, z),
+} {}
+
+///|
+pub lemma integer_total_order() where {
+  proof_ensure: total_order(@integer.le),
+} {}

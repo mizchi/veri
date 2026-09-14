@@ -7,7 +7,7 @@ pub fn add(
 ) -> UInt where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
-  proof_ensure: result => @bv32.eq(model(result), @bv32.add(model(x), model(y))),
+  proof_ensure: result => Bv32::eq(model(result), Bv32::add(model(x), model(y))),
   proof_ensure: result => 0U <= result && result <= 0xffffffffU,
   proof_ensure: result => {
     @integer.eq(
@@ -35,7 +35,7 @@ pub fn sub(
 ) -> UInt where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
-  proof_ensure: result => @bv32.eq(model(result), @bv32.sub(model(x), model(y))),
+  proof_ensure: result => Bv32::eq(model(result), Bv32::sub(model(x), model(y))),
   proof_ensure: result => 0U <= result && result <= 0xffffffffU,
   proof_ensure: result => {
     @integer.eq(
@@ -62,7 +62,7 @@ pub fn less(
 ) -> Bool where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
-  proof_ensure: result => result == @bv32.ult(model(x), model(y)),
+  proof_ensure: result => result == Bv32::ult(model(x), model(y)),
 } {
   x < y
 }

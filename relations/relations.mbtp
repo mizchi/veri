@@ -1,0 +1,73 @@
+///|
+/// Generic equality in specifications, without an executable Eq dictionary.
+#proof_import("map.Map")
+pub fn[T] same(x : T, y : T) -> Bool = "(=)"
+
+///|
+/// The laws of Why3 relations are explicit predicates over the supplied relation.
+/// No law is assumed for an arbitrary MoonBit comparator.
+pub predicate[T] reflexive(rel : (T, T) -> Bool) {
+  ∀ x : T, rel(x, x)
+}
+
+///|
+pub predicate[T] symmetric(rel : (T, T) -> Bool) {
+  ∀ x : T, ∀ y : T, rel(x, y) → rel(y, x)
+}
+
+///|
+pub predicate[T] antisymmetric(rel : (T, T) -> Bool) {
+  ∀ x : T, ∀ y : T, rel(x, y) && rel(y, x) → same(x, y)
+}
+
+///|
+pub predicate[T] transitive(rel : (T, T) -> Bool) {
+  ∀ x : T, ∀ y : T, ∀ z : T, rel(x, y) && rel(y, z) → rel(x, z)
+}
+
+///|
+pub predicate[T] total(rel : (T, T) -> Bool) {
+  ∀ x : T, ∀ y : T, rel(x, y) || rel(y, x)
+}
+
+///|
+pub predicate[T] equivalence(rel : (T, T) -> Bool) {
+  reflexive(rel) && symmetric(rel) && transitive(rel)
+}
+
+///|
+pub predicate[T] preorder(rel : (T, T) -> Bool) {
+  reflexive(rel) && transitive(rel)
+}
+
+///|
+pub predicate[T] total_preorder(rel : (T, T) -> Bool) {
+  preorder(rel) && total(rel)
+}
+
+///|
+pub predicate[T] partial_order(rel : (T, T) -> Bool) {
+  preorder(rel) && antisymmetric(rel)
+}
+
+///|
+pub predicate[T] total_order(rel : (T, T) -> Bool) {
+  partial_order(rel) && total(rel)
+}
+
+///|
+predicate[A, B] lex_tail(second : (B, B) -> Bool, a : A, c : A, b : B, d : B) {
+  same(a, c) == false || second(b, d)
+}
+
+///|
+pub predicate[A, B] lex_le(first : (A, A) -> Bool, second : (B, B) -> Bool, x : (A, B), y : (A, B)) {
+  match (x, y) {
+    ((a, b), (c, d)) => first(a, c) && lex_tail(second, a, c, b, d)
+  }
+}
+
+///|
+pub fn[T] reverse(rel : (T, T) -> Bool, x : T, y : T) -> Bool {
+  rel(y, x)
+}

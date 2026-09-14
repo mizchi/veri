@@ -1,0 +1,37 @@
+///|
+pub lemma xor_self_is_zero64(x : Bv64) where {
+  proof_ensure: Bv64::eq(Bv64::bw_xor(x, x), Bv64::zero()),
+} {}
+
+///|
+pub lemma de_morgan64(x : Bv64, y : Bv64) where {
+  proof_ensure: Bv64::eq(Bv64::bw_not(Bv64::bw_and(x, y)), Bv64::bw_or(Bv64::bw_not(x), Bv64::bw_not(y))),
+} {}
+
+///|
+pub lemma addition_wraps64() where {
+  proof_ensure: Bv64::eq(Bv64::add(Bv64::ones(), Bv64::one()), Bv64::zero()),
+} {}
+
+///|
+pub lemma subtraction_inverts_addition64(x : Bv64, y : Bv64) where {
+  proof_ensure: Bv64::eq(Bv64::sub(Bv64::add(x, y), y), x),
+} {}
+
+///|
+pub lemma signed_unsigned_differ64() where {
+  proof_ensure: Bv64::slt(Bv64::ones(), Bv64::zero()),
+  proof_ensure: Bv64::ult(Bv64::ones(), Bv64::zero()) == false,
+} {}
+
+///|
+pub lemma oversized_shifts64() where {
+  proof_ensure: Bv64::eq(Bv64::shl(Bv64::one(), Bv64::width()), Bv64::zero()),
+  proof_ensure: Bv64::eq(Bv64::lshr(Bv64::ones(), Bv64::width()), Bv64::zero()),
+  proof_ensure: Bv64::eq(Bv64::ashr(Bv64::ones(), Bv64::width()), Bv64::ones()),
+} {}
+
+///| SMT bitvector division is total, unlike many runtime division operators.
+pub lemma unsigned_division_by_zero64(x : Bv64) where {
+  proof_ensure: Bv64::eq(Bv64::udiv(x, Bv64::zero()), Bv64::ones()),
+} {}

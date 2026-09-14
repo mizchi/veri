@@ -2,7 +2,11 @@
 package "mizchi/veri/integer"
 
 // Values
+pub fn abs(Integer) -> Integer
+
 pub fn add(Integer, Integer) -> Integer
+
+pub fn div(Integer, Integer) -> Integer
 
 pub fn eq(Integer, Integer) -> Bool
 
@@ -16,9 +20,27 @@ pub fn from_uint64(UInt64) -> Integer
 
 pub fn le(Integer, Integer) -> Bool
 
+pub fn lt(Integer, Integer) -> Bool
+
+pub fn max(Integer, Integer) -> Integer
+
+pub fn min(Integer, Integer) -> Integer
+
 pub fn modulo(Integer, Integer) -> Integer
 
+pub fn mul(Integer, Integer) -> Integer
+
+pub fn neg(Integer) -> Integer
+
+pub fn one() -> Integer
+
 pub fn sub(Integer, Integer) -> Integer
+
+pub fn trunc_div(Integer, Integer) -> Integer
+
+pub fn trunc_mod(Integer, Integer) -> Integer
+
+pub fn zero() -> Integer
 
 // Errors
 

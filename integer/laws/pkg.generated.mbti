@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/integer/laws"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn euclidean_decomposition(@integer.Integer, @integer.Integer) -> Unit
+
+pub fn negative_division_conventions() -> Unit
+
+pub fn normalize_remainder(@integer.Integer, @integer.Integer) -> Unit
+
+pub fn normalized_mod(@integer.Integer, @integer.Integer) -> @integer.Integer
+
+pub fn truncating_decomposition(@integer.Integer, @integer.Integer) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

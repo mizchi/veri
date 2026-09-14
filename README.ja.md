@@ -8,9 +8,12 @@ MoonBit の形式検証を使うための小さな基盤。再利用する論理
 
 ## 実行
 
-必要なものは MoonBit、`~/.moon/share/why3/` の同梱 Why3 データ、PATH 上の Z3、Node.js 24+、just。Node スクリプトに外部依存はない。
+必要なものは MoonBit、`~/.moon/share/why3/` の同梱 Why3 データ、PATH 上の Z3、Node.js 24+、just、unzip。Node スクリプトに npm 依存はない。
+
+`just setup-solvers` は [CVC5 1.3.4](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.3.4) を `_build/solvers/` に取得し、固定した公式 SHA-256 と照合してから展開する。macOS / Linux の arm64 / x64 に対応し、配布物のライセンスを保持する。次回からは取得済みの実行ファイルを使う。既存のものを使う場合は `VERI_CVC5=/path/to/cvc5` を指定すればダウンロード不要。証明レシピと `just verify` はこのセットアップを自動実行する。
 
 ```sh
+just setup-solvers # 追加ソルバーをローカルに配置（初回のみネットワークが必要）
 just doctor       # バージョンと同梱 Why3 の存在を確認
 just verify       # 形式検証、負例、参照値、各バックエンドのテスト
 ```
@@ -21,9 +24,11 @@ just verify       # 形式検証、負例、参照値、各バックエンドの
 just prove        # MoonBit → Why3 → SMT。workspace の両モジュールを証明
 just prove-machine # 機械整数 prelude で bounds・実行時ブリッジ・利用例を証明
 just prove-collections-machine # コレクションの実装・利用例を機械整数で証明
+just prove-foundations-machine # 順序・算術・実数・IEEE 誤差の契約を機械整数で証明
 just core-capabilities # core の関数を契約内から直接呼べるかを調査
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
+just negative bitvector runtime/uint32 runtime/uint64 # 関連する負例だけを選択
 just test js      # 実行時検査
 just quickcheck js # QuickCheck の性質テストだけを実行
 just bench native # core とコレクションを比較し、時間と比率を保存
@@ -37,9 +42,9 @@ just vectors-check # 生成済み期待値と現在の Z3 の結果を照合
 just fmt          # フォーマット・公開インターフェース生成
 ```
 
-手元で確認した環境は moon 0.1.20260904、moonc v0.10.12+1634b282e、Z3 4.16.0。
+手元で確認した環境は moon 0.1.20260904、moonc v0.10.12+1634b282e、Z3 4.16.0、CVC5 1.3.4。
 このツールチェインの `moon prove` は `~/.moon/share/why3` を自動で利用する。別の Why3 インストールは行わない。
-`just` の証明レシピは、native BV と整数モデルの2経路を登録した `_build/why3/why3.conf` を生成する。
+`just` の証明レシピは、BV、量化式、実数に基づく IEEE モデルに対応する Z3 / CVC5 の経路を `_build/why3/why3.conf` に登録する。
 証明結果は各モジュールの `_build/verif/` 配下の `*.proof.json` に出力される。
 `just prove` を使う。`moon prove` 単体の既定の変換経路では、整数と BV の対応証明が時間切れになる場合がある。
 
@@ -59,8 +64,8 @@ just fmt          # フォーマット・公開インターフェース生成
 | `testing/commands` | QuickCheck の操作列生成と shrinker | 再現可能な操作列と、意図的な失敗の `[Push(3)]` への縮小 |
 | `ieee754` / `ieee754/float32` | 論理上の binary64 / binary32 と共通の丸めモード | NaN、符号付きゼロ、有限値の自己減算などの補題 |
 | `ieee754/conversions` | 論理上の拡幅・縮幅 | binary32 の拡幅往復と NaN 分類の保存 |
-| `bv32` / `bv64` | Why3 の固定幅 bitvector への接続 | 各演算と、剰余を取る整数変換 |
-| `bv32/laws` / `bv64/laws` | bitvector の補題。整数の補題は `laws/integers` | ビット演算則、双方向の変換、符号なし数値の範囲 |
+| `bitvector` | Why3 の固定幅 bitvector への接続 | 各演算と、剰余を取る整数変換 |
+| `bitvector/laws` | bitvector の補題。整数の補題は `laws/integers` | ビット演算則、双方向の変換、符号なし数値の範囲 |
 | `arrays` | select/store を持つ全域写像 | 更新後の読み出し、別キーの保存、最後の更新の優先 |
 | `strings` | 論理上の SMT string | 連結、長さ、部分文字列、検索、置換 |
 | `examples/models` | ライブラリを import する利用例 | 別モジュールでの証明と、bitvector をキー・string を値に持つ array |
@@ -83,8 +88,7 @@ veri/
 ├── moon.mod                 # mizchi/veri
 ├── moon.work                # members: ".", "examples"
 ├── bounds/
-├── bv32/
-├── bv64/
+├── bitvector/
 ├── arrays/
 ├── strings/
 ├── fset/
@@ -106,13 +110,13 @@ veri/
 ```
 
 workspace 内の依存はローカルの本体へ解決され、レジストリから取得しない。
-公開パッケージは `mizchi/veri/bounds`、`mizchi/veri/bv32`、`mizchi/veri/arrays` などのパスで import する。
+公開パッケージは `mizchi/veri/bounds`、`mizchi/veri/bitvector`、`mizchi/veri/arrays` などのパスで import する。
 本体と examples の証明は `just prove` でまとめて実行する。このツールチェインでは
 `moon prove` 単体は現在のモジュールが対象で、examples の証明には `moon -C examples prove` を使う。
 証明結果は各モジュールの `_build/verif/` 配下に出力される。
 
 `.mbt` が実装・型・契約、`.mbtp` が論理モデル・補題。`pkg.generated.mbti` で公開 API を確認できる。
-`fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bv32`・`bv64`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。
+`fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bitvector`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。
 
 最小の利用例:
 
@@ -131,9 +135,54 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 `@float64.matches(actual, AnyNaN)` で NaN 分類を検査する。
 符号付きゼロを取り違えたり、有限値に 1 ULP の差があればビット一致は失敗する。
 
+## Bitvector API
+
+`moon.pkg` で `"mizchi/veri/bitvector"` を import すると両方の幅を使える。`.mbt` ファイルで型を取り込む:
+
+```moonbit
+using @bitvector {type Bv32, type Bv64}
+```
+
+`.mbtp` の証明と実行時の契約では `Bv32::add(x, y)`、`Bv64::add(x, y)`、`Bv32::of_integer(n)` などの型メソッドを使う。型はそれぞれ Why3 の `bv.BV32` / `bv.BV64` に対応する。現在の `.mbtp` パーサでは、別パッケージの型メソッドを呼ぶためにこの `using` が必要。従来の幅別パッケージと自由関数から、この API に置き換えた。
+
+公開補題は幅を末尾につけ、`bitvector/laws` の `@laws.addition_wraps32()` / `addition_wraps64()`、`bitvector/laws/integers` の `integer_roundtrip32` / `integer_roundtrip64` として提供する。整数変換の補題は別パッケージに保ち、量化式の探索を抑える。`examples/bitvector/widths.mbtp` では、1つのパッケージの import で、2^32 が Bv32 ではゼロに循環し、Bv64 では保持されることを証明する。これらの補題と利用例は `just prove-machine` でも検証する。
+
+## 順序・整数論・実数と誤差評価
+
+| パッケージ | 内容 |
+| --- | --- |
+| `relations` | 同値関係、前順序、半順序、全順序、逆順、辞書順。法則は渡された関係に対する明示的な述語 |
+| `seq/order` | 整列、整列済み置換、区間内の置換、交換、swap の補題。添字と区間は数学的整数 |
+| `integer` / `integer/laws` | 算術、絶対値、min/max、Euclidean 除算とゼロ方向への除算、その剰余の対応 |
+| `integer/aggregate` / `integer/aggregate/laws` | 非負整数乗、半開区間の和と分割則 |
+| `number` / `number/laws` / `number/parity` | 整除、GCD、互いに素、偶奇と補題 |
+| `runtime/number` | UInt の GCD、Int の安全な除算・剰余、正の法に対する Euclidean 剰余 |
+| `real` / `real/laws` | 証明専用の数学的実数、整数の埋め込み、floor/ceil、距離と誤差の合成 |
+| `ieee754/error` / `ieee754/error/operations` | 実数への射影、丸め、binary32/64 の演算誤差と入力誤差の伝播 |
+| `examples/foundations` | 別モジュールから順序、GCD、実数、丸めの契約を利用する例 |
+
+`relations` は [Why3 relations](https://why3.org/stdlib/relations.html) の法則を、関係 `(T, T) -> Bool` に対する述語として表す。任意の比較関数を全順序だと仮定しない。辞書順の推移性には両成分の順序の法則を要求する。`seq/order` の `sorted_permutation` は整列と要素の重複数の保存を合わせた仕様であり、ソート実装そのものではない。[Why3 seq](https://why3.org/stdlib/seq.html) の交換・置換の定義を利用する。
+
+除算は規約を明示する。`integer.div(-7, 3) = -3`、`integer.modulo(-7, 3) = 2` に対して、`integer.trunc_div(-7, 3) = -2`、`integer.trunc_mod(-7, 3) = -1`。論理上の除算・剰余の法則には非ゼロの除数が必要。`runtime/number.div_rem` はゼロ除算と `Int::min_value / -1` に `None` を返す。`euclidean_mod` は法が正の場合だけ `Some(r)` を返し、`0 <= r < modulus` を保証する。[Why3 int](https://why3.org/stdlib/int.html)
+
+`runtime/number.gcd` は Euclid の互除法を使い、UInt の全範囲で [Why3 number.Gcd](https://why3.org/stdlib/number.html) との一致と停止性を証明する。`gcd(0, 0) = 0`。除算・剰余・GCD は通常の整数モデルと機械整数モデルの両方で検証する。実行時テストでは独立した共通約数の列挙、Int64 による除算の再構成、符号と境界を検査し、QuickCheck の標準 tuple shrinker を使用する。
+
+実数は丸めのない仕様用の型で、実行時 Double への型変換ではない。除算の法則には非ゼロの分母が必要。`real.within(actual, ideal, tolerance)` は `|actual - ideal| <= tolerance` を表し、負の許容誤差では成立しない。入力誤差を持つ加算の合成、距離の三角不等式、整数の埋め込みを証明する。[Why3 real](https://why3.org/stdlib/real.html)
+
+RNE で理想的な実数結果を `z` とすると、オーバーフローしない場合の誤差上限は以下になる。
+
+- binary32: `2^-24 * |z| + 2^-150`
+- binary64: `2^-53 * |z| + 2^-1075`
+
+上限は [Why3 ieee_float](https://why3.org/stdlib/ieee_float.html) の `round_bound_ne` に基づく。定数は証明上の正確な実数として構成し、subnormal を含む。`ieee754/error/operations` は有限な入力・`no_overflow`・除算時の非ゼロ除数を前提に、加減乗除の実数結果との差を評価する。加算には入力誤差 `ex + ey` と今回の丸め誤差を合成する補題もある。`checks/*/half-subnormal-error.smt2` は、相対誤差項だけでは不足する具体例を native SMT floating-point で確認する。
+
+これらは Why3 の IEEE モデルについての証明であり、実行時 Float/Double と実数射影との一致を新たに仮定しない。実行時との対応は、既存の Z3 参照値との比較および `fp-capabilities` の報告範囲に従う。
+
+`just prover-config` は既存の native SMT と整数による BV 検証に加え、Why3 の浮動小数点の公理・丸め誤差補題を保持する Z3 / CVC5 の経路、および定義を等価な公理として符号化して補題の照合を助ける Z3 の経路を生成する。CVC5 は列の量化式や非線形な実数の誤差評価で Z3 を補完する。同梱 Why3 のファイルは変更せず、独自の仮定や `proof_axiomatized` は追加しない。通常は `just prove`、機械整数での追加検証は `just prove-foundations-machine` を使う。`just verify` は両方と負例検査を実行する。
+
 ## QuickCheck による性質テスト
 
-`bounds/` と `runtime/` の33個の正例の性質を `moonbitlang/core/quickcheck` で、
+`bounds/` と `runtime/` の37個の正例の性質を `moonbitlang/core/quickcheck` で、
 固定 seed `20260914` でそれぞれ1,000件の有効入力に対して検査する。
 生成サイズは最大64、操作列と赤黒木の平衡検査は最大128。`just quickcheck js`（または `wasm`、
 `wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
@@ -310,7 +359,7 @@ Int に収まること（最大 2,147,483,647）を要求し、機械整数 prel
 MoonBit 側の API は **Why3 の理論**に接続する。Why3 のソルバードライバが、対応する演算を SMT-LIB 2 に変換する。
 
 ```text
-MoonBit の契約 / .mbtp → Why3 の理論 → SMT-LIB 2 → Z3
+MoonBit の契約 / .mbtp → Why3 の理論 → SMT-LIB 2 → Z3 / CVC5
 checks/**/*.smt2 ──────────────────→ SMT-LIB 2 → Z3
 ```
 
@@ -320,13 +369,13 @@ checks/**/*.smt2 ──────────────────→ SMT-L
 
 | パッケージ | Why3 の理論 | 主な演算 |
 | --- | --- | --- |
-| `bv32` / `bv64` | `bv.BV32` / `bv.BV64` | `add/sub/mul`、`udiv/urem`、`sdiv/srem`、`bw_and/or/xor/not`、`shl/lshr/ashr`、`ult/ule/slt/sle` |
+| `bitvector` | `bv.BV32` / `bv.BV64` | `add/sub/mul`、`udiv/urem`、`sdiv/srem`、`bw_and/or/xor/not`、`shl/lshr/ashr`、`ult/ule/slt/sle` |
 | `arrays` | `map.Map`、`map.Const` | `select`、`store`、`const_array`、外延的な `eq` |
 | `strings` | `string.String` | `concat`、`length`、`char_at`、`substring`、`contains`、`prefix_of`、`suffix_of`、`index_of`、`replace`、`to_int/from_int`、`lt/le` |
 
 bitvector は固定幅で、初版は 32 / 64 bit を提供する。signed / unsigned はビット列の型ではなく演算で区別し、
 加減乗算は 2^width を法として循環する。シフト量も同じ幅の bitvector で、幅以上のシフト量を剰余で折り返さない。
-`width()` は 32 または 64 を表す bitvector。SMT モデルでは `udiv(x, zero())` は全ビット1になるが、
+`Bv32::width()` / `Bv64::width()` は 32 または 64 を表す bitvector。SMT モデルでは符号なしのゼロ除算は全ビット1になるが、
 実行時の除算についての保証ではない。任意幅、切り出し、拡張はまだ公開していない。
 `of_integer` は最初に 2^width で剰余を取り、負数や幅を超える数学的整数も変換できる。
 `to_integer` は符号なし数値、`modulus()` は 2^width を返し、`in_range` は符号なしの範囲を判定する。
@@ -415,7 +464,8 @@ JS / wasm / wasm-gc / native の debug・release で実行時検査を行う。
 `_build/why3/` に出力する。native BV への変換を指定する import だけを除外し、
 元の算術変換と BV 理論の公理を使う。同梱ファイルの書き換えや独自公理の追加は行わない。
 生成した `MoonBit_Auto` は、ビット演算則には native bitvector、整数との対応には Why3 の整数モデルを
-使えるよう、Z3 の両経路を試す。どちらも Why3 を信頼する境界内にある。
+使えるよう、Z3 の両経路を維持する。さらに、前述の実数モデルと量化式用の経路を試す。
+いずれも Why3 を信頼する境界内にある。
 生成器は同梱ドライバの import 構成が想定と違う場合に失敗する。
 検証条件を分割した後には Why3 の `compute_in_goal` を使い、構造的なモデルの
 具体的なコンストラクターを簡約する。分割後に行うことで、リストの証明に必要な
@@ -423,12 +473,12 @@ JS / wasm / wasm-gc / native の debug・release で実行時検査を行う。
 `just prove` のパッケージ同時実行数は2に制限し、パッケージ増加による競合で
 ソルバーの短い制限時間を使い切るのを抑える。
 
-バインディングは `bv32` / `bv64`、公開補題は `bv32/laws` / `bv64/laws`、
-整数変換の補題は `bv32/laws/integers` / `bv64/laws/integers` に分けた。
+バインディングは `bitvector`、公開補題は `bitvector/laws`、
+整数変換の補題は `bitvector/laws/integers` に分けた。
 補題を呼び出す場合は対応するパッケージを import する。
 無関係な補題を呼び出し元の証明へ持ち込まず、量化式の探索が増えるのを避ける。
 `just prove` は両モジュールの全パッケージを検証する。
-負例も同じ2経路を使い、無制限の整数を値を変えずに BV に写せるという主張や、
+負例も同じ戦略の全経路を使い、無制限の整数を値を変えずに BV に写せるという主張や、
 減算を加算だとする誤った契約が証明成功にならないことを確認する。
 
 ## IEEE 754 をどこまで検査できるか

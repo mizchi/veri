@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/number"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn coprime(@integer.Integer, @integer.Integer) -> Bool
+
+pub fn divides(@integer.Integer, @integer.Integer) -> Bool
+
+pub fn gcd(@integer.Integer, @integer.Integer) -> @integer.Integer
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,71 @@
+///|
+#proof_import("real.Real")
+pub fn zero() -> Real = "zero"
+
+///|
+#proof_import("real.Real")
+pub fn one() -> Real = "one"
+
+///|
+#proof_import("real.Real")
+pub fn eq(x : Real, y : Real) -> Bool = "(=)"
+
+///|
+#proof_import("real.Real")
+pub fn le(x : Real, y : Real) -> Bool = "(<=)"
+
+///|
+#proof_import("real.Real")
+pub fn lt(x : Real, y : Real) -> Bool = "(<)"
+
+///|
+#proof_import("real.Real")
+pub fn add(x : Real, y : Real) -> Real = "(+)"
+
+///|
+#proof_import("real.Real")
+pub fn sub(x : Real, y : Real) -> Real = "(-)"
+
+///|
+#proof_import("real.Real")
+pub fn mul(x : Real, y : Real) -> Real = "(*)"
+
+///|
+#proof_import("real.Real")
+pub fn div(x : Real, y : Real) -> Real = "(/)"
+
+///|
+#proof_import("real.Abs")
+pub fn abs(x : Real) -> Real = "abs"
+
+///|
+#proof_import("real.MinMax")
+pub fn min(x : Real, y : Real) -> Real = "min"
+
+///|
+#proof_import("real.MinMax")
+pub fn max(x : Real, y : Real) -> Real = "max"
+
+///|
+#proof_import("real.FromInt")
+pub fn from_integer(x : @integer.Integer) -> Real = "from_int"
+
+///|
+#proof_import("real.Truncate")
+pub fn floor(x : Real) -> @integer.Integer = "floor"
+
+///|
+#proof_import("real.Truncate")
+pub fn ceil(x : Real) -> @integer.Integer = "ceil"
+
+///|
+pub fn neg(x : Real) -> Real { sub(zero(), x) }
+
+///|
+pub fn distance(x : Real, y : Real) -> Real { abs(sub(x, y)) }
+
+///|
+/// An absolute error bound; negative tolerances never satisfy this predicate.
+pub predicate within(actual : Real, ideal : Real, tolerance : Real) {
+  le(distance(actual, ideal), tolerance)
+}

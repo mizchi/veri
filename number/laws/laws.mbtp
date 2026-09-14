@@ -1,0 +1,28 @@
+///|
+pub lemma euclid_step(x : @integer.Integer, y : @integer.Integer) where {
+  proof_require: @integer.eq(y, @integer.zero()) == false,
+  proof_ensure: @integer.eq(@number.gcd(x, y), @number.gcd(y, @integer.modulo(x, y))),
+  proof_ensure: @integer.eq(@number.gcd(x, y), @number.gcd(y, @integer.trunc_mod(x, y))),
+} {}
+
+
+///|
+pub lemma gcd_divides_both(x : @integer.Integer, y : @integer.Integer) where {
+  proof_ensure: @number.divides(@number.gcd(x, y), x),
+  proof_ensure: @number.divides(@number.gcd(x, y), y),
+  proof_ensure: @integer.le(@integer.zero(), @number.gcd(x, y)),
+} {}
+
+
+///|
+pub lemma gcd_greatest(x : @integer.Integer, y : @integer.Integer, d : @integer.Integer) where {
+  proof_require: @number.divides(d, x),
+  proof_require: @number.divides(d, y),
+  proof_ensure: @number.divides(d, @number.gcd(x, y)),
+} {}
+
+
+///|
+pub lemma coprime_iff_gcd_one(x : @integer.Integer, y : @integer.Integer) where {
+  proof_ensure: @number.coprime(x, y) == @integer.eq(@number.gcd(x, y), @integer.one()),
+} {}

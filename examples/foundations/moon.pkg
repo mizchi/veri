@@ -1,0 +1,15 @@
+import {
+  "mizchi/veri/relations",
+  "mizchi/veri/seq",
+  "mizchi/veri/seq/order",
+  "mizchi/veri/integer",
+  "mizchi/veri/number" @logic_number,
+  "mizchi/veri/runtime/number",
+  "mizchi/veri/real",
+  "mizchi/veri/ieee754",
+  "mizchi/veri/ieee754/error",
+}
+
+options(
+  "proof-enabled": true,
+)

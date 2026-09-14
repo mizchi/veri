@@ -1,0 +1,7 @@
+///|
+fn pair() -> @seq.Seq[Int] { @seq.cons(1, @seq.singleton(2)) }
+
+///|
+pub lemma negative_control() where {
+  proof_ensure: @seq.eq(pair(), swap(pair(), @integer.zero(), @integer.one())),
+} {}

@@ -1,0 +1,44 @@
+///|
+pub predicate[T] index_valid(xs : @seq.Seq[T], i : @integer.Integer) {
+  @integer.le(@integer.from_int(0), i) && @integer.le(@seq.length(xs), i) == false
+}
+
+///|
+/// Half-open range, including an empty range at the end of the sequence.
+pub predicate[T] range_valid(xs : @seq.Seq[T], start : @integer.Integer, stop : @integer.Integer) {
+  @integer.le(@integer.from_int(0), start) && @integer.le(start, stop) && @integer.le(stop, @seq.length(xs))
+}
+
+///|
+/// Mirrors Why3 seq.Sorted, with the relation supplied explicitly.
+/// Use range_valid separately when the endpoints describe runtime storage.
+pub predicate[T] sorted_sub(xs : @seq.Seq[T], rel : (T, T) -> Bool, start : @integer.Integer, stop : @integer.Integer) {
+  ∀ i : @integer.Integer, ∀ j : @integer.Integer,
+    @integer.le(start, i) && @integer.le(i, j) && @integer.le(stop, j) == false → rel(@seq.get(xs, i), @seq.get(xs, j))
+}
+
+///|
+pub predicate[T] sorted(xs : @seq.Seq[T], rel : (T, T) -> Bool) {
+  sorted_sub(xs, rel, @integer.from_int(0), @seq.length(xs))
+}
+
+///|
+/// A sorting result preserves multiplicities, not just set membership.
+pub predicate[T] sorted_permutation(before : @seq.Seq[T], after : @seq.Seq[T], rel : (T, T) -> Bool) {
+  sorted(after, rel) && @seq.permutation(before, after)
+}
+
+///|
+/// Requires valid indices for the usual swap laws.
+pub fn[T] swap(xs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) -> @seq.Seq[T] {
+  @seq.update(@seq.update(xs, i, @seq.get(xs, j)), j, @seq.get(xs, i))
+}
+
+///|
+#proof_import("seq.Exchange")
+pub fn[T] exchange(before : @seq.Seq[T], after : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) -> Bool = "exchange"
+
+///|
+/// Also preserves all elements outside [start, stop).
+#proof_import("seq.Permut")
+pub fn[T] permutation_sub(before : @seq.Seq[T], after : @seq.Seq[T], start : @integer.Integer, stop : @integer.Integer) -> Bool = "permut_sub"

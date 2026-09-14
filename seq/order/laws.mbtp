@@ -1,0 +1,79 @@
+///|
+pub lemma[T] swap_preserves_elements(xs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) where {
+  proof_require: index_valid(xs, i),
+  proof_require: index_valid(xs, j),
+  proof_ensure: @seq.permutation(xs, swap(xs, i, j)),
+} {}
+
+///|
+pub lemma[T] swap_is_exchange(xs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) where {
+  proof_require: index_valid(xs, i),
+  proof_require: index_valid(xs, j),
+  proof_ensure: exchange(xs, swap(xs, i, j), i, j),
+} {}
+
+///|
+pub lemma[T] exchange_twice(xs : @seq.Seq[T], ys : @seq.Seq[T], zs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) where {
+  proof_require: exchange(xs, ys, i, j),
+  proof_require: exchange(ys, zs, i, j),
+  proof_ensure: @seq.eq(xs, zs),
+} {
+  proof_assert @integer.eq(@seq.length(xs), @seq.length(zs))
+  proof_assert @relations.same(@seq.get(xs, i), @seq.get(zs, i))
+  proof_assert @relations.same(@seq.get(xs, j), @seq.get(zs, j))
+  proof_assert ∀ k : @integer.Integer, index_valid(xs, k) && @integer.eq(k, i) == false && @integer.eq(k, j) == false → @relations.same(@seq.get(xs, k), @seq.get(zs, k))
+  proof_assert ∀ k : @integer.Integer, index_valid(xs, k) → @relations.same(@seq.get(xs, k), @seq.get(zs, k))
+}
+
+///|
+pub lemma[T] swap_twice(xs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer) where {
+  proof_require: index_valid(xs, i),
+  proof_require: index_valid(xs, j),
+  proof_ensure: @seq.eq(xs, swap(swap(xs, i, j), i, j)),
+} {
+  proof_assert exchange(xs, swap(xs, i, j), i, j)
+  proof_assert index_valid(swap(xs, i, j), i)
+  proof_assert index_valid(swap(xs, i, j), j)
+  proof_assert exchange(swap(xs, i, j), swap(swap(xs, i, j), i, j), i, j)
+}
+
+///|
+pub lemma[T] sorted_subrange(xs : @seq.Seq[T], rel : (T, T) -> Bool, start : @integer.Integer, stop : @integer.Integer) where {
+  proof_require: sorted(xs, rel),
+  proof_require: range_valid(xs, start, stop),
+  proof_ensure: sorted_sub(xs, rel, start, stop),
+} {
+  proof_assert ∀ i : @integer.Integer, ∀ j : @integer.Integer,
+    @integer.le(start, i) && @integer.le(i, j) && @integer.lt(j, stop) → index_valid(xs, i) && index_valid(xs, j)
+}
+
+///|
+pub lemma[T] sorted_slice(xs : @seq.Seq[T], rel : (T, T) -> Bool, start : @integer.Integer, stop : @integer.Integer) where {
+  proof_require: sorted(xs, rel),
+  proof_require: range_valid(xs, start, stop),
+  proof_ensure: sorted(@seq.slice(xs, start, stop), rel),
+} {}
+
+///|
+pub lemma[T] sorting_preserves_counts(before : @seq.Seq[T], after : @seq.Seq[T], rel : (T, T) -> Bool, value : T) where {
+  proof_require: sorted_permutation(before, after, rel),
+  proof_ensure: @integer.eq(@seq.length(before), @seq.length(after)),
+  proof_ensure: @integer.eq(@seq.occurrences(value, before), @seq.occurrences(value, after)),
+} {}
+
+///|
+pub lemma[T] swap_preserves_other(xs : @seq.Seq[T], i : @integer.Integer, j : @integer.Integer, k : @integer.Integer) where {
+  proof_require: index_valid(xs, i),
+  proof_require: index_valid(xs, j),
+  proof_require: index_valid(xs, k),
+  proof_require: @integer.eq(k, i) == false,
+  proof_require: @integer.eq(k, j) == false,
+  proof_ensure: @relations.same(@seq.get(swap(xs, i, j), k), @seq.get(xs, k)),
+} {}
+
+///|
+pub lemma[T] sorted_pair(rel : (T, T) -> Bool, x : T, y : T) where {
+  proof_require: @relations.total_preorder(rel),
+  proof_require: rel(x, y),
+  proof_ensure: sorted(@seq.cons(x, @seq.singleton(y)), rel),
+} {}

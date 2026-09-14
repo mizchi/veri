@@ -1,0 +1,12 @@
+///|
+/// One import exposes distinct widths: 2^32 wraps in Bv32 but fits in Bv64.
+lemma bitvector_widths_remain_distinct() where {
+  proof_ensure: Bv32::eq(
+    Bv32::of_integer(Bv32::modulus()),
+    Bv32::zero(),
+  ),
+  proof_ensure: @integer.eq(
+    Bv64::to_integer(Bv64::of_integer(Bv32::modulus())),
+    Bv32::modulus(),
+  ),
+} {}

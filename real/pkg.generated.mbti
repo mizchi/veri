@@ -1,0 +1,52 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/real"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn abs(Real) -> Real
+
+pub fn add(Real, Real) -> Real
+
+pub fn ceil(Real) -> @integer.Integer
+
+pub fn distance(Real, Real) -> Real
+
+pub fn div(Real, Real) -> Real
+
+pub fn eq(Real, Real) -> Bool
+
+pub fn floor(Real) -> @integer.Integer
+
+pub fn from_integer(@integer.Integer) -> Real
+
+pub fn le(Real, Real) -> Bool
+
+pub fn lt(Real, Real) -> Bool
+
+pub fn max(Real, Real) -> Real
+
+pub fn min(Real, Real) -> Real
+
+pub fn mul(Real, Real) -> Real
+
+pub fn neg(Real) -> Real
+
+pub fn one() -> Real
+
+pub fn sub(Real, Real) -> Real
+
+pub fn within(Real, Real, Real) -> Bool
+
+pub fn zero() -> Real
+
+// Errors
+
+// Types and methods
+pub type Real
+
+// Type aliases
+
+// Traits

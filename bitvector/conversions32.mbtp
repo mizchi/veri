@@ -1,0 +1,23 @@
+///|
+/// The unsigned numerical value of a bit pattern.
+#proof_import("bv.BV32")
+pub fn Bv32::to_integer(value : Bv32) -> @integer.Integer = "t'int"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::modulus() -> @integer.Integer = "two_power_size"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::in_range(value : @integer.Integer) -> Bool = "uint_in_range"
+
+///|
+#proof_import("bv.BV32")
+fn Bv32::raw_of_integer(value : @integer.Integer) -> Bv32 = "of_int"
+
+///|
+/// Total modular conversion, including negative and oversized integers.
+/// Why3's raw of_int only guarantees the unsigned value for in-range inputs.
+pub fn Bv32::of_integer(value : @integer.Integer) -> Bv32 {
+  Bv32::raw_of_integer(@integer.modulo(value, Bv32::modulus()))
+}

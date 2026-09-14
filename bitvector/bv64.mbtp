@@ -1,0 +1,95 @@
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::zero() -> Bv64 = "zeros"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::one() -> Bv64 = "one"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::ones() -> Bv64 = "ones"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::width() -> Bv64 = "size_bv"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::bw_not(x : Bv64) -> Bv64 = "bw_not"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::neg(x : Bv64) -> Bv64 = "neg"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::add(x : Bv64, y : Bv64) -> Bv64 = "add"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::sub(x : Bv64, y : Bv64) -> Bv64 = "sub"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::mul(x : Bv64, y : Bv64) -> Bv64 = "mul"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::udiv(x : Bv64, y : Bv64) -> Bv64 = "udiv"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::urem(x : Bv64, y : Bv64) -> Bv64 = "urem"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::sdiv(x : Bv64, y : Bv64) -> Bv64 = "sdiv"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::srem(x : Bv64, y : Bv64) -> Bv64 = "srem"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::bw_and(x : Bv64, y : Bv64) -> Bv64 = "bw_and"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::bw_or(x : Bv64, y : Bv64) -> Bv64 = "bw_or"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::bw_xor(x : Bv64, y : Bv64) -> Bv64 = "bw_xor"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::eq(x : Bv64, y : Bv64) -> Bool = "(=)"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::ult(x : Bv64, y : Bv64) -> Bool = "ult"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::ule(x : Bv64, y : Bv64) -> Bool = "ule"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::slt(x : Bv64, y : Bv64) -> Bool = "slt"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::sle(x : Bv64, y : Bv64) -> Bool = "sle"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::shl(x : Bv64, count : Bv64) -> Bv64 = "lsl_bv"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::lshr(x : Bv64, count : Bv64) -> Bv64 = "lsr_bv"
+
+///|
+#proof_import("bv.BV64")
+pub fn Bv64::ashr(x : Bv64, count : Bv64) -> Bv64 = "asr_bv"

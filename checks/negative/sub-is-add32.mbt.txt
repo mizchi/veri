@@ -2,7 +2,7 @@
 pub fn negative_control(x : UInt, y : UInt) -> UInt where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
-  proof_ensure: result => @bv32.eq(model(result), @bv32.add(model(x), model(y))),
+  proof_ensure: result => Bv32::eq(model(result), Bv32::add(model(x), model(y))),
 } {
   sub(x, y)
 }

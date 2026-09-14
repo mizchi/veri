@@ -1,4 +1,0 @@
-///| Deliberately false: the all-ones bitvector wraps to zero.
-lemma negative_control() where {
-  proof_ensure: ult(ones(), add(ones(), one())),
-} {}

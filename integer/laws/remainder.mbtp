@@ -1,0 +1,22 @@
+///|
+/// The normalization connecting truncating division to Euclidean division.
+pub fn normalized_mod(x : @integer.Integer, modulus : @integer.Integer) -> @integer.Integer {
+  if @integer.lt(@integer.trunc_mod(x, modulus), @integer.zero()) { @integer.add(@integer.trunc_mod(x, modulus), modulus) } else { @integer.trunc_mod(x, modulus) }
+}
+
+///|
+fn normalized_div(x : @integer.Integer, modulus : @integer.Integer) -> @integer.Integer {
+  if @integer.lt(@integer.trunc_mod(x, modulus), @integer.zero()) { @integer.sub(@integer.trunc_div(x, modulus), @integer.one()) } else { @integer.trunc_div(x, modulus) }
+}
+
+///|
+pub lemma normalize_remainder(x : @integer.Integer, modulus : @integer.Integer) where {
+  proof_require: @integer.lt(@integer.zero(), modulus),
+  proof_ensure: @integer.eq(@integer.modulo(x, modulus), normalized_mod(x, modulus)),
+} {
+  proof_assert @integer.eq(x, @integer.add(@integer.mul(modulus, @integer.trunc_div(x, modulus)), @integer.trunc_mod(x, modulus)))
+  proof_assert @integer.le(@integer.zero(), normalized_mod(x, modulus))
+  proof_assert @integer.lt(normalized_mod(x, modulus), modulus)
+  proof_assert @integer.eq(x, @integer.add(@integer.mul(modulus, normalized_div(x, modulus)), normalized_mod(x, modulus)))
+  proof_assert @integer.eq(@integer.div(x, modulus), normalized_div(x, modulus))
+}

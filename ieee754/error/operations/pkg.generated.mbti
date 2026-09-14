@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/ieee754/error/operations"
+
+import {
+  "mizchi/veri/ieee754",
+  "mizchi/veri/ieee754/float32",
+  "mizchi/veri/real",
+}
+
+// Values
+pub fn add32(@float32.Float32, @float32.Float32) -> Unit
+
+pub fn add32_with_input_error(@float32.Float32, @float32.Float32, @real.Real, @real.Real, @real.Real, @real.Real) -> Unit
+
+pub fn add64(@ieee754.Float64, @ieee754.Float64) -> Unit
+
+pub fn add64_with_input_error(@ieee754.Float64, @ieee754.Float64, @real.Real, @real.Real, @real.Real, @real.Real) -> Unit
+
+pub fn div32(@float32.Float32, @float32.Float32) -> Unit
+
+pub fn div64(@ieee754.Float64, @ieee754.Float64) -> Unit
+
+pub fn mul32(@float32.Float32, @float32.Float32) -> Unit
+
+pub fn mul64(@ieee754.Float64, @ieee754.Float64) -> Unit
+
+pub fn sub32(@float32.Float32, @float32.Float32) -> Unit
+
+pub fn sub64(@ieee754.Float64, @ieee754.Float64) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

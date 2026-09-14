@@ -1,0 +1,7 @@
+import {
+  "mizchi/veri/bitvector",
+}
+
+options(
+  "proof-enabled": true,
+)

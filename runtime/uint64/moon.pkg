@@ -1,6 +1,6 @@
 import {
   "mizchi/veri/integer",
-  "mizchi/veri/bv64",
+  "mizchi/veri/bitvector",
 }
 
 import {

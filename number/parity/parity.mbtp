@@ -1,0 +1,12 @@
+///|
+#proof_import("number.Parity")
+pub fn even(x : @integer.Integer) -> Bool = "even"
+
+///|
+#proof_import("number.Parity")
+pub fn odd(x : @integer.Integer) -> Bool = "odd"
+
+
+///|
+#proof_import("number.Divisibility")
+fn divides(d : @integer.Integer, x : @integer.Integer) -> Bool = "divides"

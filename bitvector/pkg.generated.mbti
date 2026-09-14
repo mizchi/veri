@@ -1,0 +1,75 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bitvector"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub type Bv32
+pub fn Bv32::add(Self, Self) -> Self
+pub fn Bv32::ashr(Self, Self) -> Self
+pub fn Bv32::bw_and(Self, Self) -> Self
+pub fn Bv32::bw_not(Self) -> Self
+pub fn Bv32::bw_or(Self, Self) -> Self
+pub fn Bv32::bw_xor(Self, Self) -> Self
+pub fn Bv32::eq(Self, Self) -> Bool
+pub fn Bv32::in_range(@integer.Integer) -> Bool
+pub fn Bv32::lshr(Self, Self) -> Self
+pub fn Bv32::modulus() -> @integer.Integer
+pub fn Bv32::mul(Self, Self) -> Self
+pub fn Bv32::neg(Self) -> Self
+pub fn Bv32::of_integer(@integer.Integer) -> Self
+pub fn Bv32::one() -> Self
+pub fn Bv32::ones() -> Self
+pub fn Bv32::sdiv(Self, Self) -> Self
+pub fn Bv32::shl(Self, Self) -> Self
+pub fn Bv32::sle(Self, Self) -> Bool
+pub fn Bv32::slt(Self, Self) -> Bool
+pub fn Bv32::srem(Self, Self) -> Self
+pub fn Bv32::sub(Self, Self) -> Self
+pub fn Bv32::to_integer(Self) -> @integer.Integer
+pub fn Bv32::udiv(Self, Self) -> Self
+pub fn Bv32::ule(Self, Self) -> Bool
+pub fn Bv32::ult(Self, Self) -> Bool
+pub fn Bv32::urem(Self, Self) -> Self
+pub fn Bv32::width() -> Self
+pub fn Bv32::zero() -> Self
+
+pub type Bv64
+pub fn Bv64::add(Self, Self) -> Self
+pub fn Bv64::ashr(Self, Self) -> Self
+pub fn Bv64::bw_and(Self, Self) -> Self
+pub fn Bv64::bw_not(Self) -> Self
+pub fn Bv64::bw_or(Self, Self) -> Self
+pub fn Bv64::bw_xor(Self, Self) -> Self
+pub fn Bv64::eq(Self, Self) -> Bool
+pub fn Bv64::in_range(@integer.Integer) -> Bool
+pub fn Bv64::lshr(Self, Self) -> Self
+pub fn Bv64::modulus() -> @integer.Integer
+pub fn Bv64::mul(Self, Self) -> Self
+pub fn Bv64::neg(Self) -> Self
+pub fn Bv64::of_integer(@integer.Integer) -> Self
+pub fn Bv64::one() -> Self
+pub fn Bv64::ones() -> Self
+pub fn Bv64::sdiv(Self, Self) -> Self
+pub fn Bv64::shl(Self, Self) -> Self
+pub fn Bv64::sle(Self, Self) -> Bool
+pub fn Bv64::slt(Self, Self) -> Bool
+pub fn Bv64::srem(Self, Self) -> Self
+pub fn Bv64::sub(Self, Self) -> Self
+pub fn Bv64::to_integer(Self) -> @integer.Integer
+pub fn Bv64::udiv(Self, Self) -> Self
+pub fn Bv64::ule(Self, Self) -> Bool
+pub fn Bv64::ult(Self, Self) -> Bool
+pub fn Bv64::urem(Self, Self) -> Self
+pub fn Bv64::width() -> Self
+pub fn Bv64::zero() -> Self
+
+// Type aliases
+
+// Traits

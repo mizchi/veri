@@ -1,0 +1,13 @@
+///|
+#proof_import("number.Divisibility")
+pub fn divides(divisor : @integer.Integer, value : @integer.Integer) -> Bool = "divides"
+
+///|
+#proof_import("number.Gcd")
+pub fn gcd(x : @integer.Integer, y : @integer.Integer) -> @integer.Integer = "gcd"
+
+///|
+/// Why3 number.Coprime's definition, without importing prime-number lemmas.
+pub predicate coprime(x : @integer.Integer, y : @integer.Integer) {
+  @integer.eq(gcd(x, y), @integer.one())
+}

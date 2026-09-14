@@ -1,0 +1,127 @@
+///|
+pub lemma add32(x : @float32.Float32, y : @float32.Float32) where {
+  proof_require: @float32.is_finite(x),
+  proof_require: @float32.is_finite(y),
+  proof_require: @error.no_overflow32(@ieee754.nearest_even(), @real.add(@error.to_real32(x), @error.to_real32(y))),
+  proof_ensure: @float32.is_finite(@float32.add(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real32(@float32.add(@ieee754.nearest_even(), x, y)), @real.add(@error.to_real32(x), @error.to_real32(y)), @error.bound32(@real.add(@error.to_real32(x), @error.to_real32(y)))),
+} {
+  proof_assert @real.eq(@error.to_real32(@float32.add(@ieee754.nearest_even(), x, y)), @error.round32(@ieee754.nearest_even(), @real.add(@error.to_real32(x), @error.to_real32(y))))
+  proof_assert @error.rounded32(@float32.add(@ieee754.nearest_even(), x, y), @real.add(@error.to_real32(x), @error.to_real32(y)))
+}
+
+///|
+pub lemma sub32(x : @float32.Float32, y : @float32.Float32) where {
+  proof_require: @float32.is_finite(x),
+  proof_require: @float32.is_finite(y),
+  proof_require: @error.no_overflow32(@ieee754.nearest_even(), @real.sub(@error.to_real32(x), @error.to_real32(y))),
+  proof_ensure: @float32.is_finite(@float32.sub(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real32(@float32.sub(@ieee754.nearest_even(), x, y)), @real.sub(@error.to_real32(x), @error.to_real32(y)), @error.bound32(@real.sub(@error.to_real32(x), @error.to_real32(y)))),
+} {
+  proof_assert @real.eq(@error.to_real32(@float32.sub(@ieee754.nearest_even(), x, y)), @error.round32(@ieee754.nearest_even(), @real.sub(@error.to_real32(x), @error.to_real32(y))))
+  proof_assert @error.rounded32(@float32.sub(@ieee754.nearest_even(), x, y), @real.sub(@error.to_real32(x), @error.to_real32(y)))
+}
+
+///|
+pub lemma mul32(x : @float32.Float32, y : @float32.Float32) where {
+  proof_require: @float32.is_finite(x),
+  proof_require: @float32.is_finite(y),
+  proof_require: @error.no_overflow32(@ieee754.nearest_even(), @real.mul(@error.to_real32(x), @error.to_real32(y))),
+  proof_ensure: @float32.is_finite(@float32.mul(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real32(@float32.mul(@ieee754.nearest_even(), x, y)), @real.mul(@error.to_real32(x), @error.to_real32(y)), @error.bound32(@real.mul(@error.to_real32(x), @error.to_real32(y)))),
+} {
+  proof_assert @real.eq(@error.to_real32(@float32.mul(@ieee754.nearest_even(), x, y)), @error.round32(@ieee754.nearest_even(), @real.mul(@error.to_real32(x), @error.to_real32(y))))
+  proof_assert @error.rounded32(@float32.mul(@ieee754.nearest_even(), x, y), @real.mul(@error.to_real32(x), @error.to_real32(y)))
+}
+
+///|
+pub lemma div32(x : @float32.Float32, y : @float32.Float32) where {
+  proof_require: @float32.is_finite(x),
+  proof_require: @float32.is_finite(y),
+  proof_require: @float32.is_zero(y) == false,
+  proof_require: @error.no_overflow32(@ieee754.nearest_even(), @real.div(@error.to_real32(x), @error.to_real32(y))),
+  proof_ensure: @float32.is_finite(@float32.div(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real32(@float32.div(@ieee754.nearest_even(), x, y)), @real.div(@error.to_real32(x), @error.to_real32(y)), @error.bound32(@real.div(@error.to_real32(x), @error.to_real32(y)))),
+} {
+  proof_assert @real.eq(@error.to_real32(@float32.div(@ieee754.nearest_even(), x, y)), @error.round32(@ieee754.nearest_even(), @real.div(@error.to_real32(x), @error.to_real32(y))))
+  proof_assert @error.rounded32(@float32.div(@ieee754.nearest_even(), x, y), @real.div(@error.to_real32(x), @error.to_real32(y)))
+}
+
+///|
+pub lemma add32_with_input_error(x : @float32.Float32, y : @float32.Float32, ideal_x : @real.Real, ideal_y : @real.Real, ex : @real.Real, ey : @real.Real) where {
+  proof_require: @float32.is_finite(x),
+  proof_require: @float32.is_finite(y),
+  proof_require: @real.within(@error.to_real32(x), ideal_x, ex),
+  proof_require: @real.within(@error.to_real32(y), ideal_y, ey),
+  proof_require: @error.no_overflow32(@ieee754.nearest_even(), @real.add(@error.to_real32(x), @error.to_real32(y))),
+  proof_ensure: @real.within(@error.to_real32(@float32.add(@ieee754.nearest_even(), x, y)), @real.add(ideal_x, ideal_y), @real.add(@real.add(ex, ey), @error.bound32(@real.add(@error.to_real32(x), @error.to_real32(y))))),
+} {
+  proof_assert @real.within(@error.to_real32(@float32.add(@ieee754.nearest_even(), x, y)), @real.add(@error.to_real32(x), @error.to_real32(y)), @error.bound32(@real.add(@error.to_real32(x), @error.to_real32(y))))
+  proof_assert @real.within(@real.add(@error.to_real32(x), @error.to_real32(y)), @real.add(ideal_x, ideal_y), @real.add(ex, ey))
+}
+
+///|
+pub lemma add64(x : @ieee754.Float64, y : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_require: @ieee754.is_finite(y),
+  proof_require: @error.no_overflow64(@ieee754.nearest_even(), @real.add(@error.to_real64(x), @error.to_real64(y))),
+  proof_ensure: @ieee754.is_finite(@ieee754.add(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real64(@ieee754.add(@ieee754.nearest_even(), x, y)), @real.add(@error.to_real64(x), @error.to_real64(y)), @error.bound64(@real.add(@error.to_real64(x), @error.to_real64(y)))),
+} {
+  proof_assert @real.eq(@error.to_real64(@ieee754.add(@ieee754.nearest_even(), x, y)), @error.round64(@ieee754.nearest_even(), @real.add(@error.to_real64(x), @error.to_real64(y))))
+  proof_assert @error.rounded64(@ieee754.add(@ieee754.nearest_even(), x, y), @real.add(@error.to_real64(x), @error.to_real64(y)))
+}
+
+///|
+pub lemma sub64(x : @ieee754.Float64, y : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_require: @ieee754.is_finite(y),
+  proof_require: @error.no_overflow64(@ieee754.nearest_even(), @real.sub(@error.to_real64(x), @error.to_real64(y))),
+  proof_ensure: @ieee754.is_finite(@ieee754.sub(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real64(@ieee754.sub(@ieee754.nearest_even(), x, y)), @real.sub(@error.to_real64(x), @error.to_real64(y)), @error.bound64(@real.sub(@error.to_real64(x), @error.to_real64(y)))),
+} {
+  proof_assert @real.eq(@error.to_real64(@ieee754.sub(@ieee754.nearest_even(), x, y)), @error.round64(@ieee754.nearest_even(), @real.sub(@error.to_real64(x), @error.to_real64(y))))
+  proof_assert @error.rounded64(@ieee754.sub(@ieee754.nearest_even(), x, y), @real.sub(@error.to_real64(x), @error.to_real64(y)))
+}
+
+///|
+pub lemma mul64(x : @ieee754.Float64, y : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_require: @ieee754.is_finite(y),
+  proof_require: @error.no_overflow64(@ieee754.nearest_even(), @real.mul(@error.to_real64(x), @error.to_real64(y))),
+  proof_ensure: @ieee754.is_finite(@ieee754.mul(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real64(@ieee754.mul(@ieee754.nearest_even(), x, y)), @real.mul(@error.to_real64(x), @error.to_real64(y)), @error.bound64(@real.mul(@error.to_real64(x), @error.to_real64(y)))),
+} {
+  proof_assert ∀ actual : @ieee754.Float64, ∀ ideal : @real.Real,
+    @error.rounded64(actual, ideal) → @real.within(@error.to_real64(actual), ideal, @error.bound64(ideal))
+  proof_assert @real.eq(@error.to_real64(@ieee754.mul(@ieee754.nearest_even(), x, y)), @error.round64(@ieee754.nearest_even(), @real.mul(@error.to_real64(x), @error.to_real64(y))))
+  proof_assert @error.rounded64(@ieee754.mul(@ieee754.nearest_even(), x, y), @real.mul(@error.to_real64(x), @error.to_real64(y)))
+}
+
+///|
+pub lemma div64(x : @ieee754.Float64, y : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_require: @ieee754.is_finite(y),
+  proof_require: @ieee754.is_zero(y) == false,
+  proof_require: @error.no_overflow64(@ieee754.nearest_even(), @real.div(@error.to_real64(x), @error.to_real64(y))),
+  proof_ensure: @ieee754.is_finite(@ieee754.div(@ieee754.nearest_even(), x, y)),
+  proof_ensure: @real.within(@error.to_real64(@ieee754.div(@ieee754.nearest_even(), x, y)), @real.div(@error.to_real64(x), @error.to_real64(y)), @error.bound64(@real.div(@error.to_real64(x), @error.to_real64(y)))),
+} {
+  proof_assert ∀ actual : @ieee754.Float64, ∀ ideal : @real.Real,
+    @error.rounded64(actual, ideal) → @real.within(@error.to_real64(actual), ideal, @error.bound64(ideal))
+  proof_assert @real.eq(@error.to_real64(@ieee754.div(@ieee754.nearest_even(), x, y)), @error.round64(@ieee754.nearest_even(), @real.div(@error.to_real64(x), @error.to_real64(y))))
+  proof_assert @error.rounded64(@ieee754.div(@ieee754.nearest_even(), x, y), @real.div(@error.to_real64(x), @error.to_real64(y)))
+}
+
+///|
+pub lemma add64_with_input_error(x : @ieee754.Float64, y : @ieee754.Float64, ideal_x : @real.Real, ideal_y : @real.Real, ex : @real.Real, ey : @real.Real) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_require: @ieee754.is_finite(y),
+  proof_require: @real.within(@error.to_real64(x), ideal_x, ex),
+  proof_require: @real.within(@error.to_real64(y), ideal_y, ey),
+  proof_require: @error.no_overflow64(@ieee754.nearest_even(), @real.add(@error.to_real64(x), @error.to_real64(y))),
+  proof_ensure: @real.within(@error.to_real64(@ieee754.add(@ieee754.nearest_even(), x, y)), @real.add(ideal_x, ideal_y), @real.add(@real.add(ex, ey), @error.bound64(@real.add(@error.to_real64(x), @error.to_real64(y))))),
+} {
+  proof_assert @real.within(@error.to_real64(@ieee754.add(@ieee754.nearest_even(), x, y)), @real.add(@error.to_real64(x), @error.to_real64(y)), @error.bound64(@real.add(@error.to_real64(x), @error.to_real64(y))))
+  proof_assert @real.within(@real.add(@error.to_real64(x), @error.to_real64(y)), @real.add(ideal_x, ideal_y), @real.add(ex, ey))
+}

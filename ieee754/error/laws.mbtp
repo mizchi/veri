@@ -1,0 +1,11 @@
+///|
+pub lemma rounding32(ideal : @real.Real) where {
+  proof_require: no_overflow32(@ieee754.nearest_even(), ideal),
+  proof_ensure: @real.within(round32(@ieee754.nearest_even(), ideal), ideal, bound32(ideal)),
+} {}
+
+///|
+pub lemma rounding64(ideal : @real.Real) where {
+  proof_require: no_overflow64(@ieee754.nearest_even(), ideal),
+  proof_ensure: @real.within(round64(@ieee754.nearest_even(), ideal), ideal, bound64(ideal)),
+} {}

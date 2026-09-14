@@ -1,0 +1,9 @@
+///|
+fn third() -> @real.Real {
+  @real.div(@real.one(), @real.add(@real.one(), @real.add(@real.one(), @real.one())))
+}
+
+///|
+pub lemma negative_control() where {
+  proof_ensure: @real.within(round32(@ieee754.nearest_even(), third()), third(), @real.zero()),
+} {}

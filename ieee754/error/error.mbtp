@@ -1,0 +1,78 @@
+///|
+/// Real projection; meaningful only for finite binary32 values.
+#proof_import("ieee_float.Float32")
+pub fn to_real32(x : @float32.Float32) -> @real.Real = "t'real"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn round32(mode : @ieee754.RoundingMode, x : @real.Real) -> @real.Real = "round"
+
+///|
+#proof_import("ieee_float.Float32")
+pub fn no_overflow32(mode : @ieee754.RoundingMode, x : @real.Real) -> Bool = "no_overflow"
+
+///|
+/// Real projection; meaningful only for finite binary64 values.
+#proof_import("ieee_float.Float64")
+pub fn to_real64(x : @ieee754.Float64) -> @real.Real = "t'real"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn round64(mode : @ieee754.RoundingMode, x : @real.Real) -> @real.Real = "round"
+
+///|
+#proof_import("ieee_float.Float64")
+pub fn no_overflow64(mode : @ieee754.RoundingMode, x : @real.Real) -> Bool = "no_overflow"
+
+///|
+/// Construct powers in mathematical reals, independently of runtime Int/UInt64
+/// literal conversions and their machine-integer proof obligations.
+fn two() -> @real.Real { @real.add(@real.one(), @real.one()) }
+
+///|
+fn two2() -> @real.Real { @real.mul(two(), two()) }
+
+///|
+fn two4() -> @real.Real { @real.mul(two2(), two2()) }
+
+///|
+fn two8() -> @real.Real { @real.mul(two4(), two4()) }
+
+///|
+fn two16() -> @real.Real { @real.mul(two8(), two8()) }
+
+///|
+fn two32() -> @real.Real { @real.mul(two16(), two16()) }
+
+///|
+fn two64() -> @real.Real { @real.mul(two32(), two32()) }
+
+///|
+fn two128() -> @real.Real { @real.mul(two64(), two64()) }
+
+///|
+fn two256() -> @real.Real { @real.mul(two128(), two128()) }
+
+///|
+fn two512() -> @real.Real { @real.mul(two256(), two256()) }
+
+///|
+fn two1024() -> @real.Real { @real.mul(two512(), two512()) }
+
+///|
+/// RNE bound: 2^-24 * |ideal| + 2^-150, including subnormal rounding.
+pub fn bound32(ideal : @real.Real) -> @real.Real {
+  @real.add(
+    @real.div(@real.abs(ideal), @real.mul(two16(), two8())),
+    @real.div(@real.one(), @real.mul(two128(), @real.mul(two16(), @real.mul(two4(), two2())))),
+  )
+}
+
+///|
+/// RNE bound: 2^-53 * |ideal| + 2^-1075, including subnormal rounding.
+pub fn bound64(ideal : @real.Real) -> @real.Real {
+  @real.add(
+    @real.div(@real.abs(ideal), @real.mul(two32(), @real.mul(two16(), @real.mul(two4(), two())))),
+    @real.div(@real.one(), @real.mul(two1024(), @real.mul(two32(), @real.mul(two16(), @real.mul(two2(), two()))))),
+  )
+}

@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bitvector/laws/integers"
+
+import {
+  "mizchi/veri/bitvector",
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn bitvector_roundtrip32(@bitvector.Bv32) -> Unit
+
+pub fn bitvector_roundtrip64(@bitvector.Bv64) -> Unit
+
+pub fn integer_roundtrip32(@integer.Integer) -> Unit
+
+pub fn integer_roundtrip64(@integer.Integer) -> Unit
+
+pub fn unsigned_value_in_range32(@bitvector.Bv32) -> Unit
+
+pub fn unsigned_value_in_range64(@bitvector.Bv64) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

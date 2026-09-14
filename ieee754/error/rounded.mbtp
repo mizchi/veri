@@ -1,0 +1,25 @@
+///|
+/// A finite result that rounds the given exact real value in RNE mode.
+pub predicate rounded32(actual : @float32.Float32, ideal : @real.Real) {
+  @float32.is_finite(actual) && no_overflow32(@ieee754.nearest_even(), ideal) &&
+  @real.eq(to_real32(actual), round32(@ieee754.nearest_even(), ideal))
+}
+
+///|
+/// A finite result that rounds the given exact real value in RNE mode.
+pub predicate rounded64(actual : @ieee754.Float64, ideal : @real.Real) {
+  @ieee754.is_finite(actual) && no_overflow64(@ieee754.nearest_even(), ideal) &&
+  @real.eq(to_real64(actual), round64(@ieee754.nearest_even(), ideal))
+}
+
+///|
+pub lemma rounded_bound32(actual : @float32.Float32, ideal : @real.Real) where {
+  proof_require: rounded32(actual, ideal),
+  proof_ensure: @real.within(to_real32(actual), ideal, bound32(ideal)),
+} {}
+
+///|
+pub lemma rounded_bound64(actual : @ieee754.Float64, ideal : @real.Real) where {
+  proof_require: rounded64(actual, ideal),
+  proof_ensure: @real.within(to_real64(actual), ideal, bound64(ideal)),
+} {}

@@ -1,0 +1,4 @@
+///|
+pub lemma negative_control() where {
+  proof_ensure: within(zero(), one(), zero()),
+} {}

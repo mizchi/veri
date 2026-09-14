@@ -1,4 +1,0 @@
-///| Modular conversion cannot preserve every unbounded integer unchanged.
-pub lemma negative_control(value : @integer.Integer) where {
-  proof_ensure: @integer.eq(to_integer(of_integer(value)), value),
-} {}

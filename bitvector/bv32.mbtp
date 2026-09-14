@@ -1,0 +1,95 @@
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::zero() -> Bv32 = "zeros"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::one() -> Bv32 = "one"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::ones() -> Bv32 = "ones"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::width() -> Bv32 = "size_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::bw_not(x : Bv32) -> Bv32 = "bw_not"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::neg(x : Bv32) -> Bv32 = "neg"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::add(x : Bv32, y : Bv32) -> Bv32 = "add"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::sub(x : Bv32, y : Bv32) -> Bv32 = "sub"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::mul(x : Bv32, y : Bv32) -> Bv32 = "mul"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::udiv(x : Bv32, y : Bv32) -> Bv32 = "udiv"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::urem(x : Bv32, y : Bv32) -> Bv32 = "urem"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::sdiv(x : Bv32, y : Bv32) -> Bv32 = "sdiv"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::srem(x : Bv32, y : Bv32) -> Bv32 = "srem"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::bw_and(x : Bv32, y : Bv32) -> Bv32 = "bw_and"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::bw_or(x : Bv32, y : Bv32) -> Bv32 = "bw_or"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::bw_xor(x : Bv32, y : Bv32) -> Bv32 = "bw_xor"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::eq(x : Bv32, y : Bv32) -> Bool = "(=)"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::ult(x : Bv32, y : Bv32) -> Bool = "ult"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::ule(x : Bv32, y : Bv32) -> Bool = "ule"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::slt(x : Bv32, y : Bv32) -> Bool = "slt"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::sle(x : Bv32, y : Bv32) -> Bool = "sle"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::shl(x : Bv32, count : Bv32) -> Bv32 = "lsl_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::lshr(x : Bv32, count : Bv32) -> Bv32 = "lsr_bv"
+
+///|
+#proof_import("bv.BV32")
+pub fn Bv32::ashr(x : Bv32, count : Bv32) -> Bv32 = "asr_bv"

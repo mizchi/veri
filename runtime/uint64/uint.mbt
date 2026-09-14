@@ -7,7 +7,7 @@ pub fn add(
 ) -> UInt64 where {
   proof_require: 0UL <= x && x <= 0xffffffffffffffffUL,
   proof_require: 0UL <= y && y <= 0xffffffffffffffffUL,
-  proof_ensure: result => @bv64.eq(model(result), @bv64.add(model(x), model(y))),
+  proof_ensure: result => Bv64::eq(model(result), Bv64::add(model(x), model(y))),
   proof_ensure: result => 0UL <= result && result <= 0xffffffffffffffffUL,
   proof_ensure: result => {
     @integer.eq(
@@ -38,7 +38,7 @@ pub fn sub(
 ) -> UInt64 where {
   proof_require: 0UL <= x && x <= 0xffffffffffffffffUL,
   proof_require: 0UL <= y && y <= 0xffffffffffffffffUL,
-  proof_ensure: result => @bv64.eq(model(result), @bv64.sub(model(x), model(y))),
+  proof_ensure: result => Bv64::eq(model(result), Bv64::sub(model(x), model(y))),
   proof_ensure: result => 0UL <= result && result <= 0xffffffffffffffffUL,
   proof_ensure: result => {
     @integer.eq(
@@ -68,7 +68,7 @@ pub fn less(
 ) -> Bool where {
   proof_require: 0UL <= x && x <= 0xffffffffffffffffUL,
   proof_require: 0UL <= y && y <= 0xffffffffffffffffUL,
-  proof_ensure: result => result == @bv64.ult(model(x), model(y)),
+  proof_ensure: result => result == Bv64::ult(model(x), model(y)),
 } {
   x < y
 }

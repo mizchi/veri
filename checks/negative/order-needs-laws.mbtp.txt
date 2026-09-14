@@ -1,0 +1,7 @@
+///|
+fn never(_x : Int, _y : Int) -> Bool { false }
+
+///|
+pub lemma negative_control() where {
+  proof_ensure: total_order(never),
+} {}

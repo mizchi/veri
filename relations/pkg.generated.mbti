@@ -1,0 +1,49 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/relations"
+
+// Values
+pub fn[T] antisymmetric((T, T) -> Bool) -> Bool
+
+pub fn[T] equality_from_order((T, T) -> Bool, T, T) -> Unit
+
+pub fn[T] equivalence((T, T) -> Bool) -> Bool
+
+pub fn integer_total_order() -> Unit
+
+pub fn[A, B] lex_antisymmetric((A, A) -> Bool, (B, B) -> Bool, (A, B), (A, B)) -> Unit
+
+pub fn[A, B] lex_chain((A, A) -> Bool, (B, B) -> Bool, (A, B), (A, B), (A, B)) -> Unit
+
+pub fn[A, B] lex_le((A, A) -> Bool, (B, B) -> Bool, (A, B), (A, B)) -> Bool
+
+pub fn[T] order_chain((T, T) -> Bool, T, T, T) -> Unit
+
+pub fn[T] partial_order((T, T) -> Bool) -> Bool
+
+pub fn[T] preorder((T, T) -> Bool) -> Bool
+
+pub fn[T] reflexive((T, T) -> Bool) -> Bool
+
+pub fn[T] reverse((T, T) -> Bool, T, T) -> Bool
+
+pub fn[T] reversed_chain((T, T) -> Bool, T, T, T) -> Unit
+
+pub fn[T] same(T, T) -> Bool
+
+pub fn[T] symmetric((T, T) -> Bool) -> Bool
+
+pub fn[T] total((T, T) -> Bool) -> Bool
+
+pub fn[T] total_order((T, T) -> Bool) -> Bool
+
+pub fn[T] total_preorder((T, T) -> Bool) -> Bool
+
+pub fn[T] transitive((T, T) -> Bool) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

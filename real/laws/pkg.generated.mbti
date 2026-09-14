@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/real/laws"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/real",
+}
+
+// Values
+pub fn add_error(@real.Real, @real.Real, @real.Real, @real.Real, @real.Real, @real.Real) -> Unit
+
+pub fn error_chain(@real.Real, @real.Real, @real.Real, @real.Real, @real.Real) -> Unit
+
+pub fn error_zero_iff_equal(@real.Real, @real.Real) -> Unit
+
+pub fn floor_bounds(@real.Real) -> Unit
+
+pub fn integer_embedding(@integer.Integer, @integer.Integer) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

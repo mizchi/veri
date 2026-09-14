@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/seq/order"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/seq",
+}
+
+// Values
+pub fn[T] exchange(@seq.Seq[T], @seq.Seq[T], @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] exchange_twice(@seq.Seq[T], @seq.Seq[T], @seq.Seq[T], @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] index_valid(@seq.Seq[T], @integer.Integer) -> Bool
+
+pub fn[T] permutation_sub(@seq.Seq[T], @seq.Seq[T], @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] range_valid(@seq.Seq[T], @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] sorted(@seq.Seq[T], (T, T) -> Bool) -> Bool
+
+pub fn[T] sorted_pair((T, T) -> Bool, T, T) -> Unit
+
+pub fn[T] sorted_permutation(@seq.Seq[T], @seq.Seq[T], (T, T) -> Bool) -> Bool
+
+pub fn[T] sorted_slice(@seq.Seq[T], (T, T) -> Bool, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] sorted_sub(@seq.Seq[T], (T, T) -> Bool, @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] sorted_subrange(@seq.Seq[T], (T, T) -> Bool, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] sorting_preserves_counts(@seq.Seq[T], @seq.Seq[T], (T, T) -> Bool, T) -> Unit
+
+pub fn[T] swap(@seq.Seq[T], @integer.Integer, @integer.Integer) -> @seq.Seq[T]
+
+pub fn[T] swap_is_exchange(@seq.Seq[T], @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] swap_preserves_elements(@seq.Seq[T], @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] swap_preserves_other(@seq.Seq[T], @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] swap_twice(@seq.Seq[T], @integer.Integer, @integer.Integer) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

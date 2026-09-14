@@ -1,0 +1,43 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bitvector/laws"
+
+import {
+  "mizchi/veri/bitvector",
+}
+
+// Values
+pub fn addition_wraps32() -> Unit
+
+pub fn addition_wraps64() -> Unit
+
+pub fn de_morgan32(@bitvector.Bv32, @bitvector.Bv32) -> Unit
+
+pub fn de_morgan64(@bitvector.Bv64, @bitvector.Bv64) -> Unit
+
+pub fn oversized_shifts32() -> Unit
+
+pub fn oversized_shifts64() -> Unit
+
+pub fn signed_unsigned_differ32() -> Unit
+
+pub fn signed_unsigned_differ64() -> Unit
+
+pub fn subtraction_inverts_addition32(@bitvector.Bv32, @bitvector.Bv32) -> Unit
+
+pub fn subtraction_inverts_addition64(@bitvector.Bv64, @bitvector.Bv64) -> Unit
+
+pub fn unsigned_division_by_zero32(@bitvector.Bv32) -> Unit
+
+pub fn unsigned_division_by_zero64(@bitvector.Bv64) -> Unit
+
+pub fn xor_self_is_zero32(@bitvector.Bv32) -> Unit
+
+pub fn xor_self_is_zero64(@bitvector.Bv64) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

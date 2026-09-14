@@ -1,0 +1,4 @@
+///| Modular conversion cannot preserve every unbounded integer unchanged.
+pub lemma negative_control(value : @integer.Integer) where {
+  proof_ensure: @integer.eq(Bv32::to_integer(Bv32::of_integer(value)), value),
+} {}

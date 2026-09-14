@@ -1,0 +1,9 @@
+///|
+/// Laws require a nonnegative exponent.
+#proof_import("int.Power")
+pub fn pow(x : @integer.Integer, exponent : @integer.Integer) -> @integer.Integer = "power"
+
+///|
+/// Sum over [start, stop); zero when stop <= start.
+#proof_import("int.Sum")
+pub fn sum(f : (@integer.Integer) -> @integer.Integer, start : @integer.Integer, stop : @integer.Integer) -> @integer.Integer = "sum"

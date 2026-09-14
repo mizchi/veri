@@ -1,7 +1,6 @@
 import {
   "mizchi/veri/arrays",
-  "mizchi/veri/bv32",
-  "mizchi/veri/bv64",
+  "mizchi/veri/bitvector",
   "mizchi/veri/fset",
   "mizchi/veri/ieee754",
   "mizchi/veri/ieee754/float32" @fp32,

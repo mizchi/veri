@@ -1,0 +1,9 @@
+import {
+  "mizchi/veri/seq",
+  "mizchi/veri/integer",
+  "mizchi/veri/relations",
+}
+
+options(
+  "proof-enabled": true,
+)

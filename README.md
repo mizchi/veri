@@ -8,9 +8,12 @@ Proof bindings cover finite sets, sequences, lists, bags, finite maps, binary tr
 
 ## Running
 
-Requirements: MoonBit, the bundled Why3 data at `~/.moon/share/why3/`, Z3 on PATH, Node.js 24+, and just. The Node scripts have no external dependencies.
+Requirements: MoonBit, the bundled Why3 data at `~/.moon/share/why3/`, Z3 on PATH, Node.js 24+, just, and unzip. The Node scripts have no npm dependencies.
+
+`just setup-solvers` downloads [CVC5 1.3.4](https://github.com/cvc5/cvc5/releases/tag/cvc5-1.3.4) into `_build/solvers/` and verifies the pinned official SHA-256 digest before extraction. It supports macOS and Linux on arm64/x64, preserves the distribution's licenses, and reuses the local installation. To use an existing executable, set `VERI_CVC5=/path/to/cvc5`; no download is then needed. Proof recipes and `just verify` run this setup automatically.
 
 ```sh
+just setup-solvers # Install the additional prover locally (network needed once)
 just doctor        # Check versions and bundled Why3 data
 just verify        # Run proofs, negative controls, reference checks, and backend tests
 ```
@@ -21,9 +24,11 @@ To run individual checks:
 just prove         # Prove both workspace modules: MoonBit → Why3 → SMT
 just prove-machine # Prove bounds, runtime bridges, and their example with machine integers
 just prove-collections-machine # Prove collection implementations and clients with machine integers
+just prove-foundations-machine # Prove order, arithmetic, real and IEEE error contracts with machine integers
 just core-capabilities # Probe direct calls to core from contracted functions
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just negative      # Check that deliberately false claims in each model are not proved
+just negative bitvector runtime/uint32 runtime/uint64 # Select affected negative controls
 just test js       # Run runtime checks
 just quickcheck js # Run only the QuickCheck properties
 just bench native # Compare collections with core; save timings and ratios
@@ -37,9 +42,9 @@ just vectors-check # Compare checked-in reference values with the current Z3 res
 just fmt           # Format sources and generate public interfaces
 ```
 
-The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, and Z3 4.16.0.
+The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, Z3 4.16.0, and CVC5 1.3.4.
 In this toolchain, `moon prove` automatically uses `~/.moon/share/why3`. No separate Why3 installation is needed.
-The `just` proof recipes generate `_build/why3/why3.conf` with native-BV and arithmetic encodings.
+The `just` proof recipes generate `_build/why3/why3.conf` with Z3 and CVC5 encodings for bitvectors, quantified laws and real-valued IEEE models.
 Proof results appear in `*.proof.json` files under each module’s `_build/verif/` directory.
 Use `just prove`: bare `moon prove` uses only the default encoding and can time out on integer/BV bridge goals.
 
@@ -59,8 +64,8 @@ Use `just prove`: bare `moon prove` uses only the default encoding and can time 
 | `testing/commands` | QuickCheck operation generators and shrinkers | Replayable traces; a deliberate failure shrinks to `[Push(3)]` |
 | `ieee754` / `ieee754/float32` | Logical binary64 / binary32 values and shared rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
 | `ieee754/conversions` | Logical widening and narrowing | Binary32 widening roundtrip and preservation of NaN classification |
-| `bv32` / `bv64` | Why3 fixed-size bitvector bindings | Operations and modular integer conversions |
-| `bv32/laws` / `bv64/laws` | Bitvector lemmas, with integer laws in `laws/integers` | Bitwise laws, conversions in both directions, and unsigned value bounds |
+| `bitvector` | Why3 fixed-size bitvector bindings | Operations and modular integer conversions |
+| `bitvector/laws` | Bitvector lemmas, with integer laws in `laws/integers` | Bitwise laws, conversions in both directions, and unsigned value bounds |
 | `arrays` | Total maps with select/store | Read after write, unchanged other keys, and last-write-wins |
 | `strings` | Logical SMT strings | Concatenation, length, substring, search, and replacement |
 | `examples/models` | Examples importing the libraries | Cross-module proofs, including arrays with bitvector keys and string values |
@@ -83,8 +88,7 @@ veri/
 ├── moon.mod                 # mizchi/veri
 ├── moon.work                # members: ".", "examples"
 ├── bounds/
-├── bv32/
-├── bv64/
+├── bitvector/
 ├── arrays/
 ├── strings/
 ├── fset/
@@ -106,14 +110,14 @@ veri/
 ```
 
 Workspace resolution uses the local library without downloading it from the registry.
-Public package imports use paths such as `mizchi/veri/bounds`, `mizchi/veri/bv32`, and `mizchi/veri/arrays`.
+Public package imports use paths such as `mizchi/veri/bounds`, `mizchi/veri/bitvector`, and `mizchi/veri/arrays`.
 Run `just prove` to prove the library and examples. In this toolchain, `moon prove`
 on its own selects the current module; `moon -C examples prove` proves the examples.
 Proof reports are written under each module's `_build/verif/` directory.
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.
-The abstract types in `fset`, `seq`, `list`, `bag`, `fmap`, `bintree`, `ieee754`, `ieee754/float32`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Runtime correspondence is provided separately by implementations under `runtime/` where stated.
+The abstract types in `fset`, `seq`, `list`, `bag`, `fmap`, `bintree`, `ieee754`, `ieee754/float32`, `bitvector`, `arrays`, and `strings` are **proof-only**. Runtime correspondence is provided separately by implementations under `runtime/` where stated.
 
 A minimal example:
 
@@ -132,9 +136,54 @@ At runtime, use `@float64.matches(actual, Bits(expected_bits))` for exact bit ma
 or `@float64.matches(actual, AnyNaN)` to check NaN classification.
 An incorrect zero sign or a difference of even 1 ULP in a finite value fails the bit comparison.
 
+## Bitvector API
+
+Import `"mizchi/veri/bitvector"` in `moon.pkg` for both widths. Bring the types into scope in a `.mbt` file:
+
+```moonbit
+using @bitvector {type Bv32, type Bv64}
+```
+
+Proofs in `.mbtp` and runtime contracts then use `Bv32::add(x, y)`, `Bv64::add(x, y)`, `Bv32::of_integer(n)`, and the corresponding type methods. The types retain their distinct Why3 `bv.BV32` / `bv.BV64` representations. The current `.mbtp` parser requires the `using` form for imported type methods. This replaces the previous per-width package imports and free functions.
+
+Public lemmas have width suffixes, such as `@laws.addition_wraps32()` / `addition_wraps64()` in `bitvector/laws` and `integer_roundtrip32` / `integer_roundtrip64` in `bitvector/laws/integers`. Keeping integer conversion laws separate limits quantified proof context. `examples/bitvector/widths.mbtp` proves that the value 2^32 wraps in Bv32 but is preserved in Bv64 using a single package import. `just prove-machine` also checks these laws and the example with machine integers.
+
+## Orders, number theory, reals, and error bounds
+
+| Package | Contents |
+| --- | --- |
+| `relations` | Equivalence, preorders, partial/total orders, reverse and lexicographic order, with explicit laws for the supplied relation |
+| `seq/order` | Sortedness, sorted permutations, subrange permutations, exchanges and swap laws, using mathematical indices |
+| `integer` / `integer/laws` | Arithmetic, absolute value, min/max, Euclidean and truncating division, and their remainder correspondence |
+| `integer/aggregate` / `integer/aggregate/laws` | Nonnegative integer powers, half-open interval sums and their decomposition |
+| `number` / `number/laws` / `number/parity` | Divisibility, GCD, coprimality, parity and laws |
+| `runtime/number` | UInt GCD, safe Int quotient/remainder and Euclidean remainder for a positive modulus |
+| `real` / `real/laws` | Proof-only mathematical reals, integer embedding, floor/ceil, distance and error composition |
+| `ieee754/error` / `ieee754/error/operations` | Real projections, rounding, binary32/64 operation bounds and input-error propagation |
+| `examples/foundations` | Cross-module examples composing order, GCD, real and rounding contracts |
+
+`relations` expresses the laws from [Why3 relations](https://why3.org/stdlib/relations.html) as predicates over a supplied `(T, T) -> Bool` relation. No arbitrary comparator is assumed to define a total order. Lexicographic transitivity requires laws for both component orders. `seq/order.sorted_permutation` specifies sortedness and preservation of multiplicities; it does not implement a sorting algorithm. Exchange and permutation bindings use [Why3 seq](https://why3.org/stdlib/seq.html).
+
+Division conventions are explicit: `integer.div(-7, 3) = -3` and `integer.modulo(-7, 3) = 2`, whereas `integer.trunc_div(-7, 3) = -2` and `integer.trunc_mod(-7, 3) = -1`. Logical division/remainder laws require a nonzero divisor. `runtime/number.div_rem` returns `None` for division by zero and `Int::min_value / -1`. `euclidean_mod` returns `Some(r)` only for a positive modulus and guarantees `0 <= r < modulus`. [Why3 int](https://why3.org/stdlib/int.html)
+
+`runtime/number.gcd` uses Euclid's algorithm. Its correspondence to [Why3 number.Gcd](https://why3.org/stdlib/number.html) and termination are proved across the UInt range, with `gcd(0, 0) = 0`. Division, remainder and GCD are checked under both integer preludes. Runtime tests compare GCD with independent divisor enumeration and reconstruct signed division in Int64, checking signs and boundaries. QuickCheck uses the standard tuple shrinker.
+
+`real.Real` is an exact specification type, not a runtime conversion from Double. Division laws require a nonzero denominator. `real.within(actual, ideal, tolerance)` means `|actual - ideal| <= tolerance`; a negative tolerance cannot satisfy it. Laws cover addition with input errors, the triangle inequality and integer embedding. [Why3 real](https://why3.org/stdlib/real.html)
+
+For an ideal real result `z`, RNE rounding without overflow has these error bounds:
+
+- binary32: `2^-24 * |z| + 2^-150`
+- binary64: `2^-53 * |z| + 2^-1075`
+
+These use `round_bound_ne` from [Why3 ieee_float](https://why3.org/stdlib/ieee_float.html). Constants are constructed as exact proof-level reals; the absolute term covers subnormal rounding. `ieee754/error/operations` bounds addition, subtraction, multiplication and division with finite-input and `no_overflow` premises, plus a nonzero divisor for division. Addition also composes input errors `ex + ey` with the new rounding error. The native SMT floating-point witnesses in `checks/*/half-subnormal-error.smt2` show why a relative-only bound is insufficient.
+
+These are proofs about the Why3 IEEE model. They introduce no assumed correspondence between runtime Float/Double and real projections. Runtime coverage remains the existing Z3 reference comparisons and the support reported by `fp-capabilities`.
+
+Besides native SMT and the BV arithmetic encoding, `just prover-config` generates Z3/CVC5 routes retaining Why3's float axioms and rounding-error lemmas, and a Z3 route encoding definitions as equivalent axioms to support quantified-law matching. CVC5 complements Z3 for quantified sequence laws and nonlinear real error bounds. Bundled Why3 files remain untouched; no custom assumptions or `proof_axiomatized` annotations are added. Use `just prove` normally and `just prove-foundations-machine` for checked machine integers. `just verify` includes both and the negative controls.
+
 ## QuickCheck properties
 
-The 33 positive properties under `bounds/` and `runtime/` use
+The 37 positive properties under `bounds/` and `runtime/` use
 `moonbitlang/core/quickcheck`, each running 1,000 accepted cases with seed
 `20260914`. Generated sizes grow up to 64, or 128 for operation traces and red-black balance. They run
 with `just quickcheck js` (or `wasm`, `wasm-gc`, `native`) and are also included
@@ -325,7 +374,7 @@ implementations and examples using machine integers.
 The MoonBit API binds to **Why3 theories**. Why3's solver driver then maps supported operations to SMT-LIB 2:
 
 ```text
-MoonBit contracts / .mbtp → Why3 theories → SMT-LIB 2 → Z3
+MoonBit contracts / .mbtp → Why3 theories → SMT-LIB 2 → Z3 / CVC5
 checks/**/*.smt2 ─────────────────────────→ SMT-LIB 2 → Z3
 ```
 
@@ -335,14 +384,14 @@ These are proof APIs, not a runtime Z3 FFI or a general-purpose SMT-LIB 2 expres
 
 | Package | Why3 theory | Main operations |
 | --- | --- | --- |
-| `bv32` / `bv64` | `bv.BV32` / `bv.BV64` | `add/sub/mul`, `udiv/urem`, `sdiv/srem`, `bw_and/or/xor/not`, `shl/lshr/ashr`, `ult/ule/slt/sle` |
+| `bitvector` | `bv.BV32` / `bv.BV64` | `add/sub/mul`, `udiv/urem`, `sdiv/srem`, `bw_and/or/xor/not`, `shl/lshr/ashr`, `ult/ule/slt/sle` |
 | `arrays` | `map.Map`, `map.Const` | `select`, `store`, `const_array`, extensional `eq` |
 | `strings` | `string.String` | `concat`, `length`, `char_at`, `substring`, `contains`, `prefix_of`, `suffix_of`, `index_of`, `replace`, `to_int/from_int`, `lt/le` |
 
 Bitvectors have a fixed width; the initial API provides 32- and 64-bit types.
 Signedness belongs to the operation, not the bit pattern. Addition, subtraction, and multiplication wrap modulo 2^width.
 Shift counts are bitvectors of the same width: counts at least as large as the width do not wrap around.
-`width()` returns the bitvector encoding of 32 or 64. `udiv(x, zero())` yields all ones in the SMT model;
+`Bv32::width()` / `Bv64::width()` return the bitvector encoding of 32 or 64. Unsigned division by zero yields all ones in the SMT model;
 this is not a claim about runtime division. Arbitrary widths, extraction, and extension are not exposed yet.
 `of_integer` first reduces modulo 2^width, so it is defined for negative and oversized mathematical integers too.
 `to_integer` returns the unsigned value, `modulus()` is 2^width, and `in_range` recognizes unsigned values.
@@ -430,8 +479,8 @@ and runs runtime tests on JS / wasm / wasm-gc / native in debug and release conf
 `just prover-config` derives an arithmetic driver from the installed Why3 `z3_487.drv` and writes it
 under `_build/why3/`. It omits only the native-BV encoding imports, retaining the upstream arithmetic
 transformations and BV theory axioms. The installed files remain unchanged, and no new axioms are added.
-The generated `MoonBit_Auto` strategy tries both Z3 encodings: native bitvectors for bitwise laws,
-and the Why3 arithmetic model for integer/BV correspondence. Both encodings remain within the trusted Why3 boundary.
+The generated `MoonBit_Auto` strategy retains both Z3 encodings: native bitvectors for bitwise laws,
+and the Why3 arithmetic model for integer/BV correspondence. It also tries the real-valued and quantified-law routes described above. These encodings remain within the trusted Why3 boundary.
 The generator rejects unexpected upstream import layouts rather than silently deriving a different driver.
 After splitting verification conditions, the strategy also uses Why3's
 `compute_in_goal` to reduce concrete datatype constructors in structural models.
@@ -439,11 +488,11 @@ Doing this after splitting preserves the recursive hypotheses needed by list pro
 `just prove` limits concurrent package jobs to two to avoid contention between
 short solver time limits as the number of packages grows.
 
-Bindings stay in `bv32` / `bv64`; their public lemmas now live in `bv32/laws` / `bv64/laws`,
-with conversion lemmas in `bv32/laws/integers` / `bv64/laws/integers`.
+Bindings live in `bitvector`; their public lemmas live in `bitvector/laws`,
+with conversion lemmas in `bitvector/laws/integers`.
 Import the corresponding law package when calling a lemma. Keeping unrelated lemmas out of a caller's
 proof context avoids expensive quantifier instantiation. `just prove` checks every package in both modules.
-Negative controls use the same two encodings and include unbounded conversion identity and subtraction
+Negative controls use the same complete strategy and include unbounded conversion identity and subtraction
 incorrectly specified as addition, to detect a proof path accepting invalid correspondence claims.
 
 ## Scope of IEEE 754 verification

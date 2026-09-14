@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/foundations"
+
+import {
+  "mizchi/veri/ieee754",
+  "mizchi/veri/real",
+}
+
+// Values
+pub fn common_factor(UInt, UInt) -> UInt
+
+pub fn finite_roundtrip(@ieee754.Float64) -> Unit
+
+pub fn integer_comparator_laws() -> Unit
+
+pub fn measurement_error(@real.Real, @real.Real, @real.Real, @real.Real, @real.Real) -> Unit
+
+pub fn ordered_pair(Int, Int) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

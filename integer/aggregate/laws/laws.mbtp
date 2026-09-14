@@ -1,0 +1,13 @@
+///|
+pub lemma power_add(x : @integer.Integer, n : @integer.Integer, m : @integer.Integer) where {
+  proof_require: @integer.le(@integer.zero(), n),
+  proof_require: @integer.le(@integer.zero(), m),
+  proof_ensure: @integer.eq(@aggregate.pow(x, @integer.add(n, m)), @integer.mul(@aggregate.pow(x, n), @aggregate.pow(x, m))),
+} {}
+
+///|
+pub lemma sum_split(f : (@integer.Integer) -> @integer.Integer, start : @integer.Integer, middle : @integer.Integer, stop : @integer.Integer) where {
+  proof_require: @integer.le(start, middle),
+  proof_require: @integer.le(middle, stop),
+  proof_ensure: @integer.eq(@aggregate.sum(f, start, stop), @integer.add(@aggregate.sum(f, start, middle), @aggregate.sum(f, middle, stop))),
+} {}

@@ -1,0 +1,4 @@
+///| Deliberately false: the all-ones bitvector wraps to zero.
+lemma negative_control() where {
+  proof_ensure: Bv64::ult(Bv64::ones(), Bv64::add(Bv64::ones(), Bv64::one())),
+} {}

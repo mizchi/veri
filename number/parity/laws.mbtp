@@ -1,0 +1,5 @@
+///|
+pub lemma parity(x : @integer.Integer) where {
+  proof_ensure: even(x) == (odd(x) == false),
+  proof_ensure: even(x) == divides(@integer.from_int(2), x),
+} {}

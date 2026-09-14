@@ -2,7 +2,7 @@
 package "mizchi/veri/runtime/uint64"
 
 import {
-  "mizchi/veri/bv64",
+  "mizchi/veri/bitvector",
 }
 
 // Values
@@ -10,7 +10,7 @@ pub fn add(UInt64, UInt64) -> UInt64
 
 pub fn less(UInt64, UInt64) -> Bool
 
-pub fn model(UInt64) -> @bv64.Bv64
+pub fn model(UInt64) -> @bitvector.Bv64
 
 pub fn model_preserves_value(UInt64) -> Unit
 

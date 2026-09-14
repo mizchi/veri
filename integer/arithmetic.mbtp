@@ -1,0 +1,45 @@
+///|
+#proof_import("int.Int")
+pub fn zero() -> Integer = "zero"
+
+///|
+#proof_import("int.Int")
+pub fn one() -> Integer = "one"
+
+///|
+#proof_import("int.Int")
+pub fn lt(x : Integer, y : Integer) -> Bool = "(<)"
+
+///|
+pub fn neg(x : Integer) -> Integer { sub(zero(), x) }
+
+///|
+#proof_import("int.Int")
+pub fn mul(x : Integer, y : Integer) -> Integer = "(*)"
+
+///|
+#proof_import("int.Abs")
+pub fn abs(x : Integer) -> Integer = "abs"
+
+///|
+#proof_import("int.MinMax")
+pub fn min(x : Integer, y : Integer) -> Integer = "min"
+
+///|
+#proof_import("int.MinMax")
+pub fn max(x : Integer, y : Integer) -> Integer = "max"
+
+///|
+/// Euclidean quotient; y must be nonzero. The remainder is nonnegative.
+#proof_import("int.EuclideanDivision")
+pub fn div(x : Integer, y : Integer) -> Integer = "div"
+
+///|
+/// Quotient rounded toward zero; y must be nonzero.
+#proof_import("int.ComputerDivision")
+pub fn trunc_div(x : Integer, y : Integer) -> Integer = "div"
+
+///|
+/// Remainder has the sign of x; y must be nonzero.
+#proof_import("int.ComputerDivision")
+pub fn trunc_mod(x : Integer, y : Integer) -> Integer = "mod"

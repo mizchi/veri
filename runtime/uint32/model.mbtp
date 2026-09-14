@@ -1,11 +1,11 @@
 ///|
 /// Logical encoding of a runtime unsigned value; not a runtime cast.
-pub fn model(value : UInt) -> @bv32.Bv32 {
-  @bv32.of_integer(@integer.from_uint(value))
+pub fn model(value : UInt) -> Bv32 {
+  Bv32::of_integer(@integer.from_uint(value))
 }
 
 ///|
 pub lemma model_preserves_value(value : UInt) where {
-  proof_require: @bv32.in_range(@integer.from_uint(value)),
-  proof_ensure: @integer.eq(@bv32.to_integer(model(value)), @integer.from_uint(value)),
+  proof_require: Bv32::in_range(@integer.from_uint(value)),
+  proof_ensure: @integer.eq(Bv32::to_integer(model(value)), @integer.from_uint(value)),
 } {}

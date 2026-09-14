@@ -1,0 +1,22 @@
+///|
+pub lemma euclidean_decomposition(x : @integer.Integer, y : @integer.Integer) where {
+  proof_require: @integer.eq(y, @integer.zero()) == false,
+  proof_ensure: @integer.eq(x, @integer.add(@integer.mul(y, @integer.div(x, y)), @integer.modulo(x, y))),
+  proof_ensure: @integer.le(@integer.zero(), @integer.modulo(x, y)),
+  proof_ensure: @integer.lt(@integer.modulo(x, y), @integer.abs(y)),
+} {}
+
+///|
+pub lemma truncating_decomposition(x : @integer.Integer, y : @integer.Integer) where {
+  proof_require: @integer.eq(y, @integer.zero()) == false,
+  proof_ensure: @integer.eq(x, @integer.add(@integer.mul(y, @integer.trunc_div(x, y)), @integer.trunc_mod(x, y))),
+  proof_ensure: @integer.lt(@integer.abs(@integer.trunc_mod(x, y)), @integer.abs(y)),
+} {}
+
+///|
+pub lemma negative_division_conventions() where {
+  proof_ensure: @integer.eq(@integer.div(@integer.from_int(-7), @integer.from_int(3)), @integer.from_int(-3)),
+  proof_ensure: @integer.eq(@integer.modulo(@integer.from_int(-7), @integer.from_int(3)), @integer.from_int(2)),
+  proof_ensure: @integer.eq(@integer.trunc_div(@integer.from_int(-7), @integer.from_int(3)), @integer.from_int(-2)),
+  proof_ensure: @integer.eq(@integer.trunc_mod(@integer.from_int(-7), @integer.from_int(3)), @integer.from_int(-1)),
+} {}

@@ -54,5 +54,17 @@
   {
     "file": "fp32/narrowing-loss.smt2",
     "expected": "sat"
+  },
+  {
+    "file": "real/add-error.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "fp32/half-subnormal-error.smt2",
+    "expected": "sat"
+  },
+  {
+    "file": "fp/half-subnormal-error.smt2",
+    "expected": "sat"
   }
 ]

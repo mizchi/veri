@@ -1,0 +1,45 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/ieee754/error"
+
+import {
+  "mizchi/veri/ieee754",
+  "mizchi/veri/ieee754/float32",
+  "mizchi/veri/real",
+}
+
+// Values
+pub fn bound32(@real.Real) -> @real.Real
+
+pub fn bound64(@real.Real) -> @real.Real
+
+pub fn no_overflow32(@ieee754.RoundingMode, @real.Real) -> Bool
+
+pub fn no_overflow64(@ieee754.RoundingMode, @real.Real) -> Bool
+
+pub fn round32(@ieee754.RoundingMode, @real.Real) -> @real.Real
+
+pub fn round64(@ieee754.RoundingMode, @real.Real) -> @real.Real
+
+pub fn rounded32(@float32.Float32, @real.Real) -> Bool
+
+pub fn rounded64(@ieee754.Float64, @real.Real) -> Bool
+
+pub fn rounded_bound32(@float32.Float32, @real.Real) -> Unit
+
+pub fn rounded_bound64(@ieee754.Float64, @real.Real) -> Unit
+
+pub fn rounding32(@real.Real) -> Unit
+
+pub fn rounding64(@real.Real) -> Unit
+
+pub fn to_real32(@float32.Float32) -> @real.Real
+
+pub fn to_real64(@ieee754.Float64) -> @real.Real
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

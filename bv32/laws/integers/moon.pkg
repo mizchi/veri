@@ -1,8 +1,0 @@
-import {
-  "mizchi/veri/bv32",
-  "mizchi/veri/integer",
-}
-
-options(
-  "proof-enabled": true,
-)

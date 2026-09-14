@@ -1,11 +1,11 @@
 ///|
 /// Logical encoding of a runtime unsigned value; not a runtime cast.
-pub fn model(value : UInt64) -> @bv64.Bv64 {
-  @bv64.of_integer(@integer.from_uint64(value))
+pub fn model(value : UInt64) -> Bv64 {
+  Bv64::of_integer(@integer.from_uint64(value))
 }
 
 ///|
 pub lemma model_preserves_value(value : UInt64) where {
-  proof_require: @bv64.in_range(@integer.from_uint64(value)),
-  proof_ensure: @integer.eq(@bv64.to_integer(model(value)), @integer.from_uint64(value)),
+  proof_require: Bv64::in_range(@integer.from_uint64(value)),
+  proof_ensure: @integer.eq(Bv64::to_integer(model(value)), @integer.from_uint64(value)),
 } {}

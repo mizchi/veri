@@ -1,9 +1,13 @@
 default:
     @just --list
 
-# Check the installed MoonBit/Why3/Z3 toolchain.
+# Check the installed MoonBit/Why3/Z3/CVC5 toolchain.
 doctor:
     node tools/doctor.mjs
+
+# Fetch pinned CVC5 into _build/solvers, checking the official SHA-256 digest.
+setup-solvers:
+    node tools/setup-solvers.mjs
 
 fmt:
     moon fmt
@@ -14,7 +18,7 @@ check:
     moon check --deny-warn
 
 # Prove both workspace members using the bundled ~/.moon/share/why3 data.
-prover-config:
+prover-config: setup-solvers
     node tools/configure-why3.mjs
 
 # Bound package concurrency so solver time limits remain useful as packages grow.
@@ -24,16 +28,23 @@ prove: prover-config
 
 # The same integer contracts under the bundled machine-integer model.
 prove-machine: prover-config
+    for bitvector_package in bitvector/laws bitvector/laws/integers; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$bitvector_package" --target-dir _build/machine --why3-config _build/why3/why3.conf || exit; done
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove bounds --target-dir _build/machine
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/uint32 --target-dir _build/machine --why3-config _build/why3/why3.conf
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/uint64 --target-dir _build/machine --why3-config _build/why3/why3.conf
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/array --target-dir _build/machine
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove bridges --target-dir _build/machine --why3-config ../_build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove bitvector --target-dir _build/machine --why3-config ../_build/why3/why3.conf
 
 # Collection contracts also use mathematical lengths with checked runtime Ints.
 prove-collections-machine: prover-config
     for collection_package in runtime/list runtime/stack runtime/queue runtime/pqueue runtime/bintree runtime/bintree/search; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$collection_package" --target-dir _build/collections-machine --why3-config _build/why3/why3.conf || exit; done
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove collections --target-dir _build/collections-machine --why3-config ../_build/why3/why3.conf
+
+# Order, arithmetic and real/IEEE error models under checked machine integers.
+prove-foundations-machine: prover-config
+    for foundation_package in relations seq/order integer/laws integer/aggregate/laws number/laws number/parity real/laws ieee754/error ieee754/error/operations runtime/number; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$foundation_package" --target-dir _build/foundations-machine --why3-config _build/why3/why3.conf || exit; done
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove foundations --target-dir _build/foundations-machine --why3-config ../_build/why3/why3.conf
 
 test target="js":
     moon test --target {{target}}
@@ -80,9 +91,10 @@ fp-capabilities:
 core-capabilities:
     node tools/check-core-capabilities.mjs
 
-# Fail unless deliberately false statements in each model remain unproved.
-negative:
-    node tools/check-negative.mjs
+# Fail unless deliberately false statements remain unproved; optionally select packages.
+[positional-arguments]
+negative *packages: setup-solvers
+    node tools/check-negative.mjs "$@"
 
 # UNSAT proofs and concrete SAT witnesses for FP, bitvectors, arrays, and strings.
 smt:
@@ -96,4 +108,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: doctor check test-tools fp-capabilities core-capabilities prove prove-machine prove-collections-machine negative smt vectors-check test-backends test-release
+verify: setup-solvers doctor check test-tools fp-capabilities core-capabilities prove prove-machine prove-collections-machine prove-foundations-machine negative smt vectors-check test-backends test-release

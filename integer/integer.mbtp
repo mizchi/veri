@@ -31,6 +31,6 @@ pub fn add(left : Integer, right : Integer) -> Integer = "(+)"
 pub fn sub(left : Integer, right : Integer) -> Integer = "(-)"
 
 ///|
-/// Euclidean remainder; use a strictly positive modulus.
+/// Euclidean remainder; a nonzero modulus gives 0 <= result < abs(modulus).
 #proof_import("int.EuclideanDivision")
 pub fn modulo(value : Integer, modulus : Integer) -> Integer = "mod"

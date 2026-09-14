@@ -1,0 +1,28 @@
+///|
+fn increasing(x : Int, y : Int) -> Bool { x <= y }
+
+///|
+pub lemma integer_comparator_laws() where {
+  proof_ensure: @relations.total_order(increasing),
+} {}
+
+///|
+pub lemma ordered_pair(x : Int, y : Int) where {
+  proof_require: x <= y,
+  proof_ensure: @order.sorted(@seq.cons(x, @seq.singleton(y)), increasing),
+} {}
+
+///|
+/// The real projection is used only after establishing finiteness.
+pub lemma finite_roundtrip(x : @ieee754.Float64) where {
+  proof_require: @ieee754.is_finite(x),
+  proof_ensure: @real.eq(@error.round64(@ieee754.nearest_even(), @error.to_real64(x)), @error.to_real64(x)),
+} {}
+
+///|
+/// Tolerances are exact reals, independently of runtime Double arithmetic.
+pub lemma measurement_error(actual : @real.Real, reference : @real.Real, target : @real.Real, e1 : @real.Real, e2 : @real.Real) where {
+  proof_require: @real.within(actual, reference, e1),
+  proof_require: @real.within(reference, target, e2),
+  proof_ensure: @real.within(actual, target, @real.add(e1, e2)),
+} {}

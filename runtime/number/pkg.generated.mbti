@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/number"
+
+// Values
+pub fn div_rem(Int, Int) -> (Int, Int)?
+
+pub fn euclidean_mod(Int, Int) -> Int?
+
+pub fn gcd(UInt, UInt) -> UInt
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

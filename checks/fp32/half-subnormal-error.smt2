@@ -1,0 +1,13 @@
+(set-logic ALL)
+; Exact real half of the smallest positive subnormal: ties-to-even gives +0.
+(define-fun ideal () Real (/ 1.0 1427247692705959881058285969449495136382746624.0))
+(define-fun rounded () (_ FloatingPoint 8 24) ((_ to_fp 8 24) RNE ideal))
+(define-fun absolute_error () Real (- ideal (fp.to_real rounded)))
+(define-fun relative () Real (/ ideal 16777216.0))
+(define-fun bound () Real (+ relative ideal))
+(assert (fp.isZero rounded))
+(assert (not (fp.isNegative rounded)))
+(assert (> absolute_error relative))
+(assert (<= absolute_error bound))
+(check-sat)
+(get-value (absolute_error relative bound))

@@ -1,0 +1,29 @@
+///|
+pub lemma integer_embedding(x : @integer.Integer, y : @integer.Integer) where {
+  proof_ensure: @real.eq(@real.from_integer(@integer.add(x, y)), @real.add(@real.from_integer(x), @real.from_integer(y))),
+} {}
+
+///|
+pub lemma error_zero_iff_equal(x : @real.Real, y : @real.Real) where {
+  proof_ensure: @real.eq(@real.distance(x, y), @real.zero()) == @real.eq(x, y),
+} {}
+
+///|
+pub lemma add_error(x : @real.Real, ideal_x : @real.Real, y : @real.Real, ideal_y : @real.Real, ex : @real.Real, ey : @real.Real) where {
+  proof_require: @real.within(x, ideal_x, ex),
+  proof_require: @real.within(y, ideal_y, ey),
+  proof_ensure: @real.within(@real.add(x, y), @real.add(ideal_x, ideal_y), @real.add(ex, ey)),
+} {}
+
+///|
+pub lemma error_chain(x : @real.Real, y : @real.Real, z : @real.Real, e1 : @real.Real, e2 : @real.Real) where {
+  proof_require: @real.within(x, y, e1),
+  proof_require: @real.within(y, z, e2),
+  proof_ensure: @real.within(x, z, @real.add(e1, e2)),
+} {}
+
+///|
+pub lemma floor_bounds(x : @real.Real) where {
+  proof_ensure: @real.le(@real.from_integer(@real.floor(x)), x),
+  proof_ensure: @real.lt(x, @real.add(@real.from_integer(@real.floor(x)), @real.one())),
+} {}

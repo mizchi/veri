@@ -16,14 +16,14 @@ lemma binary32_adding_nan_is_nan(x : @fp32.Float32, y : @fp32.Float32) where {
 } {}
 
 ///| Clear the lowest set bit using modular arithmetic, including x = 0.
-lemma clear_lowest_bit_never_increases(x : @bv32.Bv32) where {
-  proof_ensure: @bv32.ule(@bv32.bw_and(x, @bv32.sub(x, @bv32.one())), x),
+lemma clear_lowest_bit_never_increases(x : Bv32) where {
+  proof_ensure: Bv32::ule(Bv32::bw_and(x, Bv32::sub(x, Bv32::one())), x),
 } {}
 
 ///| The array's key and value sorts can themselves be other theory types.
 lemma read_written_text(
-  array : @arrays.SmtArray[@bv64.Bv64, @strings.Text],
-  key : @bv64.Bv64,
+  array : @arrays.SmtArray[Bv64, @strings.Text],
+  key : Bv64,
   text : @strings.Text,
 ) where {
   proof_ensure: @strings.eq(@arrays.select(@arrays.store(array, key, text), key), text),

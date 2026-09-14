@@ -1,0 +1,6 @@
+///|
+pub fn negative_control() -> UInt where {
+  proof_ensure: result => result == 1U,
+} {
+  gcd(48U, 18U)
+}

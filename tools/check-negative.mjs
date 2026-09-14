@@ -5,9 +5,13 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { configureWhy3 } from "./why3-config.mjs";
+import { selectNegativeChecks } from "./negative-selection.mjs";
 
 const fixtures = new URL("../checks/negative/", import.meta.url);
-const checks = JSON.parse(readFileSync(new URL("manifest.json", fixtures), "utf8"));
+const checks = selectNegativeChecks(
+  JSON.parse(readFileSync(new URL("manifest.json", fixtures), "utf8")),
+  process.argv.slice(2),
+);
 if (checks.length === 0) throw new Error("No negative proof controls configured");
 const config = configureWhy3();
 

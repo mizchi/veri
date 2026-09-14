@@ -5,13 +5,13 @@
     "claim": "NaN reflexivity"
   },
   {
-    "package": "bv32",
-    "fixture": "unsigned-increment.mbtp.txt",
+    "package": "bitvector",
+    "fixture": "unsigned-increment32.mbtp.txt",
     "claim": "unsigned increment always grows (32-bit)"
   },
   {
-    "package": "bv64",
-    "fixture": "unsigned-increment.mbtp.txt",
+    "package": "bitvector",
+    "fixture": "unsigned-increment64.mbtp.txt",
     "claim": "unsigned increment always grows (64-bit)"
   },
   {
@@ -48,8 +48,8 @@
     "claim": "every in-bounds array cell is zero"
   },
   {
-    "package": "bv32",
-    "fixture": "integer-conversion-unbounded.mbtp.txt",
+    "package": "bitvector",
+    "fixture": "integer-conversion-unbounded32.mbtp.txt",
     "claim": "32-bit conversion preserves every unbounded integer"
   },
   {
@@ -59,8 +59,8 @@
     "claim": "UInt32 subtraction implements bitvector addition"
   },
   {
-    "package": "bv64",
-    "fixture": "integer-conversion-unbounded.mbtp.txt",
+    "package": "bitvector",
+    "fixture": "integer-conversion-unbounded64.mbtp.txt",
     "claim": "64-bit conversion preserves every unbounded integer"
   },
   {
@@ -123,5 +123,41 @@
     "package": "runtime/bintree/search",
     "fixture": "search-misses-insert.mbt.txt",
     "claim": "search misses an inserted key"
+  },
+  {
+    "package": "relations",
+    "fixture": "order-needs-laws.mbtp.txt",
+    "claim": "every comparator is a total order"
+  },
+  {
+    "package": "seq/order",
+    "fixture": "swap-is-identity.mbtp.txt",
+    "claim": "swapping distinct elements leaves the sequence unchanged"
+  },
+  {
+    "package": "integer",
+    "fixture": "negative-division-conventions.mbtp.txt",
+    "claim": "Euclidean division always equals truncating division"
+  },
+  {
+    "package": "runtime/number",
+    "fixture": "gcd-is-one.mbt.txt",
+    "machine": true,
+    "claim": "gcd(48, 18) is one"
+  },
+  {
+    "package": "real",
+    "fixture": "real-zero-distance.mbtp.txt",
+    "claim": "zero and one have zero distance"
+  },
+  {
+    "package": "ieee754/error",
+    "fixture": "round32-is-exact.mbtp.txt",
+    "claim": "binary32 represents one third exactly"
+  },
+  {
+    "package": "ieee754/error",
+    "fixture": "round64-is-exact.mbtp.txt",
+    "claim": "binary64 represents one third exactly"
   }
 ]

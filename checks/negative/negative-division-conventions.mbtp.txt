@@ -1,0 +1,4 @@
+///|
+pub lemma negative_control() where {
+  proof_ensure: eq(div(from_int(-7), from_int(3)), trunc_div(from_int(-7), from_int(3))),
+} {}
