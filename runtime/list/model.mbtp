@@ -1,0 +1,14 @@
+///|
+/// Structural correspondence with Why3's list datatype, without added axioms.
+pub fn[T] model(xs : List[T]) -> @logic_list.List[T] {
+  match xs {
+    Nil => @logic_list.empty()
+    Cons(value, rest) => @logic_list.cons(value, model(rest))
+  }
+}
+
+///|
+/// Expose one structural step to clients without unfolding an entire model.
+pub lemma[T] model_cons(value : T, rest : List[T]) where {
+  proof_ensure: @logic_list.eq(model(Cons(value, rest)), @logic_list.cons(value, model(rest))),
+} {}

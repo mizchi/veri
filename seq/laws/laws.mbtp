@@ -1,0 +1,29 @@
+///|
+fn empty_int() -> @seq.Seq[Int] { @seq.empty() }
+
+///|
+pub lemma empty_length() where {
+  proof_ensure: @integer.eq(@seq.length(empty_int()), @integer.from_int(0)),
+} {}
+///|
+pub lemma cons_head(x : Int, xs : @seq.Seq[Int]) where {
+  proof_ensure: @seq.get(@seq.cons(x, xs), @integer.from_int(0)) == x,
+} {}
+///|
+pub lemma append_length(xs : @seq.Seq[Int], ys : @seq.Seq[Int]) where {
+  proof_ensure: @integer.eq(@seq.length(@seq.append(xs, ys)), @integer.add(@seq.length(xs), @seq.length(ys))),
+} {}
+///|
+pub lemma append_associative(xs : @seq.Seq[Int], ys : @seq.Seq[Int], zs : @seq.Seq[Int]) where {
+  proof_ensure: same(@seq.append(@seq.append(xs, ys), zs), @seq.append(xs, @seq.append(ys, zs))),
+} {}
+
+///|
+#proof_import("seq.FreeMonoid")
+fn[T] same(xs : @seq.Seq[T], ys : @seq.Seq[T]) -> Bool = "(=)"
+///|
+pub lemma update_reads(xs : @seq.Seq[Int], i : @integer.Integer, value : Int) where {
+  proof_require: @integer.le(@integer.from_int(0), i),
+  proof_require: @integer.le(@seq.length(xs), i) == false,
+  proof_ensure: @seq.get(@seq.update(xs, i, value), i) == value,
+} {}

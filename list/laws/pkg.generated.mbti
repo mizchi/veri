@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/list/laws"
+
+import {
+  "mizchi/veri/list",
+}
+
+// Values
+pub fn append_associative(@list.List[Int], @list.List[Int], @list.List[Int]) -> Unit
+
+pub fn cons_head(Int, @list.List[Int]) -> Unit
+
+pub fn cons_length(Int, @list.List[Int]) -> Unit
+
+pub fn cons_tail(Int, @list.List[Int]) -> Unit
+
+pub fn reverse_twice(@list.List[Int]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

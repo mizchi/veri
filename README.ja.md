@@ -4,7 +4,7 @@
 
 MoonBit の形式検証を使うための小さな基盤。再利用する論理モデル・補題、契約付き実装、実行時の差分検査を用意する。
 
-有限集合・固定幅 bitvector・全域 array・string・IEEE 浮動小数点の証明用バインディングを提供する。IEEE 754 については **binary32・binary64 / roundTiesToEven (RNE)** の実行結果を検査し、Why3 の IEEE モデル上の性質を証明する。規格全体への適合認証や、MoonBit コンパイラ・CPU の正しさの証明を提供するものではない。
+有限集合・Seq・List・Bag・有限 Map・二分木・固定幅 bitvector・全域 array・string・IEEE 浮動小数点の証明用バインディングを提供する。IEEE 754 については **binary32・binary64 / roundTiesToEven (RNE)** の実行結果を検査し、Why3 の IEEE モデル上の性質を証明する。規格全体への適合認証や、MoonBit コンパイラ・CPU の正しさの証明を提供するものではない。
 
 ## 実行
 
@@ -20,6 +20,7 @@ just verify       # 形式検証、負例、参照値、各バックエンドの
 ```sh
 just prove        # MoonBit → Why3 → SMT。workspace の両モジュールを証明
 just prove-machine # 機械整数 prelude で bounds・実行時ブリッジ・利用例を証明
+just prove-collections-machine # コレクションの実装・利用例を機械整数で証明
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just test js      # 実行時検査
@@ -44,6 +45,14 @@ just fmt          # フォーマット・公開インターフェース生成
 | --- | --- | --- |
 | `bounds` | 半開区間への clamp | 有効な上下限に対し結果が区間内に入り、元から区間内の値を保存する |
 | `fset` | Why3 の有限集合への接続 | 空集合・要素追加・和集合の補題 |
+| `seq` / `list` | 有限列と帰納的リストのモデル | 連結・長さ・反転・添字、`list/conversions` による相互変換 |
+| `bag` / `fmap` | 多重集合と有限写像 | 出現回数・和・更新後の参照・定義域・削除 |
+| `bintree` | 論理的な二分木 | サイズ・高さ・所属・走査列の長さ |
+| `runtime/list` / `runtime/stack` / `runtime/queue` | 永続リスト・LIFO スタック・FIFO キュー | リストモデルとの構造的な対応と操作の契約 |
+| `runtime/pqueue` | Int の最小優先キュー | 整列不変条件・最小値の取り出し・重複数の保存 |
+| `runtime/bintree` / `runtime/bintree/search` | 二分木と Int の探索木 | 中間順走査の対応、挿入時の BST 順序と所属の保存 |
+| `examples/collections` | 別モジュールからのコレクション利用例 | LIFO・FIFO・最小値・探索の契約合成 |
+| `testing/commands` | QuickCheck の操作列生成と shrinker | 再現可能な操作列と、意図的な失敗の `[Push(3)]` への縮小 |
 | `ieee754` / `ieee754/float32` | 論理上の binary64 / binary32 と共通の丸めモード | NaN、符号付きゼロ、有限値の自己減算などの補題 |
 | `ieee754/conversions` | 論理上の拡幅・縮幅 | binary32 の拡幅往復と NaN 分類の保存 |
 | `bv32` / `bv64` | Why3 の固定幅 bitvector への接続 | 各演算と、剰余を取る整数変換 |
@@ -75,14 +84,21 @@ veri/
 ├── arrays/
 ├── strings/
 ├── fset/
+├── seq/
+├── list/                    # laws, indexed, conversions
+├── bag/
+├── fmap/
+├── bintree/
 ├── ieee754/
 ├── integer/
-├── runtime/                 # uint32, uint64, array, text, float32, float64, float_conversions
+├── runtime/                 # 数値・文字列の対応とコレクション実装
+├── testing/commands/
 └── examples/
     ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.1.0 に依存
     ├── models/
     ├── bridges/
-    └── floating/
+    ├── floating/
+    └── collections/
 ```
 
 workspace 内の依存はローカルの本体へ解決され、レジストリから取得しない。
@@ -92,7 +108,7 @@ workspace 内の依存はローカルの本体へ解決され、レジストリ�
 証明結果は各モジュールの `_build/verif/` 配下に出力される。
 
 `.mbt` が実装・型・契約、`.mbtp` が論理モデル・補題。`pkg.generated.mbti` で公開 API を確認できる。
-`fset`・`ieee754`・`ieee754/float32`・`bv32`・`bv64`・`arrays`・`strings` の抽象型は **証明専用**。バインディングだけで MoonBit の実行時の値との対応が保証されるわけではない。
+`fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bv32`・`bv64`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。
 
 最小の利用例:
 
@@ -113,10 +129,9 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 
 ## QuickCheck による性質テスト
 
-`moonbitlang/core/quickcheck` をテスト専用で import する。
-`bounds/properties_test.mbt` と `runtime/*/properties_test.mbt` の26個の性質を、
+`bounds/` と `runtime/` の32個の正例の性質を `moonbitlang/core/quickcheck` で、
 固定 seed `20260914` でそれぞれ1,000件の有効入力に対して検査する。
-コレクションの生成サイズは最大64。`just quickcheck js`（または `wasm`、
+生成サイズは最大64、操作列は最大128。`just quickcheck js`（または `wasm`、
 `wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
 `just test-release`・`just verify` にも含まれる。
 
@@ -127,6 +142,12 @@ SMT の文字集合とコードポイント単位の位置、浮動小数点の�
 浮動小数点は `UInt` / `UInt64` のビット列から生成し、特殊値と指数の全範囲を
 生成対象にする。非 NaN はゼロの符号も含めて比較し、NaN は分類だけを比較する。
 NaN ペイロードの保存は要求しない。
+
+コレクションでは、リスト、Stack / Queue の操作列、優先キュー、木の走査、
+BST の挿入・検索を独立した配列モデルと比較する。最小優先キューは、
+MoonBit core の優先キューに `Reverse[Int]` を渡した実装とも照合する。
+core の既定は最大値を返すため、順序を反転させる。
+各操作では、以前の永続データ構造の内容が変わらないことも確認する。
 
 例えば `mizchi/veri/runtime/uint32` と `moonbitlang/core/quickcheck` を
 `for "test"` で import すると、次のように書ける。
@@ -148,6 +169,63 @@ test "quickcheck: wrapping roundtrip" {
 再現でき、seed を変えると別の再現可能な標本を検査できる。
 これは実行時の標本検査であり、Z3 の参照値テストや形式証明と併用する。
 IEEE 全入力への適合証明を与えるものではない。
+
+`testing/commands` で `Push(Int) | Pop | Peek | Clear` に対する
+`moonbitlang/core/quickcheck/shrink.Shrink` を実装する。core の Array shrinker が
+操作列の一部を削除し、Command の shrinker が core の Int shrinker を使って
+Push の値を縮める。二分木には、部分木への置き換えと内部ノードの値の縮小を
+再帰的に行う shrinker を用意した。これらは `max_shrinks=1000` として探索量を
+制限するため、あらゆる性質で大域的に最小の反例が得られるとは限らない。
+
+別の回帰テストでは「Push される値はすべて3未満」という意図的に偽の性質を
+`@quickcheck.report` に渡し、`counterexample=[Push(3)]` まで縮小されたことを
+検査する。これは33個目の `quickcheck:*` テストで、失敗と縮小の経路を確認するもの。
+1,000件成功する正例の性質には数えない。
+
+## コレクションのモデルと実装
+
+| 論理パッケージ | 同梱 Why3 の理論 | 意味 |
+| --- | --- | --- |
+| `seq` | `seq.Seq`・`Reverse`・`Mem`・`Occ`・`Permut` | 数学的な長さと添字を持つ有限列 |
+| `list` / `list/indexed` | `list.List`・`Length`・`Append`・`Reverse`・`NthNoOpt`・`NumOcc` | 帰納的リスト。添字と出現数は必要に応じて追加 import |
+| `list/conversions` | `seq.OfList`・`seq.ToList` | 論理リストと有限列の変換 |
+| `bag` | `bag.Bag` | 多重集合。和は出現回数を加算し、差は0で切り詰める |
+| `fmap` | `fmap.Fmap` | 有限集合の定義域を持つ写像 |
+| `bintree` | `bintree.Tree`・`Size`・`Height`・`Occ`・`Inorder`・`Preorder` | 二分木の内容と走査モデル |
+
+論理上の長さ・出現回数・添字は、上限のない `integer.Integer` を使う。
+`seq.get/update` は `0 <= index < length`、`slice(start, stop)` は
+`0 <= start <= stop <= length` を満たす範囲で使う。`stop` は範囲に含めない。
+論理リストの `head/tail` は非空、`list/indexed.get(index, xs)` は範囲内の添字、
+`fmap.find` は `mem(key, map)` が成立するキーを前提とする。
+これらは実行時の境界検査ではなく、規定された範囲外の値は未規定。
+
+実行時パッケージは永続データ構造を実装し、実際のコンストラクターと Why3 の
+リスト・多重集合・木を再帰的なモデルで結ぶ。Stack / Queue は Why3 の LIFO / FIFO、
+優先キューは最小値と重複数の仕様に対応する。Why3 の可変データ構造の抽象的な
+`val` API を実行可能な実装として取り込むものではない。
+
+| 実行時パッケージ | 操作と表現 | 計算量 |
+| --- | --- | --- |
+| `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`。不変の連結構造 | 基本操作 O(1)、連結・反転・長さ O(n) |
+| `runtime/stack` | `empty/push/pop/peek/is_empty`。連結リスト | O(1) |
+| `runtime/queue` | `empty/push/pop/peek/is_empty`。前方リストと逆順の後方リスト | Push O(1)、pop/peek は最悪 O(n) |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`。Int の整列リストで重複を保持 | Push O(n)、pop/peek O(1) |
+| `runtime/bintree` | `empty/node/inorder`。汎用二分木 | 構築 O(1)、inorder はリスト連結により最悪 O(n²) |
+| `runtime/bintree/search` | `empty/insert/contains`。重複のない Int の BST | O(高さ)、平衡化なし |
+
+計算量は実装の説明であり、形式証明の対象にはしていない。2リスト Queue の push/pop は
+一直線の利用履歴では償却 O(1) だが、永続スナップショットからの分岐や peek で反転を
+繰り返す場合がある。優先キューは最初の検証済み整列リスト実装で、ヒープではない。
+BST の呼び出し側には `valid(tree)` が必要で、`empty` が確立し `insert` が保存する。
+削除と平衡化は未実装。
+
+`pop/uncons/peek` は空入力に `None` を返す。リストの `length` は数学的な長さが
+Int に収まること（最大 2,147,483,647）を要求し、機械整数 prelude でも確認する。
+配列変換の補助関数 `from_array/to_array` は実行時の性質テストで検査し、対応の契約は
+まだ付けていない。永続性が保つのはコンテナーの構造で、格納した値自体は可変の場合がある。
+`examples/collections` でモジュールをまたいだ契約の合成を示し、
+`just prove-collections-machine` で同じ実装と利用例を機械整数でも証明する。
 
 ## バインディングの接続先
 
@@ -261,6 +339,11 @@ JS / wasm / wasm-gc / native の debug・release で実行時検査を行う。
 生成した `MoonBit_Auto` は、ビット演算則には native bitvector、整数との対応には Why3 の整数モデルを
 使えるよう、Z3 の両経路を試す。どちらも Why3 を信頼する境界内にある。
 生成器は同梱ドライバの import 構成が想定と違う場合に失敗する。
+検証条件を分割した後には Why3 の `compute_in_goal` を使い、構造的なモデルの
+具体的なコンストラクターを簡約する。分割後に行うことで、リストの証明に必要な
+再帰の仮定を残す。
+`just prove` のパッケージ同時実行数は2に制限し、パッケージ増加による競合で
+ソルバーの短い制限時間を使い切るのを抑える。
 
 バインディングは `bv32` / `bv64`、公開補題は `bv32/laws` / `bv64/laws`、
 整数変換の補題は `bv32/laws/integers` / `bv64/laws/integers` に分けた。
@@ -328,7 +411,7 @@ Why3 モデル上の証明と実行時の差分検査を用意し、その両者
 ## 信頼する境界と未対応
 
 - `#proof_external` / `#proof_import` の型・引数順・Why3 記号の対応、Why3、ソルバー、MoonBit の変換処理を信頼する。独自の `proof_axiomatized` は使わない。
-- 通常の整数証明は数学的整数モデル。bounds・循環演算・FixedArray の読み取り・ブリッジの利用例は同梱の機械整数モデルでも別途証明する。`lower < upper` は呼び出し側の事前条件であり、実行時の入力検査ではない。
+- 通常の整数証明は数学的整数モデル。bounds・循環演算・FixedArray の読み取り・コレクション・利用例は同梱の機械整数モデルでも別途証明する。`lower < upper` は呼び出し側の事前条件であり、実行時の入力検査ではない。
 - 実行時の検査プロファイルは binary32・binary64 の RNE。論理 API は 5 丸めモードを持つが、実行時に全モードを設定・検査する機能はない。
 - NaN ペイロード、signaling / quiet NaN、例外フラグ、trap、decimal、実行時 FMA、浮動小数点の文字列変換は未検査。SMT-LIB の FP 理論自体も signaling / quiet NaN を区別しない。
 - 超越関数の `sin` / `exp` などや、実数アルゴリズムに対する誤差上限の証明は別途必要。
@@ -337,7 +420,7 @@ Why3 モデル上の証明と実行時の差分検査を用意し、その両者
 - 現在はローカルツールチェインを利用する。共有 CI のための配布物・ソルバーのバージョン固定は今後の課題。
 
 次はコンパイラの実演算 FP 証明変換、Berkeley TestFloat / SoftFloat のケース取り込み、bitvector の切り出し・拡張、
-実行時のブリッジ契約の拡充、正規表現、Seq / 有限 Map のモデルを拡張できる。
+実行時のブリッジ契約の拡充、正規表現、平衡探索木、ヒープによる優先キュー、実行時の有限 Map を拡張できる。
 TestFloat / SoftFloat はこのリポジトリにはまだ組み込んでいない。
 
 ## 参考
@@ -346,6 +429,7 @@ TestFloat / SoftFloat はこのリポジトリにはまだ組み込んでいな�
 - [moonbit-community/verified の FSet](https://github.com/moonbit-community/verified/tree/main/libs/fset): 有限集合を取り込む設計の参考。本リポジトリは小さな接続 API と利用例を独自に用意している。
 - [MoonBit の形式検証を活用した実例](https://eng.mates.education/blog/b-moonbit-formal-verification/): 整数の契約、実行時との差、浮動小数点の差分検査。
 - [Why3 ieee_float](https://www.why3.org/stdlib/ieee_float.html): IEEE の論理型と演算。
+- [Why3 標準ライブラリ](https://www.why3.org/stdlib/): Seq・List・Bag・有限 Map・Tree・Stack・Queue・PQueue の仕様。利用可能な理論は同梱ファイルを基準とする。
 - [SMT-LIB FloatingPoint](https://smt-lib.org/theories-FloatingPoint.shtml): IEEE FP 演算、丸めモード、NaN 表現の範囲。
 - [Berkeley TestFloat](https://www.jhauser.us/arithmetic/TestFloat.html) / [SoftFloat](https://www.jhauser.us/arithmetic/SoftFloat.html): 演算の適合検査とソフトウェア参照実装。
 

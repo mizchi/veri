@@ -1,0 +1,13 @@
+import {
+  "mizchi/veri/runtime/bintree" @tree,
+  "mizchi/veri/bintree" @logic_tree,
+}
+
+import {
+  "mizchi/veri/runtime/list" @linked,
+  "moonbitlang/core/quickcheck",
+} for "test"
+
+options(
+  "proof-enabled": true,
+)

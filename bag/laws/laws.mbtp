@@ -1,0 +1,16 @@
+///|
+pub lemma add_count(value : Int, bag : @bag.Bag[Int]) where {
+  proof_ensure: @integer.eq(@bag.count(value, @bag.add(value, bag)), @integer.add(@bag.count(value, bag), @integer.from_int(1))),
+} {}
+///|
+pub lemma remove_added(value : Int, bag : @bag.Bag[Int]) where {
+  proof_ensure: @bag.eq(@bag.diff(@bag.add(value, bag), @bag.singleton(value)), bag),
+} {}
+///|
+pub lemma union_commutes(left : @bag.Bag[Int], right : @bag.Bag[Int]) where {
+  proof_ensure: @bag.eq(@bag.union(left, right), @bag.union(right, left)),
+} {}
+///|
+pub lemma add_size(value : Int, bag : @bag.Bag[Int]) where {
+  proof_ensure: @integer.eq(@bag.size(@bag.add(value, bag)), @integer.add(@bag.size(bag), @integer.from_int(1))),
+} {}

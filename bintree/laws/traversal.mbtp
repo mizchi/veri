@@ -1,0 +1,4 @@
+///|
+// Import the upstream traversal/size relationship for the local law.
+#proof_import("bintree.InorderLength")
+fn same_length(left : @integer.Integer, right : @integer.Integer) -> Bool = "(=)"

@@ -1,0 +1,8 @@
+///|
+pub fn[T] model(stack : Stack[T]) -> @logic_list.List[T] {
+  @linked.model(stack.contents)
+}
+
+///|
+#proof_import("list.List")
+fn[T] same(left : T, right : T) -> Bool = "(=)"

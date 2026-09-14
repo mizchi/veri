@@ -1,0 +1,7 @@
+///|
+pub fn[T] model(tree : Tree[T]) -> @logic_tree.Tree[T] {
+  match tree {
+    Empty => @logic_tree.empty()
+    Node(left, value, right) => @logic_tree.node(model(left), value, model(right))
+  }
+}

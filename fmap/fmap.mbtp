@@ -1,0 +1,32 @@
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] empty() -> Fmap[K, V] = "empty"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] mem(key : K, map : Fmap[K, V]) -> Bool = "mem"
+
+///|
+/// Lookup is specified only when mem(key, map) holds.
+#proof_import("fmap.Fmap")
+pub fn[K, V] find(key : K, map : Fmap[K, V]) -> V = "find"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] add(key : K, value : V, map : Fmap[K, V]) -> Fmap[K, V] = "add"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] remove(key : K, map : Fmap[K, V]) -> Fmap[K, V] = "remove"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] size(map : Fmap[K, V]) -> @integer.Integer = "size"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] domain(map : Fmap[K, V]) -> @fset.Fset[K] = "domain"
+
+///|
+#proof_import("fmap.Fmap")
+pub fn[K, V] eq(left : Fmap[K, V], right : Fmap[K, V]) -> Bool = "(==)"

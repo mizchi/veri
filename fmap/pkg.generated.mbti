@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/fmap"
+
+import {
+  "mizchi/veri/fset",
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[K, V] add(K, V, Fmap[K, V]) -> Fmap[K, V]
+
+pub fn[K, V] domain(Fmap[K, V]) -> @fset.Fset[K]
+
+pub fn[K, V] empty() -> Fmap[K, V]
+
+pub fn[K, V] eq(Fmap[K, V], Fmap[K, V]) -> Bool
+
+pub fn[K, V] find(K, Fmap[K, V]) -> V
+
+pub fn[K, V] mem(K, Fmap[K, V]) -> Bool
+
+pub fn[K, V] remove(K, Fmap[K, V]) -> Fmap[K, V]
+
+pub fn[K, V] size(Fmap[K, V]) -> @integer.Integer
+
+// Errors
+
+// Types and methods
+pub type Fmap[K, V]
+
+// Type aliases
+
+// Traits

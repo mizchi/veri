@@ -1,0 +1,15 @@
+import {
+  "mizchi/veri/runtime/list" @linked,
+  "mizchi/veri/bag",
+}
+
+import {
+  "moonbitlang/core/quickcheck",
+  "mizchi/veri/testing/commands",
+  "moonbitlang/core/priority_queue" @core_pqueue,
+  "moonbitlang/core/cmp",
+} for "test"
+
+options(
+  "proof-enabled": true,
+)

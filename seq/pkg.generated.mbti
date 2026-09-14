@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/seq"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[T] append(Seq[T], Seq[T]) -> Seq[T]
+
+pub fn[T] cons(T, Seq[T]) -> Seq[T]
+
+pub fn[T] empty() -> Seq[T]
+
+pub fn[T] eq(Seq[T], Seq[T]) -> Bool
+
+pub fn[T] get(Seq[T], @integer.Integer) -> T
+
+pub fn[T] length(Seq[T]) -> @integer.Integer
+
+pub fn[T] mem(T, Seq[T]) -> Bool
+
+pub fn[T] occurrences(T, Seq[T]) -> @integer.Integer
+
+pub fn[T] permutation(Seq[T], Seq[T]) -> Bool
+
+pub fn[T] reverse(Seq[T]) -> Seq[T]
+
+pub fn[T] singleton(T) -> Seq[T]
+
+pub fn[T] slice(Seq[T], @integer.Integer, @integer.Integer) -> Seq[T]
+
+pub fn[T] snoc(Seq[T], T) -> Seq[T]
+
+pub fn[T] update(Seq[T], @integer.Integer, T) -> Seq[T]
+
+// Errors
+
+// Types and methods
+pub type Seq[T]
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/list"
+
+// Values
+pub fn[T] append(List[T], List[T]) -> List[T]
+
+pub fn[T] cons(T, List[T]) -> List[T]
+
+pub fn[T] empty() -> List[T]
+
+pub fn[T] from_array(ArrayView[T]) -> List[T]
+
+pub fn[T] is_empty(List[T]) -> Bool
+
+pub fn[T] length(List[T]) -> Int
+
+pub fn[T] model(List[T]) -> @mizchi/veri/list.List[T]
+
+pub fn[T] model_cons(T, List[T]) -> Unit
+
+pub fn[T] reverse(List[T]) -> List[T]
+
+pub fn[T] to_array(List[T]) -> Array[T]
+
+pub fn[T] uncons(List[T]) -> (T, List[T])?
+
+// Errors
+
+// Types and methods
+pub(all) enum List[T] {
+  Nil
+  Cons(T, List[T])
+}
+
+// Type aliases
+
+// Traits

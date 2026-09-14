@@ -1,0 +1,28 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/bintree"
+
+import {
+  "mizchi/veri/runtime/list",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn[T] empty() -> Tree[T]
+
+pub fn[T] inorder(Tree[T]) -> @list.List[T]
+
+pub fn[T] model(Tree[T]) -> @mizchi/veri/bintree.Tree[T]
+
+pub fn[T] node(Tree[T], T, Tree[T]) -> Tree[T]
+
+// Errors
+
+// Types and methods
+pub(all) enum Tree[T] {
+  Empty
+  Node(Tree[T], T, Tree[T])
+} derive(@debug.Debug)
+
+// Type aliases
+
+// Traits

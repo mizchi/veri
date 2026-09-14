@@ -1,0 +1,26 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/seq/laws"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/seq",
+}
+
+// Values
+pub fn append_associative(@seq.Seq[Int], @seq.Seq[Int], @seq.Seq[Int]) -> Unit
+
+pub fn append_length(@seq.Seq[Int], @seq.Seq[Int]) -> Unit
+
+pub fn cons_head(Int, @seq.Seq[Int]) -> Unit
+
+pub fn empty_length() -> Unit
+
+pub fn update_reads(@seq.Seq[Int], @integer.Integer, Int) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

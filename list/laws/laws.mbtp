@@ -1,0 +1,20 @@
+///|
+pub lemma cons_head(x : Int, xs : @list.List[Int]) where {
+  proof_ensure: @list.head(@list.cons(x, xs)) == x,
+} {}
+///|
+pub lemma cons_tail(x : Int, xs : @list.List[Int]) where {
+  proof_ensure: @list.eq(@list.tail(@list.cons(x, xs)), xs),
+} {}
+///|
+pub lemma append_associative(xs : @list.List[Int], ys : @list.List[Int], zs : @list.List[Int]) where {
+  proof_ensure: @list.eq(@list.append(@list.append(xs, ys), zs), @list.append(xs, @list.append(ys, zs))),
+} {}
+///|
+pub lemma reverse_twice(xs : @list.List[Int]) where {
+  proof_ensure: @list.eq(@list.reverse(@list.reverse(xs)), xs),
+} {}
+///|
+pub lemma cons_length(x : Int, xs : @list.List[Int]) where {
+  proof_ensure: @integer.eq(@list.length(@list.cons(x, xs)), @integer.add(@integer.from_int(1), @list.length(xs))),
+} {}

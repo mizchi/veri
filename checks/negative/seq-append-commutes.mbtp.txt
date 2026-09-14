@@ -1,0 +1,4 @@
+///|
+pub lemma negative_control(xs : Seq[Int], ys : Seq[Int]) where {
+  proof_ensure: eq(append(xs, ys), append(ys, xs)),
+} {}

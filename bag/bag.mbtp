@@ -1,0 +1,39 @@
+///|
+#proof_import("bag.Bag")
+pub fn[T] empty() -> Bag[T] = "empty_bag"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] singleton(value : T) -> Bag[T] = "singleton"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] count(value : T, bag : Bag[T]) -> @integer.Integer = "nb_occ"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] size(bag : Bag[T]) -> @integer.Integer = "card"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] mem(value : T, bag : Bag[T]) -> Bool = "mem"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] add(value : T, bag : Bag[T]) -> Bag[T] = "add"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] union(left : Bag[T], right : Bag[T]) -> Bag[T] = "union"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] diff(left : Bag[T], right : Bag[T]) -> Bag[T] = "diff"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] intersection(left : Bag[T], right : Bag[T]) -> Bag[T] = "inter"
+
+///|
+#proof_import("bag.Bag")
+pub fn[T] eq(left : Bag[T], right : Bag[T]) -> Bool = "(==)"

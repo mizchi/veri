@@ -1,0 +1,27 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/testing/commands"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+pub(all) enum Command {
+  Push(Int)
+  Pop
+  Peek
+  Clear
+} derive(Eq, @debug.Debug)
+pub impl @quickcheck.Arbitrary for Command
+pub impl @shrink.Shrink for Command
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bag/laws"
+
+import {
+  "mizchi/veri/bag",
+}
+
+// Values
+pub fn add_count(Int, @bag.Bag[Int]) -> Unit
+
+pub fn add_size(Int, @bag.Bag[Int]) -> Unit
+
+pub fn remove_added(Int, @bag.Bag[Int]) -> Unit
+
+pub fn union_commutes(@bag.Bag[Int], @bag.Bag[Int]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,37 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bintree"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/list",
+}
+
+// Values
+pub fn[T] count(T, Tree[T]) -> @integer.Integer
+
+pub fn[T] empty() -> Tree[T]
+
+pub fn[T] eq(Tree[T], Tree[T]) -> Bool
+
+pub fn[T] height(Tree[T]) -> @integer.Integer
+
+pub fn[T] inorder(Tree[T]) -> @list.List[T]
+
+pub fn[T] is_empty(Tree[T]) -> Bool
+
+pub fn[T] mem(T, Tree[T]) -> Bool
+
+pub fn[T] node(Tree[T], T, Tree[T]) -> Tree[T]
+
+pub fn[T] preorder(Tree[T]) -> @list.List[T]
+
+pub fn[T] size(Tree[T]) -> @integer.Integer
+
+// Errors
+
+// Types and methods
+pub type Tree[T]
+
+// Type aliases
+
+// Traits

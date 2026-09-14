@@ -1,0 +1,4 @@
+///|
+pub lemma negative_control(value : Int) where {
+  proof_ensure: eq(add(value, singleton(value)), singleton(value)),
+} {}

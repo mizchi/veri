@@ -1,0 +1,4 @@
+///|
+pub fn negative_control(value : Int) -> Bool where {
+  proof_ensure: result => result == false,
+} { contains(insert(empty(), value), value) }

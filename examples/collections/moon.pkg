@@ -1,0 +1,10 @@
+import {
+  "mizchi/veri/runtime/stack",
+  "mizchi/veri/runtime/queue",
+  "mizchi/veri/runtime/pqueue",
+  "mizchi/veri/runtime/bintree/search",
+}
+
+options(
+  "proof-enabled": true,
+)

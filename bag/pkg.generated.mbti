@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bag"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[T] add(T, Bag[T]) -> Bag[T]
+
+pub fn[T] count(T, Bag[T]) -> @integer.Integer
+
+pub fn[T] diff(Bag[T], Bag[T]) -> Bag[T]
+
+pub fn[T] empty() -> Bag[T]
+
+pub fn[T] eq(Bag[T], Bag[T]) -> Bool
+
+pub fn[T] intersection(Bag[T], Bag[T]) -> Bag[T]
+
+pub fn[T] mem(T, Bag[T]) -> Bool
+
+pub fn[T] singleton(T) -> Bag[T]
+
+pub fn[T] size(Bag[T]) -> @integer.Integer
+
+pub fn[T] union(Bag[T], Bag[T]) -> Bag[T]
+
+// Errors
+
+// Types and methods
+pub type Bag[T]
+
+// Type aliases
+
+// Traits

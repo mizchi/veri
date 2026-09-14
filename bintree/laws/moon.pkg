@@ -1,0 +1,9 @@
+import {
+  "mizchi/veri/bintree",
+  "mizchi/veri/integer",
+  "mizchi/veri/list",
+}
+
+options(
+  "proof-enabled": true,
+)

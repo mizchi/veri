@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/bintree/laws"
+
+import {
+  "mizchi/veri/bintree",
+}
+
+// Values
+pub fn height_nonnegative(@bintree.Tree[Int]) -> Unit
+
+pub fn node_size(@bintree.Tree[Int], Int, @bintree.Tree[Int]) -> Unit
+
+pub fn root_member(@bintree.Tree[Int], Int, @bintree.Tree[Int]) -> Unit
+
+pub fn traversal_length(@bintree.Tree[Int]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

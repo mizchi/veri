@@ -1,0 +1,5 @@
+///|
+pub lemma negative_control(map : Fmap[Int, Int], key : Int, value : Int) where {
+  proof_require: mem(key, map),
+  proof_ensure: find(key, add(key, value, map)) == find(key, map),
+} {}

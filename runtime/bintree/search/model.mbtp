@@ -1,0 +1,28 @@
+///|
+predicate all_lt(tree : @tree.Tree[Int], value : Int) {
+  ∀ other : Int, @logic_tree.mem(other, @tree.model(tree)) → other < value
+}
+
+///|
+predicate all_gt(tree : @tree.Tree[Int], value : Int) {
+  ∀ other : Int, @logic_tree.mem(other, @tree.model(tree)) → value < other
+}
+
+///|
+/// Strict search-tree order, with no duplicates. No balancing invariant.
+pub predicate valid(tree : @tree.Tree[Int]) {
+  match tree {
+    Empty => true
+    Node(left, value, right) => valid(left) && valid(right) && all_lt(left, value) && all_gt(right, value)
+  }
+}
+
+///|
+fn expected_member(tree : @tree.Tree[Int], value : Int, other : Int) -> Bool {
+  other == value || @logic_tree.mem(other, @tree.model(tree))
+}
+
+///|
+predicate inserted(before : @tree.Tree[Int], value : Int, after : @tree.Tree[Int]) {
+  ∀ other : Int, @logic_tree.mem(other, @tree.model(after)) == expected_member(before, value, other)
+}

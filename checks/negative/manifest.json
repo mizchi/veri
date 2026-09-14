@@ -78,5 +78,50 @@
     "package": "ieee754/conversions",
     "fixture": "narrowing-is-lossless.mbtp.txt",
     "claim": "binary64 narrowing and widening is lossless for every finite value"
+  },
+  {
+    "package": "list",
+    "fixture": "list-append-commutes.mbtp.txt",
+    "claim": "list concatenation commutes"
+  },
+  {
+    "package": "seq",
+    "fixture": "seq-append-commutes.mbtp.txt",
+    "claim": "sequence concatenation commutes"
+  },
+  {
+    "package": "bag",
+    "fixture": "bag-duplicates-disappear.mbtp.txt",
+    "claim": "a bag discards duplicates"
+  },
+  {
+    "package": "fmap",
+    "fixture": "fmap-ignore-update.mbtp.txt",
+    "claim": "finite map update preserves the old value"
+  },
+  {
+    "package": "bintree",
+    "fixture": "tree-no-root.mbtp.txt",
+    "claim": "a tree does not contain its root"
+  },
+  {
+    "package": "runtime/stack",
+    "fixture": "stack-is-fifo.mbt.txt",
+    "claim": "stack returns the oldest pushed value"
+  },
+  {
+    "package": "runtime/queue",
+    "fixture": "queue-is-lifo.mbt.txt",
+    "claim": "queue returns the newest pushed value"
+  },
+  {
+    "package": "runtime/pqueue",
+    "fixture": "pqueue-is-max.mbt.txt",
+    "claim": "minimum priority queue returns the maximum"
+  },
+  {
+    "package": "runtime/bintree/search",
+    "fixture": "search-misses-insert.mbt.txt",
+    "claim": "search misses an inserted key"
   }
 ]

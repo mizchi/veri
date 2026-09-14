@@ -17,9 +17,10 @@ check:
 prover-config:
     node tools/configure-why3.mjs
 
+# Bound package concurrency so solver time limits remain useful as packages grow.
 prove: prover-config
-    moon prove --why3-config _build/why3/why3.conf
-    moon -C examples prove --why3-config ../_build/why3/why3.conf
+    moon prove -j 2 --why3-config _build/why3/why3.conf
+    moon -C examples prove -j 2 --why3-config ../_build/why3/why3.conf
 
 # The same integer contracts under the bundled machine-integer model.
 prove-machine: prover-config
@@ -28,6 +29,11 @@ prove-machine: prover-config
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/uint64 --target-dir _build/machine --why3-config _build/why3/why3.conf
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/array --target-dir _build/machine
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove bridges --target-dir _build/machine --why3-config ../_build/why3/why3.conf
+
+# Collection contracts also use mathematical lengths with checked runtime Ints.
+prove-collections-machine: prover-config
+    for collection_package in runtime/list runtime/stack runtime/queue runtime/pqueue runtime/bintree runtime/bintree/search; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$collection_package" --target-dir _build/collections-machine --why3-config _build/why3/why3.conf || exit; done
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove collections --target-dir _build/collections-machine --why3-config ../_build/why3/why3.conf
 
 test target="js":
     moon test --target {{target}}
@@ -71,4 +77,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: doctor check test-tools fp-capabilities prove prove-machine negative smt vectors-check test-backends test-release
+verify: doctor check test-tools fp-capabilities prove prove-machine prove-collections-machine negative smt vectors-check test-backends test-release

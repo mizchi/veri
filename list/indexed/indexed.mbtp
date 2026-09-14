@@ -1,0 +1,8 @@
+///|
+/// Read at 0 <= index < list.length(xs); unspecified outside that range.
+#proof_import("list.NthNoOpt")
+pub fn[T] get(index : @integer.Integer, xs : @list.List[T]) -> T = "nth"
+
+///|
+#proof_import("list.NumOcc")
+pub fn[T] occurrences(value : T, xs : @list.List[T]) -> @integer.Integer = "num_occ"

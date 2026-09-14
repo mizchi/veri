@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/fmap/laws"
+
+import {
+  "mizchi/veri/fmap",
+}
+
+// Values
+pub fn add_lookup(@fmap.Fmap[Int, Int], Int, Int) -> Unit
+
+pub fn preserve_other(@fmap.Fmap[Int, Int], Int, Int, Int) -> Unit
+
+pub fn remove_key(@fmap.Fmap[Int, Int], Int) -> Unit
+
+pub fn replace_preserves_size(@fmap.Fmap[Int, Int], Int, Int) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

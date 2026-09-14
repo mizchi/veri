@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/bintree/search"
+
+import {
+  "mizchi/veri/runtime/bintree",
+}
+
+// Values
+pub fn contains(@bintree.Tree[Int], Int) -> Bool
+
+pub fn empty() -> @bintree.Tree[Int]
+
+pub fn insert(@bintree.Tree[Int], Int) -> @bintree.Tree[Int]
+
+pub fn valid(@bintree.Tree[Int]) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

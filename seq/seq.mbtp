@@ -1,0 +1,58 @@
+///|
+#proof_import("seq.Seq")
+pub fn[T] empty() -> Seq[T] = "empty"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] length(xs : Seq[T]) -> @integer.Integer = "length"
+
+///|
+/// Read at 0 <= index < length(xs); out-of-range values are unspecified.
+#proof_import("seq.Seq")
+pub fn[T] get(xs : Seq[T], index : @integer.Integer) -> T = "get"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] singleton(value : T) -> Seq[T] = "singleton"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] cons(value : T, xs : Seq[T]) -> Seq[T] = "cons"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] snoc(xs : Seq[T], value : T) -> Seq[T] = "snoc"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] append(xs : Seq[T], ys : Seq[T]) -> Seq[T] = "(++)"
+
+///|
+/// Use with 0 <= index < length(xs).
+#proof_import("seq.Seq")
+pub fn[T] update(xs : Seq[T], index : @integer.Integer, value : T) -> Seq[T] = "([<-])"
+
+///|
+/// Half-open slice, with 0 <= start <= stop <= length(xs).
+#proof_import("seq.Seq")
+pub fn[T] slice(xs : Seq[T], start : @integer.Integer, stop : @integer.Integer) -> Seq[T] = "([..])"
+
+///|
+#proof_import("seq.Seq")
+pub fn[T] eq(xs : Seq[T], ys : Seq[T]) -> Bool = "(==)"
+
+///|
+#proof_import("seq.Reverse")
+pub fn[T] reverse(xs : Seq[T]) -> Seq[T] = "reverse"
+
+///|
+#proof_import("seq.Mem")
+pub fn[T] mem(value : T, xs : Seq[T]) -> Bool = "mem"
+
+///|
+#proof_import("seq.Occ")
+pub fn[T] occurrences(value : T, xs : Seq[T]) -> @integer.Integer = "occ_all"
+
+///|
+#proof_import("seq.Permut")
+pub fn[T] permutation(xs : Seq[T], ys : Seq[T]) -> Bool = "permut_all"

@@ -35,6 +35,9 @@ export function configureWhy3() {
     "c Z3-Arithmetic," + version + " 1 1000",
     "t compute_specified start",
     "t split_vc start",
+    // Normalize concrete datatype constructors after splitting. Doing this
+    // earlier can obscure the recursive hypotheses needed by list proofs.
+    "t compute_in_goal start",
     "c Z3," + version + " 2 4000",
     "c Z3-Arithmetic," + version + " 2 4000",
     "",

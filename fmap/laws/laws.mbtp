@@ -1,0 +1,22 @@
+///|
+pub lemma add_lookup(map : @fmap.Fmap[Int, Int], key : Int, value : Int) where {
+  proof_ensure: @fmap.mem(key, @fmap.add(key, value, map)),
+  proof_ensure: @fmap.find(key, @fmap.add(key, value, map)) == value,
+} {}
+///|
+pub lemma remove_key(map : @fmap.Fmap[Int, Int], key : Int) where {
+  proof_ensure: @fmap.mem(key, @fmap.remove(key, map)) == false,
+} {}
+///|
+pub lemma preserve_other(map : @fmap.Fmap[Int, Int], key : Int, other : Int, value : Int) where {
+  proof_require: key != other,
+  proof_require: @fmap.mem(other, map),
+  proof_ensure: @fmap.find(other, @fmap.add(key, value, map)) == @fmap.find(other, map),
+} {
+  proof_assert @fmap.mem(other, @fmap.add(key, value, map))
+}
+///|
+pub lemma replace_preserves_size(map : @fmap.Fmap[Int, Int], key : Int, value : Int) where {
+  proof_require: @fmap.mem(key, map),
+  proof_ensure: @integer.eq(@fmap.size(@fmap.add(key, value, map)), @fmap.size(map)),
+} {}

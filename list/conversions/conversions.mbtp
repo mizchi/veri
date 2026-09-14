@@ -1,0 +1,17 @@
+///|
+#proof_import("seq.OfList")
+pub fn[T] to_seq(xs : @list.List[T]) -> @seq.Seq[T] = "of_list"
+
+///|
+#proof_import("seq.ToList")
+pub fn[T] from_seq(xs : @seq.Seq[T]) -> @list.List[T] = "to_list"
+
+///|
+pub lemma length_preserved(xs : @list.List[Int]) where {
+  proof_ensure: @integer.eq(@seq.length(to_seq(xs)), @list.length(xs)),
+} {}
+
+///|
+pub lemma append_preserved(xs : @list.List[Int], ys : @list.List[Int]) where {
+  proof_ensure: @seq.eq(to_seq(@list.append(xs, ys)), @seq.append(to_seq(xs), to_seq(ys))),
+} {}

@@ -1,0 +1,47 @@
+///|
+#proof_import("list.List")
+pub fn[T] empty() -> List[T] = "Nil"
+
+///|
+#proof_import("list.List")
+pub fn[T] cons(value : T, xs : List[T]) -> List[T] = "Cons"
+
+///|
+#proof_import("list.List")
+pub fn[T] is_empty(xs : List[T]) -> Bool = "is_nil"
+
+///|
+#proof_import("list.List")
+pub fn[T] eq(xs : List[T], ys : List[T]) -> Bool = "(=)"
+
+///|
+/// The head of a nonempty list; unspecified on empty lists.
+#proof_import("list.HdTlNoOpt")
+pub fn[T] head(xs : List[T]) -> T = "hd"
+
+///|
+/// The tail of a nonempty list; unspecified on empty lists.
+#proof_import("list.HdTlNoOpt")
+pub fn[T] tail(xs : List[T]) -> List[T] = "tl"
+
+///|
+#proof_import("list.Length")
+pub fn[T] length(xs : List[T]) -> @integer.Integer = "length"
+
+///|
+#proof_import("list.Mem")
+pub fn[T] mem(value : T, xs : List[T]) -> Bool = "mem"
+
+///|
+#proof_import("list.Append")
+pub fn[T] append(xs : List[T], ys : List[T]) -> List[T] = "(++)"
+
+///|
+#proof_import("list.Reverse")
+pub fn[T] reverse(xs : List[T]) -> List[T] = "reverse"
+
+///|
+/// One-step append equation for clients that keep list models abstract.
+pub lemma[T] append_cons(value : T, xs : List[T], ys : List[T]) where {
+  proof_ensure: eq(append(cons(value, xs), ys), cons(value, append(xs, ys))),
+} {}

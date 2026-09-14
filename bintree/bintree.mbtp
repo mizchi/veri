@@ -1,0 +1,39 @@
+///|
+#proof_import("bintree.Tree")
+pub fn[T] empty() -> Tree[T] = "Empty"
+
+///|
+#proof_import("bintree.Tree")
+pub fn[T] node(left : Tree[T], value : T, right : Tree[T]) -> Tree[T] = "Node"
+
+///|
+#proof_import("bintree.Tree")
+pub fn[T] is_empty(tree : Tree[T]) -> Bool = "is_empty"
+
+///|
+#proof_import("bintree.Tree")
+pub fn[T] eq(left : Tree[T], right : Tree[T]) -> Bool = "(=)"
+
+///|
+#proof_import("bintree.Size")
+pub fn[T] size(tree : Tree[T]) -> @integer.Integer = "size"
+
+///|
+#proof_import("bintree.Height")
+pub fn[T] height(tree : Tree[T]) -> @integer.Integer = "height"
+
+///|
+#proof_import("bintree.Occ")
+pub fn[T] count(value : T, tree : Tree[T]) -> @integer.Integer = "occ"
+
+///|
+#proof_import("bintree.Occ")
+pub fn[T] mem(value : T, tree : Tree[T]) -> Bool = "mem"
+
+///|
+#proof_import("bintree.Inorder")
+pub fn[T] inorder(tree : Tree[T]) -> @list.List[T] = "inorder"
+
+///|
+#proof_import("bintree.Preorder")
+pub fn[T] preorder(tree : Tree[T]) -> @list.List[T] = "preorder"

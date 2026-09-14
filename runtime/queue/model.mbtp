@@ -1,0 +1,16 @@
+///|
+pub fn[T] model(queue : Queue[T]) -> @logic_list.List[T] {
+  @logic_list.append(@linked.model(queue.front), @logic_list.reverse(@linked.model(queue.back)))
+}
+
+///|
+#proof_import("list.List")
+fn[T] same(left : T, right : T) -> Bool = "(=)"
+
+///|
+predicate[T] normalized(queue : Queue[T]) {
+  match queue.front {
+    Nil => @logic_list.is_empty(@linked.model(queue.back))
+    Cons(_value, _rest) => true
+  }
+}

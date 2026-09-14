@@ -1,0 +1,24 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/list/conversions"
+
+import {
+  "mizchi/veri/list",
+  "mizchi/veri/seq",
+}
+
+// Values
+pub fn append_preserved(@list.List[Int], @list.List[Int]) -> Unit
+
+pub fn[T] from_seq(@seq.Seq[T]) -> @list.List[T]
+
+pub fn length_preserved(@list.List[Int]) -> Unit
+
+pub fn[T] to_seq(@list.List[T]) -> @seq.Seq[T]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,36 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/pqueue"
+
+import {
+  "mizchi/veri/bag",
+}
+
+// Values
+pub fn empty() -> PriorityQueue
+
+pub fn is_empty(PriorityQueue) -> Bool
+
+pub fn minimum(Int, PriorityQueue) -> Bool
+
+pub fn model(PriorityQueue) -> @bag.Bag[Int]
+
+pub fn peek(PriorityQueue) -> Int?
+
+pub fn pop(PriorityQueue) -> (Int, PriorityQueue)?
+
+pub fn push(PriorityQueue, Int) -> PriorityQueue
+
+pub fn to_array(PriorityQueue) -> Array[Int]
+
+pub fn valid(PriorityQueue) -> Bool
+
+// Errors
+
+// Types and methods
+pub struct PriorityQueue {
+  // private fields
+}
+
+// Type aliases
+
+// Traits

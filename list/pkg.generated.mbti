@@ -1,0 +1,38 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/list"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[T] append(List[T], List[T]) -> List[T]
+
+pub fn[T] append_cons(T, List[T], List[T]) -> Unit
+
+pub fn[T] cons(T, List[T]) -> List[T]
+
+pub fn[T] empty() -> List[T]
+
+pub fn[T] eq(List[T], List[T]) -> Bool
+
+pub fn[T] head(List[T]) -> T
+
+pub fn[T] is_empty(List[T]) -> Bool
+
+pub fn[T] length(List[T]) -> @integer.Integer
+
+pub fn[T] mem(T, List[T]) -> Bool
+
+pub fn[T] reverse(List[T]) -> List[T]
+
+pub fn[T] tail(List[T]) -> List[T]
+
+// Errors
+
+// Types and methods
+pub type List[T]
+
+// Type aliases
+
+// Traits

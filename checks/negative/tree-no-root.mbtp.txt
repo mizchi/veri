@@ -1,0 +1,4 @@
+///|
+pub lemma negative_control(left : Tree[Int], value : Int, right : Tree[Int]) where {
+  proof_ensure: mem(value, node(left, value, right)) == false,
+} {}

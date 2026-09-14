@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/queue"
+
+import {
+  "mizchi/veri/list",
+}
+
+// Values
+pub fn[T] empty() -> Queue[T]
+
+pub fn[T] is_empty(Queue[T]) -> Bool
+
+pub fn[T] model(Queue[T]) -> @list.List[T]
+
+pub fn[T] peek(Queue[T]) -> T?
+
+pub fn[T] pop(Queue[T]) -> (T, Queue[T])?
+
+pub fn[T] push(Queue[T], T) -> Queue[T]
+
+pub fn[T] to_array(Queue[T]) -> Array[T]
+
+// Errors
+
+// Types and methods
+pub struct Queue[T] {
+  // private fields
+}
+
+// Type aliases
+
+// Traits

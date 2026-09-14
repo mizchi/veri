@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri/fmap",
+  "mizchi/veri/integer",
+}
+
+options(
+  "proof-enabled": true,
+)

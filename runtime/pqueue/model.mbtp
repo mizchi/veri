@@ -1,0 +1,36 @@
+///|
+fn contents(xs : @linked.List[Int]) -> @bag.Bag[Int] {
+  match xs {
+    Nil => @bag.empty()
+    Cons(value, rest) => @bag.add(value, contents(rest))
+  }
+}
+
+///|
+predicate all_ge(value : Int, xs : @linked.List[Int]) {
+  ∀ other : Int, @bag.mem(other, contents(xs)) → value <= other
+}
+
+///|
+predicate sorted(xs : @linked.List[Int]) {
+  match xs {
+    Nil => true
+    Cons(value, rest) => all_ge(value, rest) && sorted(rest)
+  }
+}
+
+///|
+pub fn model(queue : PriorityQueue) -> @bag.Bag[Int] {
+  contents(queue.values)
+}
+
+///|
+pub predicate valid(queue : PriorityQueue) {
+  sorted(queue.values)
+}
+
+///|
+pub predicate minimum(value : Int, queue : PriorityQueue) {
+  @bag.mem(value, model(queue)) &&
+  (∀ other : Int, @bag.mem(other, model(queue)) → value <= other)
+}

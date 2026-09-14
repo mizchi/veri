@@ -1,0 +1,16 @@
+///|
+pub lemma node_size(left : @bintree.Tree[Int], value : Int, right : @bintree.Tree[Int]) where {
+  proof_ensure: @integer.eq(@bintree.size(@bintree.node(left, value, right)), @integer.add(@integer.from_int(1), @integer.add(@bintree.size(left), @bintree.size(right)))),
+} {}
+///|
+pub lemma root_member(left : @bintree.Tree[Int], value : Int, right : @bintree.Tree[Int]) where {
+  proof_ensure: @bintree.mem(value, @bintree.node(left, value, right)),
+} {}
+///|
+pub lemma traversal_length(tree : @bintree.Tree[Int]) where {
+  proof_ensure: same_length(@list.length(@bintree.inorder(tree)), @bintree.size(tree)),
+} {}
+///|
+pub lemma height_nonnegative(tree : @bintree.Tree[Int]) where {
+  proof_ensure: @integer.le(@integer.from_int(0), @bintree.height(tree)),
+} {}

@@ -4,7 +4,7 @@ English | [日本語](README.ja.md)
 
 A small foundation for formal verification in MoonBit, with reusable logical models and lemmas, implementations with contracts, and runtime differential checks.
 
-Proof bindings cover finite sets, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, the repository checks **binary32 and binary64 / roundTiesToEven (RNE)** execution results and proves properties in Why3's IEEE models. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
+Proof bindings cover finite sets, sequences, lists, bags, finite maps, binary trees, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, the repository checks **binary32 and binary64 / roundTiesToEven (RNE)** execution results and proves properties in Why3's IEEE models. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
 
 ## Running
 
@@ -20,6 +20,7 @@ To run individual checks:
 ```sh
 just prove         # Prove both workspace modules: MoonBit → Why3 → SMT
 just prove-machine # Prove bounds, runtime bridges, and their example with machine integers
+just prove-collections-machine # Prove collection implementations and clients with machine integers
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just negative      # Check that deliberately false claims in each model are not proved
 just test js       # Run runtime checks
@@ -44,6 +45,14 @@ Use `just prove`: bare `moon prove` uses only the default encoding and can time 
 | --- | --- | --- |
 | `bounds` | Clamp to a half-open interval | Given valid bounds, the result lies within the interval and preserves inputs already in range |
 | `fset` | Bindings to Why3's finite-set model | Lemmas for empty sets, insertion, and union |
+| `seq` / `list` | Finite sequence and inductive list models | Concatenation, lengths, reversal, indexing; `list/conversions` connects the models |
+| `bag` / `fmap` | Multisets and finite maps | Multiplicity, union, lookup after update, domain and removal |
+| `bintree` | Logical binary trees | Size, height, membership, and traversal length |
+| `runtime/list` / `runtime/stack` / `runtime/queue` | Persistent lists, LIFO stacks, and FIFO queues | Structural list correspondence and operation contracts |
+| `runtime/pqueue` | Persistent Int minimum priority queue | Sortedness, minimum removal, and exact multiplicities |
+| `runtime/bintree` / `runtime/bintree/search` | Binary trees and Int search trees | Inorder correspondence; insertion preserves strict BST order and membership |
+| `examples/collections` | Collection clients in the example module | Composed LIFO, FIFO, minimum, and search contracts |
+| `testing/commands` | QuickCheck operation generators and shrinkers | Replayable traces; a deliberate failure shrinks to `[Push(3)]` |
 | `ieee754` / `ieee754/float32` | Logical binary64 / binary32 values and shared rounding modes | Lemmas about NaN, signed zero, and self-subtraction of finite values |
 | `ieee754/conversions` | Logical widening and narrowing | Binary32 widening roundtrip and preservation of NaN classification |
 | `bv32` / `bv64` | Why3 fixed-size bitvector bindings | Operations and modular integer conversions |
@@ -75,14 +84,21 @@ veri/
 ├── arrays/
 ├── strings/
 ├── fset/
+├── seq/
+├── list/                    # laws, indexed, conversions
+├── bag/
+├── fmap/
+├── bintree/
 ├── ieee754/
 ├── integer/
-├── runtime/                 # uint32, uint64, array, text, float32, float64, float_conversions
+├── runtime/                 # numeric/text bridges and collection implementations
+├── testing/commands/
 └── examples/
     ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.1.0
     ├── models/
     ├── bridges/
-    └── floating/
+    ├── floating/
+    └── collections/
 ```
 
 Workspace resolution uses the local library without downloading it from the registry.
@@ -93,7 +109,7 @@ Proof reports are written under each module's `_build/verif/` directory.
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.
-The abstract types in `fset`, `ieee754`, `ieee754/float32`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Their bindings do not establish a correspondence with MoonBit runtime values.
+The abstract types in `fset`, `seq`, `list`, `bag`, `fmap`, `bintree`, `ieee754`, `ieee754/float32`, `bv32`, `bv64`, `arrays`, and `strings` are **proof-only**. Runtime correspondence is provided separately by implementations under `runtime/` where stated.
 
 A minimal example:
 
@@ -114,9 +130,9 @@ An incorrect zero sign or a difference of even 1 ULP in a finite value fails the
 
 ## QuickCheck properties
 
-`moonbitlang/core/quickcheck` is imported only by tests. The 26 properties in
-`bounds/properties_test.mbt` and `runtime/*/properties_test.mbt` each run 1,000
-accepted cases with seed `20260914`. Collection sizes grow up to 64. They run
+The 32 positive properties under `bounds/` and `runtime/` use
+`moonbitlang/core/quickcheck`, each running 1,000 accepted cases with seed
+`20260914`. Generated sizes grow up to 64, or 128 for operation traces. They run
 with `just quickcheck js` (or `wasm`, `wasm-gc`, `native`) and are also included
 in `just test`, `just test-backends`, `just test-release`, and `just verify`.
 
@@ -128,6 +144,12 @@ separate scalar-iteration reference. FP inputs come from arbitrary `UInt` /
 `UInt64` encodings so exceptional values and the full exponent range are
 reachable. Non-NaN comparisons retain the sign of zero; NaNs are compared by
 classification, without requiring payload preservation.
+
+Collection properties compare lists, stack/queue operation traces, priority queues,
+tree traversals, and BST insertion/search against independent array models.
+The minimum priority queue is also compared with MoonBit core's priority queue
+using `Reverse[Int]`, since the core queue returns the maximum by default.
+Each trace checks that earlier persistent values retain their contents.
 
 For example, with `mizchi/veri/runtime/uint32` and
 `moonbitlang/core/quickcheck` imported `for "test"`:
@@ -149,6 +171,69 @@ QuickCheck reports a shrunk counterexample on failure. Rerun the same property
 with its seed to reproduce it; change the seed to explore another deterministic
 sample. These are sampled runtime properties, alongside the Z3 reference cases
 and formal proofs. They do not establish universal IEEE conformance.
+
+`testing/commands` implements `moonbitlang/core/quickcheck/shrink.Shrink` for
+`Push(Int) | Pop | Peek | Clear`. Core's array shrinker removes chunks of the
+operation trace, and the command shrinker reduces `Push` values using the core
+Int shrinker. The binary-tree generator has a recursive shrinker that replaces
+nodes with subtrees and shrinks values throughout the tree. These checks set
+`max_shrinks=1000`; this bounds the search and does not guarantee a globally
+minimal counterexample for every property.
+
+A separate regression test uses `@quickcheck.report` on the deliberately false
+claim that all pushed values are less than 3, then checks that the report contains
+`counterexample=[Push(3)]`. This is the 33rd `quickcheck:*` test and verifies the
+failure/shrinking path; it is not counted as a successful 1,000-case property.
+
+## Collection models and implementations
+
+| Logical package | Bundled Why3 theories | Interpretation |
+| --- | --- | --- |
+| `seq` | `seq.Seq`, `Reverse`, `Mem`, `Occ`, `Permut` | Finite sequences with mathematical lengths and indices |
+| `list` / `list/indexed` | `list.List`, `Length`, `Append`, `Reverse`, `NthNoOpt`, `NumOcc` | Inductive lists, with optional indexing/counting imports |
+| `list/conversions` | `seq.OfList`, `seq.ToList` | Conversion between logical lists and sequences |
+| `bag` | `bag.Bag` | Multisets; union adds counts and difference truncates at zero |
+| `fmap` | `fmap.Fmap` | Finite maps with a finite-set domain |
+| `bintree` | `bintree.Tree`, `Size`, `Height`, `Occ`, `Inorder`, `Preorder` | Binary trees and their content/traversal models |
+
+Logical lengths, counts, and indices use unbounded `integer.Integer`.
+Use `seq.get/update` with `0 <= index < length`, and `slice(start, stop)` with
+`0 <= start <= stop <= length`; `stop` is exclusive. Logical list `head/tail`
+require a nonempty list, and `list/indexed.get(index, xs)` needs an in-range
+index. `fmap.find` is meaningful only when `mem(key, map)` holds. These logical
+operations do not perform runtime bounds checks; values outside their specified
+domains are unspecified.
+
+The runtime packages implement persistent data structures. Recursive models
+connect their actual constructors to Why3 lists, bags, and trees. The stack and
+queue APIs follow Why3's LIFO/FIFO specifications; the priority queue follows
+the minimum/multiplicity specification. Why3's abstract mutable `val` APIs are
+not imported as executable implementations.
+
+| Runtime package | Operations and representation | Cost |
+| --- | --- | --- |
+| `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`; immutable linked spine | Basic operations O(1); append/reverse/length O(n) |
+| `runtime/stack` | `empty/push/pop/peek/is_empty`; linked list | O(1) |
+| `runtime/queue` | `empty/push/pop/peek/is_empty`; front list and reversed back list | Push O(1), pop/peek O(n) worst case |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`; sorted Int list, duplicates retained | Push O(n), pop/peek O(1) |
+| `runtime/bintree` | `empty/node/inorder`; generic binary tree | Constructors O(1); inorder O(n²) worst case with list append |
+| `runtime/bintree/search` | `empty/insert/contains`; strict Int BST without duplicates | O(height); no balancing |
+
+Costs describe the implementations and are not formally proved. The two-list
+queue has amortized O(1) push/pop along a single linear history; branching
+from persistent snapshots or repeatedly peeking can repeat reversal work. The priority queue is an
+initial verified sorted-list implementation, not a logarithmic heap. BST callers
+must satisfy `valid(tree)`; `empty` establishes it and `insert` preserves it.
+Deletion and balancing are not implemented.
+
+`pop/uncons/peek` return `None` for empty inputs. List `length` requires its
+mathematical result to fit in an Int (at most 2,147,483,647), including under
+the machine-integer prelude. Array conversion helpers (`from_array/to_array`)
+are covered by runtime properties but have no correspondence contracts yet.
+Persistence preserves the container's structure; stored values may themselves
+be mutable. `examples/collections` demonstrates contract composition across
+modules, and `just prove-collections-machine` checks the same collection
+implementations and examples using machine integers.
 
 ## Binding architecture
 
@@ -263,6 +348,11 @@ transformations and BV theory axioms. The installed files remain unchanged, and 
 The generated `MoonBit_Auto` strategy tries both Z3 encodings: native bitvectors for bitwise laws,
 and the Why3 arithmetic model for integer/BV correspondence. Both encodings remain within the trusted Why3 boundary.
 The generator rejects unexpected upstream import layouts rather than silently deriving a different driver.
+After splitting verification conditions, the strategy also uses Why3's
+`compute_in_goal` to reduce concrete datatype constructors in structural models.
+Doing this after splitting preserves the recursive hypotheses needed by list proofs.
+`just prove` limits concurrent package jobs to two to avoid contention between
+short solver time limits as the number of packages grows.
 
 Bindings stay in `bv32` / `bv64`; their public lemmas now live in `bv32/laws` / `bv64/laws`,
 with conversion lemmas in `bv32/laws/integers` / `bv64/laws/integers`.
@@ -331,7 +421,7 @@ The Why3 logical laws and runtime differential tests are both available; a theor
 ## Trusted boundary and limitations
 
 - The type mappings, argument order, and Why3 symbol mappings in `#proof_external` / `#proof_import`, along with Why3, the solver, and MoonBit's translation, are trusted. No custom `proof_axiomatized` declarations are used.
-- Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads, and the bridge example are also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
+- Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads, collections, and their examples are also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
 - The runtime check profile is binary32 and binary64 with RNE. The logical API exposes five rounding modes, but runtime configuration and testing of all modes are not implemented.
 - NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, runtime FMA, and floating-point string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
 - Transcendental functions such as `sin` / `exp`, and proofs of error bounds relative to real-valued algorithms, require separate work.
@@ -340,7 +430,7 @@ The Why3 logical laws and runtime differential tests are both available; a theor
 - The project currently uses the local toolchain. Pinning toolchain distributions and solver versions for shared CI remains future work.
 
 Possible extensions include compiler support for native FP proof lowering, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
-additional runtime bridge contracts, regular expressions, and Seq / finite-map models.
+additional runtime bridge contracts, regular expressions, balanced search trees, heap-based priority queues, and runtime finite maps.
 TestFloat / SoftFloat are not integrated into this repository yet.
 
 ## References
@@ -349,6 +439,7 @@ TestFloat / SoftFloat are not integrated into this repository yet.
 - [FSet in moonbit-community/verified](https://github.com/moonbit-community/verified/tree/main/libs/fset): A reference for importing finite-set models. This repository provides its own small binding API and usage examples.
 - [A practical example of MoonBit formal verification (Japanese)](https://eng.mates.education/blog/b-moonbit-formal-verification/): Integer contracts, differences from runtime behavior, and floating-point differential tests.
 - [Why3 ieee_float](https://www.why3.org/stdlib/ieee_float.html): Logical IEEE types and operations.
+- [Why3 standard library](https://www.why3.org/stdlib/): Sources for the sequence, list, bag, finite-map, tree, stack, queue, and priority-queue specifications. The bundled files determine the available theories.
 - [SMT-LIB FloatingPoint](https://smt-lib.org/theories-FloatingPoint.shtml): IEEE FP operations, rounding modes, and the scope of NaN representation.
 - [Berkeley TestFloat](https://www.jhauser.us/arithmetic/TestFloat.html) / [SoftFloat](https://www.jhauser.us/arithmetic/SoftFloat.html): Arithmetic conformance testing and a software reference implementation.
 
