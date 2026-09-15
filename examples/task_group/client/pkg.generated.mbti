@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/task_group/client"
+
+import {
+  "mizchi/veri-examples/task_group",
+  "mizchi/veri/runtime/list",
+}
+
+// Values
+pub fn checked_default_trace(@list.List[@task_group.Event]) -> @task_group.State?
+
+pub fn checked_step(@task_group.Policy, @task_group.State, @task_group.Event) -> @task_group.State?
+
+pub fn checked_trace(@task_group.Policy, @list.List[@task_group.Event]) -> @task_group.State?
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,108 @@
+///|
+predicate same_phase(a : Phase, b : Phase) {
+  match a {
+    Open => match b { Open => true; _ => false }
+    Closing => match b { Closing => true; _ => false }
+    Finalizing => match b { Finalizing => true; _ => false }
+    Returned => match b { Returned => true; _ => false }
+  }
+}
+
+///|
+predicate same_body(a : Body, b : Body) {
+  match a {
+    Running => match b { Running => true; _ => false }
+    CancelRequested => match b { CancelRequested => true; _ => false }
+    Finished => match b { Finished => true; _ => false }
+  }
+}
+
+///|
+predicate same_child(a : Child, b : Child) {
+  match a {
+    Absent => match b { Absent => true; _ => false }
+    Active => match b { Active => true; _ => false }
+    Completing => match b { Completing => true; _ => false }
+    Failing => match b { Failing => true; _ => false }
+    Cancelling => match b { Cancelling => true; _ => false }
+    Done => match b { Done => true; _ => false }
+  }
+}
+
+///|
+pub predicate default_settings(policy : Policy) {
+  !policy.first_no_wait && !policy.second_no_wait &&
+  !policy.first_allow_failure && !policy.second_allow_failure
+}
+
+///|
+pub predicate valid_state(state : State) { invariant_model(state) }
+
+///|
+pub predicate children_joined(state : State) { no_orphans_model(state) }
+
+///|
+pub predicate resources_safe(state : State) { resources_model(state) }
+
+///|
+pub predicate same_state(a : State, b : State) {
+  same_phase(a.phase, b.phase) && same_body(a.body, b.body) && same_child(a.first, b.first) &&
+  same_child(a.second, b.second) && a.first_held == b.first_held &&
+  a.second_held == b.second_held && a.cancel_requested == b.cancel_requested && a.failed == b.failed
+}
+
+///|
+pub predicate initial_state(state : State) { same_state(state, initial_model()) }
+
+///|
+pub predicate same_outcome(a : Option[State], b : Option[State]) {
+  match a {
+    None => match b { None => true; Some(_) => false }
+    Some(left) => match b { None => false; Some(right) => same_state(left, right) }
+  }
+}
+
+///|
+pub predicate safe_outcome(outcome : Option[State]) {
+  match outcome { None => true; Some(state) => valid_state(state) }
+}
+
+///|
+pub predicate step_result(policy : Policy, state : State, event : Event, outcome : Option[State]) {
+  same_outcome(outcome, step_model(policy, state, event))
+}
+
+///|
+pub lemma initial_safe() where { proof_ensure: valid_state(initial_model()), } {}
+
+///|
+pub lemma step_preserves_safe(policy : Policy, state : State, event : Event) where {
+  proof_require: valid_state(state),
+  proof_ensure: safe_outcome(step_model(policy, state, event)),
+} {}
+
+///|
+pub fn run(policy : Policy, state : State, events : @list.List[Event]) -> Option[State] {
+  match events {
+    Nil => Some(state)
+    Cons(event, rest) => match step_model(policy, state, event) {
+      None => None
+      Some(next) => run(policy, next, rest)
+    }
+  }
+}
+
+///|
+pub lemma finite_trace_safe(policy : Policy, state : State, events : @list.List[Event]) where {
+  proof_decrease: events,
+  proof_require: valid_state(state),
+  proof_ensure: safe_outcome(run(policy, state, events)),
+} {
+  match events {
+    Nil => ()
+    Cons(event, rest) => match step_model(policy, state, event) {
+      None => ()
+      Some(next) => finite_trace_safe(policy, next, rest)
+    }
+  }
+}

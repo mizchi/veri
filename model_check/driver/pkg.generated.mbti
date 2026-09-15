@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/model_check/driver"
+
+import {
+  "mizchi/veri/model_check",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] dispatch(String, (C) -> @model_check.Client[S, E, Snapshot] raise?) -> Json raise
+
+pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] serve((C) -> @model_check.Client[S, E, Snapshot] raise?) -> Unit
+
+// Errors
+type ProtocolError derive(@debug.Debug)
+
+// Types and methods
+type Request[C] derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

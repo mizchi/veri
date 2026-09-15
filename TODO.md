@@ -109,13 +109,31 @@ CSR 構築と `path_to` の配列変換は差分テストで検査する。
 - [x] `just temporal`: Z3 による固定ジョブモデルの安全性の帰納的検査と、
   活性・弱公平性の bounded lasso 検査。到達する正例、壊した遷移、要求消失の反例を含む。
   有限状態の全探索と比較し、SAT の実行列を独立に再生する。
-- [ ] `checks/temporal/Job.tla` を Apalache で実行・照合する。TLA+ の対応例は作成済みだが、
-  この環境には JVM と稼働中の Docker がなく未検証。
+- [x] `checks/temporal/Job.tla` を Apalache で実行・照合する。
+  `just apalache` で Nix による版固定の導入、Job 4件＋TaskGroup 11件の Z3 との照合、
+  ITF の反例を MoonBit へ戻して再生する。深さ8の有限モデルが対象。
 - [x] 固定ジョブモデルと MoonBit の `step(state, action)` を接続。
   private な `#proof_pure` と公開契約を使い、両整数モデルで有限実行列の安全性・
   enabled・状態符号化を証明。実際の遷移表から Z3 の制約を生成し、反例を MoonBit で再生。
   全探索との照合、1,000件の shrinking 付き QuickCheck、不正証明書も検査。
 - [ ] 汎用の型付き状態遷移モデル、反例の shrinking、任意のプログラムとの対応。
-  JSON 入出力・SMT 生成・ループ評価の実装証明。Apalache との往復は未実装。
+  JSON 入出力・SMT/TLA+ 生成・ループ評価の実装証明。
+  列挙済み有限モデルの Apalache との往復は実装済み・テスト対象。
 - [ ] 汎用の時相APIとバックエンド。Z3 の bounded safety / induction と、
   必要に応じた Apalache の時相式変換を分離する。Bounded / Proved / Unknown を混同しない。
+- [x] TaskGroup の子2個＋本体の有限モデル。no_wait・allow_failure・キャンセル・
+  即時終了・終了待ち・グループ defer を扱う。共用遷移の証明、全16設定の照合、
+  shrinking 付き QuickCheck、Z3 の弱公平性と故障モデルの反例、実 async の履歴検査。
+  `just verify-task-group`。実ランタイムとの対応はテスト済み・未証明。
+- [ ] TaskGroup の任意個数・入れ子・spawn_loop・終了処理中の追加キャンセル・
+  非同期 cleanup の詳細。ソルバの任意のスケジュールを実 async で再生する制御器と
+  実装/モデルの対応証明。チャネル・タイマー・実時間の意味論。
+- [x] `model_check`: client / driver を汎用化。Job・TaskGroup・lease-clock を
+  version 1 の export / replay 形式へ統一し、状態と JSON snapshot、設定と性質を分離。
+  反例・公平性の評価、SMT 生成、Z3 との通信を MoonBit で実装。
+  `moonx veri.mbtx` と公開用 `cmd/model-check`、日英のモデル追加手順を用意。
+  JavaScript の既存ツールは互換 API・独立した照合先として維持。
+- [x] `examples/lease_clock`: Quint の脆弱モデルと修正候補を MoonBit に移植。
+  深さ上限付きの共用探索器、範囲を超えた検査の拒否、Z3/Apalache との照合、
+  MoonBit 再生、独立実装・shrinking 付き QuickCheck。修正した有限モデルの470状態を全探索。
+  `just verify-lease-clock` / `just apalache-lease-clock`。celld の実装には接続しない。

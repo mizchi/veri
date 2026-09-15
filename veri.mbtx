@@ -1,0 +1,14 @@
+///|
+import {
+  "moonbitlang/async@0.21.3",
+  "moonbitlang/async@0.21.3/shell",
+  "moonbitlang/core/env",
+}
+
+///|
+/// Local checkout launcher. The checker and its subprocess client are MoonBit.
+async fn main {
+  let args = ["run", "cmd/model-check", "--target", "wasm", "--"]
+  args.append(@env.args()[1:])
+  @shell.Cmd("moon", args, stdout=Inherit, stderr=Inherit).run()
+}

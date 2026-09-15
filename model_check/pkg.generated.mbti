@@ -1,0 +1,75 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/model_check"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int, max_states? : Int) -> Exploration[S] raise ExplorationError
+
+// Errors
+pub(all) suberror ExplorationError {
+  InvalidDepth(Int)
+  InvalidStateLimit(Int)
+  InvalidEventCount(Int)
+  StateLimitExceeded(Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) struct Client[S, E, Snapshot] {
+  initial : S
+  states : Array[S]
+  events : Array[E]
+  step : (S, E) -> S?
+  holds : (S, String) -> Bool?
+  model : Model[Snapshot]
+}
+pub fn[S : Eq, E, Snapshot] Client::accepts(Self[S, E, Snapshot], Property, Witness, justice? : Array[Int]) -> Bool
+
+pub(all) struct Exploration[S] {
+  states : Array[S]
+  transitions : Array[Array[Int]]
+  depths : Array[Int]
+  frontier : Array[Int]
+  max_depth : Int
+  complete : Bool
+}
+
+pub(all) struct Model[Snapshot] {
+  initial : Int
+  actions : Array[String]
+  states : Array[Snapshot]
+  transitions : Array[Array[Int]]
+  predicates : Map[String, Array[Bool]]
+  justice : Array[Int]
+  exploration : Scope?
+} derive(ToJson, @json.FromJson)
+
+pub(all) enum Property {
+  Safety(String)
+  Reachability(String)
+  Response(String, String)
+} derive(Eq, @debug.Debug)
+pub impl ToJson for Property
+pub impl @json.FromJson for Property
+
+pub(all) struct Scope {
+  complete : Bool
+  max_depth : Int
+  depths : Array[Int]
+  frontier : Array[Int]
+} derive(ToJson, @json.FromJson)
+
+type WireProperty derive(@json.FromJson)
+
+pub(all) struct Witness {
+  states : Array[Int]
+  actions : Array[Int]
+  loop_start : Int?
+} derive(ToJson, @json.FromJson)
+
+// Type aliases
+
+// Traits

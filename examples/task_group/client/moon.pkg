@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri-examples/task_group",
+  "mizchi/veri/runtime/list",
+}
+
+options(
+  "proof-enabled": true,
+)

@@ -1,0 +1,33 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/model_check/smt"
+
+import {
+  "mizchi/veri/model_check",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn decode_witness(String, Int, response~ : Bool) -> @model_check.Witness raise
+
+pub fn evaluate(@model_check.Model[Json], @model_check.Property, @model_check.Witness, justice? : Array[Int]) -> Bool raise ModelError
+
+pub fn query_source(@model_check.Model[Json], @model_check.Property, Int, justice? : Array[Int]) -> String raise ModelError
+
+pub fn validate(@model_check.Model[Json]) -> Unit raise ModelError
+
+pub fn validate_query(@model_check.Model[Json], @model_check.Property, Int, justice? : Array[Int]) -> Unit raise ModelError
+
+pub fn value_command(Int, response~ : Bool) -> String
+
+// Errors
+pub(all) suberror ModelError {
+  InvalidModel(String)
+  InvalidQuery(String)
+  InvalidSolverOutput(String)
+} derive(@debug.Debug)
+
+// Types and methods
+
+// Type aliases
+
+// Traits

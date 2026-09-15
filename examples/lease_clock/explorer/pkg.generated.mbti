@@ -1,0 +1,34 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/lease_clock/explorer"
+
+import {
+  "mizchi/veri-examples/lease_clock",
+  "mizchi/veri/model_check",
+}
+
+// Values
+pub fn accepts(Graph, @lease_clock.Variant, String, @model_check.Witness) -> Bool
+
+pub fn explore(@lease_clock.Variant, Int) -> Graph raise @model_check.ExplorationError
+
+// Errors
+
+// Types and methods
+pub(all) struct Graph {
+  model : @model_check.Model[Snapshot]
+  states : Array[@lease_clock.State]
+}
+pub fn Graph::client(Self, @lease_clock.Variant) -> @model_check.Client[@lease_clock.State, @lease_clock.Event, Snapshot]
+
+pub(all) struct Snapshot {
+  now : Int
+  a : @lease_clock.NodeState
+  b : @lease_clock.NodeState
+  owner : Int
+  epoch : Int
+} derive(ToJson)
+
+// Type aliases
+pub using @model_check {type Witness}
+
+// Traits

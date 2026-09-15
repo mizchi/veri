@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri/model_check",
+  "mizchi/veri/model_check/smt",
+  "moonbitlang/async/shell",
+  "moonbitlang/core/json",
+}
+
+supported_targets = "wasm+native"

@@ -10,9 +10,7 @@ import {
 // Errors
 
 // Types and methods
-type Model derive(ToJson)
-
-type Witness derive(@json.FromJson)
+type Config derive(@json.FromJson)
 
 // Type aliases
 

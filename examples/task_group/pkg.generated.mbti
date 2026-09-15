@@ -1,0 +1,117 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/task_group"
+
+import {
+  "mizchi/veri/runtime/list",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn children_joined(State) -> Bool
+
+pub fn default_policy() -> Policy
+
+pub fn default_settings(Policy) -> Bool
+
+pub fn finite_trace_safe(Policy, State, @list.List[Event]) -> Unit
+
+pub fn initial() -> State
+
+pub fn initial_safe() -> Unit
+
+pub fn initial_state(State) -> Bool
+
+pub fn no_orphans(State) -> Bool
+
+pub fn replay(Policy, State, @list.List[Event]) -> State?
+
+pub fn resources_safe(State) -> Bool
+
+pub fn run(Policy, State, @list.List[Event]) -> State?
+
+pub fn safe(State) -> Bool
+
+pub fn safe_outcome(State?) -> Bool
+
+pub fn same_outcome(State?, State?) -> Bool
+
+pub fn same_state(State, State) -> Bool
+
+pub fn step(Policy, State, Event) -> State?
+
+pub fn step_preserves_safe(Policy, State, Event) -> Unit
+
+pub fn step_result(Policy, State, Event, State?) -> Bool
+
+pub fn terminal_resources_released(State) -> Bool
+
+pub fn valid_state(State) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) enum Body {
+  Running
+  CancelRequested
+  Finished
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Child {
+  Absent
+  Active
+  Completing
+  Failing
+  Cancelling
+  Done
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Event {
+  Spawn(TaskId)
+  Complete(TaskId)
+  Fail(TaskId)
+  CancelTask(TaskId)
+  Cleanup(TaskId)
+  BodyReturn
+  BodyFail
+  BodyCancelled
+  CancelGroup
+  ReturnImmediately
+  Join
+  FinishDefers
+  FailDefers
+  Tick
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Phase {
+  Open
+  Closing
+  Finalizing
+  Returned
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Policy {
+  first_no_wait : Bool
+  second_no_wait : Bool
+  first_allow_failure : Bool
+  second_allow_failure : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) struct State {
+  phase : Phase
+  body : Body
+  first : Child
+  second : Child
+  first_held : Bool
+  second_held : Bool
+  cancel_requested : Bool
+  failed : Bool
+} derive(Eq, @debug.Debug)
+
+pub(all) enum TaskId {
+  First
+  Second
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

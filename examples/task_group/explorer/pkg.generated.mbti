@@ -1,0 +1,53 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/task_group/explorer"
+
+import {
+  "mizchi/veri-examples/task_group",
+  "mizchi/veri/model_check",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn accepts(Graph, @task_group.Policy, Fault, @model_check.Witness, String, Bool) -> Bool
+
+pub fn events() -> Array[@task_group.Event]
+
+pub fn explore(@task_group.Policy, Fault) -> Graph
+
+pub fn holds(@task_group.State, String) -> Bool
+
+pub fn policy(Int) -> @task_group.Policy
+
+pub fn transition(@task_group.Policy, @task_group.State, @task_group.Event, Fault) -> @task_group.State?
+
+// Errors
+
+// Types and methods
+pub(all) enum Fault {
+  Correct
+  EarlyJoin
+  LeakCleanup
+  LostCancel
+} derive(Eq, @debug.Debug)
+
+pub(all) struct Graph {
+  model : @model_check.Model[Snapshot]
+  states : Array[@task_group.State]
+}
+pub fn Graph::client(Self, @task_group.Policy, Fault) -> @model_check.Client[@task_group.State, @task_group.Event, Snapshot]
+
+pub(all) struct Snapshot {
+  phase : Int
+  body : Int
+  first : Int
+  second : Int
+  first_held : Bool
+  second_held : Bool
+  cancel_requested : Bool
+  failed : Bool
+} derive(ToJson)
+
+// Type aliases
+pub using @model_check {type Witness}
+
+// Traits

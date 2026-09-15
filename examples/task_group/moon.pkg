@@ -1,0 +1,11 @@
+import {
+  "mizchi/veri/runtime/list",
+}
+
+import {
+  "moonbitlang/core/quickcheck",
+} for "test"
+
+options(
+  "proof-enabled": true,
+)

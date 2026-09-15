@@ -13,4 +13,5 @@ target/
 /tools/
 /runtime/float_conversions/
 /justfile
+/veri.mbtx
 /TODO.md

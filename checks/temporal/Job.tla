@@ -7,7 +7,7 @@ VARIABLES
 
 \* @type: <<Bool, Bool>>;
 vars == <<pending, done>>
-Init == ~pending /\ ~done
+Init == pending = FALSE /\ done = FALSE
 
 Request ==
   /\ ~pending /\ ~done
@@ -31,6 +31,6 @@ Response == [](pending => <>done)
 
 \* Manual expansion of WF_vars(Complete). CanComplete is exactly the enabling
 \* condition of this state-changing action; it is not an arbitrary assumption.
-WeakFairComplete == ([]<>(~CanComplete)) \/ ([]<>Complete)
+WeakFairComplete == ([]<>(~CanComplete)) \/ ([]<><<Complete>>_vars)
 FairResponse == WeakFairComplete => Response
 =============================================================================

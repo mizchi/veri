@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/lease_clock/driver"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+type ConfigError derive(@debug.Debug)
+
+// Types and methods
+type Config derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

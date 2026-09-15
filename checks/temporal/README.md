@@ -44,24 +44,45 @@ also violate liveness without ever repeating a state.
 
 ## Optional Apalache backend
 
-`Job.tla` describes the same model separately. These are the intended commands:
+`just apalache` installs **Apalache 0.62.2 and Java 21 through Nix**, checks this
+Job model and the TaskGroup model, compares all 15 results with Z3, and replays
+the counterexamples in MoonBit. Nix with flakes enabled is required in addition
+to the normal MoonBit/Node.js/Z3 toolchain. This backend is optional; it is not
+part of `just verify`.
 
 ```sh
-apalache-mc check --length=10 --inv=Safe checks/temporal/Job.tla
-apalache-mc check --length=10 --temporal=Response checks/temporal/Job.tla
-apalache-mc check --length=10 --temporal=FairResponse checks/temporal/Job.tla
-apalache-mc check --length=10 --next=DropNext --temporal=FairResponse checks/temporal/Job.tla
+just apalache
+just setup-apalache # installation only; creates _build/apalache-bin
+_build/apalache-bin/bin/apalache-mc version
+
+# Run one property directly, with outputs kept under _build.
+nix run path:./nix -- check --out-dir=_build/apalache/manual \
+  --length=8 --temporal=FairResponse checks/temporal/Job.tla
 ```
 
-Expected outcomes are: no safety violation, a liveness counterexample, no liveness
-counterexample within the bound, and a dropped-request counterexample. Apalache
-was **not executed** in this environment: it has no JVM or running Docker daemon.
-The TLA+ example and the commands are therefore not yet validated with Apalache.
+The [Nix flake](../../nix/flake.nix) pins nixpkgs, the official release archive,
+and its SHA-256 from the [v0.62.2 release](https://github.com/apalache-mc/apalache/releases/tag/v0.62.2).
+It does not need a system JVM or Docker. The package has been exercised on
+Apple Silicon macOS; the other declared Nix systems have not been tested here.
+
+`Job.tla` describes the model separately. Its four checks are `Safe`, `Response`,
+`FairResponse`, and `FairResponse` with `DropNext`: respectively, no safety
+violation through depth 8, a waiting counterexample, no fair-response violation
+through depth 8, and a dropped-request counterexample. The initial variables use
+explicit assignments, as required by Apalache's assignment analysis.
+
+The report is `_build/apalache/report.json`. Each run gets a fresh directory
+containing TLA+ sources, JSON graphs, Z3 queries, logs and ITF traces. Parse/type
+errors, unknown solver results, timeouts, and malformed witnesses fail the run.
+The runner checks Apalache's version before interpreting its temporal loop
+markers and validates every returned trace independently. See also
+[the TaskGroup bridge](../task_group/README.md#apalache-cross-check).
 
 The [supported-features list](https://apalache-mc.org/docs/apalache/features.html)
 supports `[]`, `<>` and `~>`, but requires manual expansion of `ENABLED`, `WF` and
 `SF`. Accordingly, `Job.tla` expands weak fairness using the exact guard and
-checks `WeakFairComplete => Response` as a temporal property. See the
+checks `WeakFairComplete => Response` as a temporal property. The occurrence of
+the action under `[]<>` uses `<<Complete>>_vars`, which excludes stuttering. See the
 [temporal tutorial](https://apalache-mc.org/docs/tutorials/temporal-properties.html)
 and [temporal encoding design](https://apalache-mc.org/docs/adr/017pdr-temporal.html).
 
@@ -111,4 +132,5 @@ JSON exporter/parser, SMT generator, and lasso evaluator are **tested, not
 formally proved**. Fairness is a scheduling assumption, not a postcondition of
 one call. No external UNSAT result is imported as a MoonBit axiom. This finite
 example does not implement a general LTL API or automatic extraction of arbitrary
-MoonBit programs; Apalache remains optional and unexecuted as noted above.
+MoonBit programs. Apalache checks the separate Job specification; its traces
+are mapped back to the exported MoonBit states and replayed by the same driver.

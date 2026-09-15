@@ -1,0 +1,59 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/lease_clock"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn events() -> Array[Event]
+
+pub fn initial() -> State
+
+pub fn may_write(Variant, State, Node) -> Bool
+
+pub fn replay(Variant, State, Array[Event]) -> State?
+
+pub fn single_writer(Variant, State) -> Bool
+
+pub fn step(Variant, State, Event) -> State?
+
+// Errors
+
+// Types and methods
+pub(all) enum Event {
+  AdvanceTime
+  RenewNodeLease(Node)
+  FenceExpiredNode(Node)
+  TakeOver(Node)
+  PublishCurrentOwner
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Node {
+  A
+  B
+} derive(Eq, @debug.Debug)
+
+pub(all) struct NodeState {
+  expires : Int
+  elapsed : Int
+  held : Bool
+  resident_epoch : Int
+} derive(Eq, ToJson, @debug.Debug)
+
+pub(all) struct State {
+  now : Int
+  a : NodeState
+  b : NodeState
+  owner : Node
+  epoch : Int
+} derive(Eq, @debug.Debug)
+
+pub(all) enum Variant {
+  Vulnerable
+  BoundedSkew
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

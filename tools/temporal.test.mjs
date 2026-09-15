@@ -87,8 +87,8 @@ test("job safety has both inductive obligations, a broken transition, and reacha
 });
 
 const model = {
-  initial: 0, action_names: ["Request", "Complete", "Wait", "Drop"],
-  pending: [false, true, false, true], done: [false, false, true, true],
+  initial: 0, actions: ["Request", "Complete", "Wait", "Drop"],
+  predicates: {pending: [false, true, false, true], done: [false, false, true, true]},
   transitions: [[1, -1, 0, -1], [-1, 2, 1, 0], [-1, -1, 2, -1], [-1, -1, 3, -1]],
 };
 
@@ -104,7 +104,7 @@ test("MoonBit bridge encoding agrees with exhaustive lasso search at every teste
 
 test("finite model export rejects missing states and malformed transitions", () => {
   const missing = structuredClone(model);
-  missing.pending[3] = false;
+  missing.predicates.pending[3] = false;
   assert.throws(() => validateJobModel(missing));
   const bad = structuredClone(model);
   bad.transitions[0][0] = 4;

@@ -3,16 +3,16 @@ import { runZ3, expectStatus } from "./solver.mjs";
 
 // Finite, explicitly enumerated job model. This is not a symbolic MoonBit compiler.
 export function validateJobModel(model) {
-  assert.deepEqual(model.action_names, ["Request", "Complete", "Wait", "Drop"]);
-  assert.equal(model.pending.length, 4);
-  assert.equal(model.done.length, 4);
+  assert.deepEqual(model.actions, ["Request", "Complete", "Wait", "Drop"]);
+  assert.equal(model.predicates.pending.length, 4);
+  assert.equal(model.predicates.done.length, 4);
   assert.equal(model.transitions.length, 4);
   assert.ok(Number.isInteger(model.initial) && model.initial >= 0 && model.initial < 4);
   const states = new Set();
   for (let i = 0; i < 4; i++) {
-    assert.equal(typeof model.pending[i], "boolean");
-    assert.equal(typeof model.done[i], "boolean");
-    states.add(`${model.pending[i]},${model.done[i]}`);
+    assert.equal(typeof model.predicates.pending[i], "boolean");
+    assert.equal(typeof model.predicates.done[i], "boolean");
+    states.add(`${model.predicates.pending[i]},${model.predicates.done[i]}`);
     assert.equal(model.transitions[i].length, 4);
     for (const next of model.transitions[i]) assert.ok(Number.isInteger(next) && next >= -1 && next < 4);
   }
@@ -49,9 +49,9 @@ export function lassoSource(model, depth, {fair, allowDrop}) {
   const loops = indices(0, depth).map(loop => {
     const cycle = indices(loop, depth);
     const violation = or(indices(0, depth).map(start => and([
-      predicate(model.pending, start),
-      ...indices(start, depth).map(i => `(not ${predicate(model.done, i)})`),
-      ...cycle.map(i => `(not ${predicate(model.done, i)})`),
+      predicate(model.predicates.pending, start),
+      ...indices(start, depth).map(i => `(not ${predicate(model.predicates.done, i)})`),
+      ...cycle.map(i => `(not ${predicate(model.predicates.done, i)})`),
     ])));
     const fairness = fair ? or(cycle.flatMap(i => [
       `(not ${predicate(enabled, i)})`,
@@ -84,7 +84,7 @@ export function findResponseCounterexample(model, bound, options, onQuery = () =
     const witness = {
       states: indices(0, depth + 1).map(i => values.get(`s${i}`)),
       actions: indices(0, depth).map(i => values.get(`a${i}`)),
-      loop_start: values.get("loop"), allow_drop: options.allowDrop, fair: options.fair,
+      loop: values.get("loop"),
     };
     return {result: "counterexample", bound: depth, witness};
   }

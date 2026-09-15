@@ -41,11 +41,13 @@ for (const required of ["LICENSE", "README.md", "README.ja.md", "moon.mod",
   "runtime/graph/checker/relaxation.mbt", "runtime/graph/checker/soundness.mbtp",
   "runtime/graph/checker/certificate.mbt", "runtime/graph/certificate.mbtp",
   "runtime/graph/topology/order.mbt", "runtime/graph/topology/cycle.mbt",
-  "runtime/graph/topology/soundness.mbtp", "runtime/graph/topology.mbtp", "runtime/bytes/cursor/cursor.mbt"]) {
+  "runtime/graph/topology/soundness.mbtp", "runtime/graph/topology.mbtp", "runtime/bytes/cursor/cursor.mbt",
+  "model_check/types.mbt", "model_check/driver/driver.mbt", "model_check/smt/encode.mbt",
+  "model_check/runner/runner.mbt", "cmd/model-check/main.mbt"]) {
   assert.ok(entries.includes(required), `Missing packaged file: ${required}`);
 }
 for (const entry of entries) {
-  assert.ok(!/^(?:_build\/|examples\/|benchmarks\/|checks\/|tools\/|\.git\/|moon\.work$|TODO\.md$)/.test(entry),
+  assert.ok(!/^(?:_build\/|examples\/|benchmarks\/|checks\/|tools\/|\.git\/|moon\.work$|TODO\.md$|veri\.mbtx$)/.test(entry),
     `Development file in package: ${entry}`);
 }
 
@@ -128,6 +130,34 @@ options("proof-enabled": true)
 `);
   writeFileSync(join(graphContracts, "client.mbt"), readFileSync(join(root, "examples/toolkit/checked_graph.mbt")));
   process.stdout.write(run("moon", ["prove", "graph-contracts", "--deny-warn"], consumer));
+  // Exercise the packaged CLI and protocol from a separate consumer model.
+  const modelDriver = join(consumer, "model-driver");
+  mkdirSync(modelDriver);
+  writeFileSync(join(modelDriver, "moon.pkg"), `import {
+    "mizchi/veri/model_check",
+    "mizchi/veri/model_check/driver",
+  }
+  pkgtype(kind: "executable")
+`);
+  writeFileSync(join(modelDriver, "main.mbt"), `fn client(_config : Json) -> @model_check.Client[Int, Int, Int] {
+    {
+      initial: 0, states: [0, 1], events: [0],
+      step: (_, _) => Some(1),
+      holds: (s, name) => if name == "safe" { Some(s == 0) } else { None },
+      model: {
+        initial: 0, actions: ["advance"], states: [0, 1], transitions: [[1], [1]],
+        predicates: { "safe": [true, false] }, justice: [], exploration: None,
+      },
+    }
+  }
+  fn main { @driver.serve(client) }
+`);
+  const cliResult = JSON.parse(run("moon", ["run", "cmd/model-check", "--target", "wasm", "--deny-warn", "--",
+    "check", "model-driver", "--module", consumer, "--safety", "safe", "--bound", "1"], join(directory, "dependency")));
+  assert.equal(cliResult.result, "counterexample");
+  assert.equal(cliResult.bound, 1);
+  assert.deepEqual(cliResult.witness, {states: [0, 1], actions: [0]});
+  console.log("Packaged MoonBit CLI checks and replays a separate consumer model on Wasm.");
   console.log(`Packaged ${entries.length} files; both README quickstarts execute and prove.`);
 } finally {
   rmSync(directory, {recursive: true, force: true});

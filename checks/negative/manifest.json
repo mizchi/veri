@@ -382,5 +382,19 @@
     "claim": "a broken job implementation returns a safe state",
     "machine": true,
     "timeoutMs": 300000
+  },
+  {
+    "package": "examples/task_group",
+    "fixture": "task-group-early-return.mbt.txt",
+    "claim": "a cancellation request permits returning before children terminate",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "examples/task_group",
+    "fixture": "task-group-early-return.mbt.txt",
+    "claim": "a cancellation request permits returning before children terminate",
+    "machine": true,
+    "timeoutMs": 300000
   }
 ]

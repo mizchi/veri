@@ -1,0 +1,9 @@
+import {
+  "mizchi/veri-examples/task_group",
+  "mizchi/veri/runtime/list",
+  "moonbitlang/async",
+  "moonbitlang/async/aqueue",
+  "moonbitlang/core/debug",
+} for "test"
+
+supported_targets = "-all+js+native+wasm"

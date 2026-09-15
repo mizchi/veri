@@ -1,16 +1,12 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
 import { mkdirSync, writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import {loadJob, replayJob} from "./job-model.mjs";
 import { validateJobModel, findResponseCounterexample } from "./temporal-bridge.mjs";
 
-const root = fileURLToPath(new URL("../", import.meta.url));
 const directory = new URL("../_build/temporal-bridge/", import.meta.url);
 mkdirSync(directory, {recursive: true});
-const runMoon = argument => JSON.parse(execFileSync("moon", [
-  "-C", "examples", "run", "temporal/driver", "--target", "js", "--deny-warn", "--", argument,
-], {cwd: root, encoding: "utf8", timeout: 60000, maxBuffer: 4 * 1024 * 1024}));
-const model = validateJobModel(runMoon("export"));
+const model = validateJobModel(loadJob(true));
 writeFileSync(new URL("model.json", directory), JSON.stringify(model, null, 2) + "\n");
 const cases = [
   {name: "unfair", fair: false, allowDrop: false, expected: "counterexample"},
@@ -22,9 +18,9 @@ const results = cases.map(check => {
     writeFileSync(new URL(`${check.name}-${depth}.smt2`, directory), source));
   assert.equal(found.result, check.expected, check.name);
   console.log(`${check.name}: ${found.result} (transitions=${found.bound})`);
-  return {name: check.name, ...found};
+  return {name: check.name, fair: check.fair, allow_drop: check.allowDrop, ...found};
 });
-const witnesses = results.flatMap(result => result.witness ? [result.witness] : []);
+const witnesses = results.flatMap(result => result.witness ? [{...result.witness, fair: result.fair, allow_drop: result.allow_drop}] : []);
 assert.equal(witnesses.length, 2);
 const [unfair, dropped] = witnesses;
 // The actual MoonBit evaluator must also reject forged transitions, fairness,
@@ -34,11 +30,12 @@ const corrupted = [
   {...unfair, actions: unfair.actions.map((action, i) => i === 0 ? -1 : action)},
   {...unfair, fair: true},
   {...dropped, allow_drop: false},
-  {...unfair, loop_start: unfair.states.length},
+  {...unfair, loop: unfair.states.length},
   {...unfair, states: unfair.states.slice(0, -1)},
-  {states: [0, 1, 2, 2], actions: [0, 1, 2], loop_start: 2, allow_drop: false, fair: true},
+  {states: [0, 1, 2, 2], actions: [0, 1, 2], loop: 2, allow_drop: false, fair: true},
 ];
-const replayed = runMoon(JSON.stringify([...witnesses, ...corrupted]));
+const replayed = [...witnesses, ...corrupted].map(({fair, allow_drop, ...witness}) =>
+  replayJob([witness], {fair, allowDrop: allow_drop})[0]);
 assert.deepEqual(replayed, [...witnesses.map(() => true), ...corrupted.map(() => false)]);
 console.log(`MoonBit replay: ${witnesses.length} counterexamples accepted; ${corrupted.length} invalid certificates rejected.`);
 const toolchain = execFileSync("moon", ["version", "--all"], {encoding: "utf8"}).trim();

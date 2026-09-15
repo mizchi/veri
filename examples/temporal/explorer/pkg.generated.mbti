@@ -1,0 +1,22 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/temporal/explorer"
+
+import {
+  "mizchi/veri-examples/temporal",
+  "mizchi/veri/model_check",
+}
+
+// Values
+pub fn client(Bool) -> @model_check.Client[@temporal.State, @temporal.Action, Snapshot]
+
+// Errors
+
+// Types and methods
+pub(all) struct Snapshot {
+  pending : Bool
+  done : Bool
+} derive(ToJson)
+
+// Type aliases
+
+// Traits

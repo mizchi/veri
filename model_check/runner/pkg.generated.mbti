@@ -1,0 +1,39 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/model_check/runner"
+
+import {
+  "mizchi/veri/model_check",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+pub(all) suberror RunnerError {
+  InvalidResponse(String)
+  SolverFailure(String)
+  ReplayRejected
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct CheckResult {
+  result : String
+  bound : Int
+  witness : @model_check.Witness?
+} derive(ToJson)
+
+pub(all) struct Driver {
+  driver_pkg : String
+  module_dir : String
+  target : String
+} derive(@debug.Debug)
+pub async fn Driver::check(Self, Json, @model_check.Property, bound? : Int, justice? : Array[Int], z3? : String) -> CheckResult
+pub async fn Driver::load(Self, Json) -> @model_check.Model[Json]
+pub async fn Driver::replay(Self, Json, @model_check.Property, Array[@model_check.Witness], justice? : Array[Int]) -> Array[Bool]
+
+type Response[T] derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

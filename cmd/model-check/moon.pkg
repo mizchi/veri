@@ -1,0 +1,16 @@
+import {
+  "mizchi/veri/model_check",
+  "mizchi/veri/model_check/runner",
+  "moonbitlang/async",
+  "moonbitlang/async/fs",
+  "moonbitlang/async/stdio",
+  "moonbitlang/async/io",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+  "moonbitlang/core/string",
+  "moonbitlang/core/debug",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "wasm+native"

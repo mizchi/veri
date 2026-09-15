@@ -1,6 +1,6 @@
 import {
-  "mizchi/veri-examples/temporal",
-  "moonbitlang/core/env",
+  "mizchi/veri-examples/temporal/explorer",
+  "mizchi/veri/model_check/driver" @model_driver,
   "moonbitlang/core/json",
 }
 

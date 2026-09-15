@@ -1,0 +1,7 @@
+///|
+pub fn negative_control() -> State where {
+  proof_ensure: state => children_joined(state),
+} {
+  { phase: Returned, body: CancelRequested, first: Cancelling, second: Absent,
+    first_held: true, second_held: false, cancel_requested: true, failed: false }
+}

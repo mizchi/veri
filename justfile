@@ -160,6 +160,16 @@ temporal:
 temporal-bridge:
     node tools/check-temporal-bridge.mjs
 
+# Install pinned Apalache and Java through Nix, local to _build.
+setup-apalache:
+    mkdir -p _build
+    nix build path:./nix --out-link _build/apalache-bin
+
+# Cross-check Job and TaskGroup with Apalache/Z3 and replay all witnesses in MoonBit.
+apalache: setup-apalache
+    node --test tools/apalache.test.mjs
+    node tools/check-apalache.mjs
+
 prove-temporal: prover-config
     moon -C examples prove temporal --why3-config ../_build/why3/why3.conf
     moon -C examples prove temporal/client --why3-config ../_build/why3/why3.conf
@@ -173,6 +183,54 @@ verify-temporal: check prove-temporal temporal temporal-bridge
     just negative examples/temporal
     for temporal_target in js wasm wasm-gc native; do moon -C examples test temporal --target "$temporal_target" --deny-warn || exit; moon -C examples test temporal --target "$temporal_target" --release --deny-warn || exit; done
 
+# Bounded TaskGroup interleavings, fairness, injected bugs and MoonBit replay.
+task-group:
+    node tools/check-task-group.mjs
+
+prove-task-group: prover-config
+    moon -C examples prove task_group --why3-config ../_build/why3/why3.conf
+    moon -C examples prove task_group/client --why3-config ../_build/why3/why3.conf
+    just prove-task-group-machine
+
+prove-task-group-machine: prover-config
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove task_group --target-dir _build/task-group-machine --why3-config ../_build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove task_group/client --target-dir _build/task-group-machine --why3-config ../_build/why3/why3.conf
+
+test-task-group:
+    node --test tools/finite-temporal.test.mjs tools/task-group.test.mjs
+    for task_group_target in js wasm wasm-gc native; do moon -C examples test task_group --target "$task_group_target" --deny-warn || exit; moon -C examples test task_group --target "$task_group_target" --release --deny-warn || exit; done
+    for task_group_target in js wasm native; do moon -C examples test task_group/runtime --target "$task_group_target" --deny-warn || exit; moon -C examples test task_group/runtime --target "$task_group_target" --release --deny-warn || exit; done
+
+verify-task-group: check prove-task-group task-group test-task-group
+    just negative examples/task_group
+
+# Quint lease/clock examples: bounded bug search and exhaustive repaired model.
+lease-clock:
+    node tools/check-lease-clock.mjs
+
+test-lease-clock:
+    node --test tools/lease-clock.test.mjs tools/model-scope.test.mjs
+    for lease_target in js wasm wasm-gc native; do moon -C examples test lease_clock --target "$lease_target" --deny-warn || exit; moon -C examples test lease_clock --target "$lease_target" --release --deny-warn || exit; done
+
+verify-lease-clock: check lease-clock test-lease-clock
+
+# Shared model protocol, executable certificate evaluator and all three adapters.
+test-model-check:
+    node --test tools/model-client.test.mjs tools/model-scope.test.mjs tools/finite-temporal.test.mjs
+    for model_target in js wasm wasm-gc native; do moon test model_check model_check/driver model_check/smt --target "$model_target" --deny-warn || exit; moon test model_check model_check/driver model_check/smt --target "$model_target" --release --deny-warn || exit; done
+    node --test tools/moon-model-cli.test.mjs
+
+# MoonBit CLI, executed by moonx on Wasm. No Node.js is used by this command.
+[positional-arguments]
+model-check *args:
+    moonx veri.mbtx "$@"
+
+verify-model-check: check temporal-bridge task-group lease-clock test-model-check
+
+# Optional second backend. Checks the same finite prefixes and replays ITF traces.
+apalache-lease-clock: setup-apalache
+    node tools/check-lease-clock.mjs --apalache
+
 vectors:
     node tools/generate-floats.mjs
     node tools/generate-runtime.mjs
@@ -181,4 +239,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine negative smt temporal temporal-bridge vectors-check test-backends test-release package-check
+verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine negative smt temporal temporal-bridge task-group test-task-group test-model-check vectors-check test-backends test-release package-check
