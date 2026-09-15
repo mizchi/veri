@@ -16,7 +16,7 @@ Queue の連続 peek は同じ構造を読み続けるため、コンパイラ�
 
 Repeated queue peeks may be hoisted by the compiler; their ratios are not per-call latency ratios. Generic-tree workloads compare enumeration of the same ordered values, not equivalent arbitrary-shape tree APIs. Mutable core baselines incur no simulated snapshot copying.
 
-比較条件 / Boundaries: [日本語 README](../../README.ja.md#コレクションのベンチマーク), [English README](../../README.md#collection-benchmarks).
+比較条件 / Boundaries: [ベンチマークの説明（日本語）](../../docs/benchmarks.ja.md), [Benchmark guide (English)](../../docs/benchmarks.md).
 
 | Backend | Both orders ≤ 1.0 | Both orders > 1.0 | Straddles 1.0 |
 | --- | ---: | ---: | ---: |

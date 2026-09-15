@@ -18,18 +18,26 @@ function run(command, args, cwd) {
   return execFileSync(command, args, {cwd, encoding: "utf8", maxBuffer: 16 * 1024 * 1024});
 }
 
-function quickstart(file, endHeading) {
-  const section = readFileSync(join(root, file), "utf8").split(endHeading)[0];
+function quickstart(file) {
+  const section = readFileSync(join(root, file), "utf8").split("## QuickStart\n")[1]?.split("\n## ")[0];
+  assert.ok(section, `Missing QuickStart section in ${file}`);
   const blocks = [...section.matchAll(/```moonbit\n([\s\S]*?)\n```/g)].map(match => match[1]);
   assert.equal(blocks.length, 2, `Expected import and source examples in ${file}`);
   return blocks;
 }
 
-const blocks = quickstart("README.md", "## Verify the repository");
-assert.deepEqual(blocks, quickstart("README.ja.md", "## リポジトリを検証する"));
+const blocks = quickstart("README.md");
+assert.deepEqual(blocks, quickstart("README.ja.md"));
 process.stdout.write(run("moon", ["package"], root));
 const archive = join(root, "_build", "publish", `${name.replaceAll("/", "-")}-${version}.zip`);
 const entries = run("unzip", ["-Z1", archive], root).trim().split("\n");
+for (const guide of ["packages", "toolkit", "collections", "numerics", "verification",
+  "benchmarks", "architecture", "floating-point", "temporal"]) {
+  for (const suffix of [".md", ".ja.md"]) {
+    const file = `docs/${guide}${suffix}`;
+    assert.ok(entries.includes(file), `Missing packaged guide: ${file}`);
+  }
+}
 for (const required of ["LICENSE", "README.md", "README.ja.md", "moon.mod",
   "runtime/array/range.mbt", "runtime/queue/iter.mbt", "strings/strings.mbtp",
   "bitvector/bv32.mbtp", "bitvector/bv8.mbtp", "bitvector/bv16.mbtp",

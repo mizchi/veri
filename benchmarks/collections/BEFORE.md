@@ -4,9 +4,9 @@
 
 Release measurements recorded on 2026-09-14 on Apple M5. The implementations before optimization have workloads slower than core and do not meet an unconditional no-slowdown target.
 
-比率は veri/core。各組を順序を逆転して2回計測し、各回で自動調整した5バッチを測定した。256・2,048要素の出力一致を計測前に検査した。入力生成は計測外で、構築・出力を含む範囲は [日本語 README](../../README.ja.md#コレクションのベンチマーク) / [English README](../../README.md#collection-benchmarks) に記載する。
+比率は veri/core。各組を順序を逆転して2回計測し、各回で自動調整した5バッチを測定した。256・2,048要素の出力一致を計測前に検査した。入力生成は計測外で、構築・出力を含む範囲は [ベンチマークの説明（日本語）](../../docs/benchmarks.ja.md) / [Benchmark guide (English)](../../docs/benchmarks.md) に記載する。
 
-Ratios are veri/core. Both implementation orders are measured with five calibrated batches each; exact outputs are checked before timing at n=256 and n=2048. These are complete workloads, including the documented allocations and conversions. See the READMEs for comparison boundaries.
+Ratios are veri/core. Both implementation orders are measured with five calibrated batches each; exact outputs are checked before timing at n=256 and n=2048. These are complete workloads, including the documented allocations and conversions. See the benchmark guides linked above for comparison boundaries.
 
 Queue の連続 peek では同じキューを読み続ける。core 側の読み取りをコンパイラがループ外へ移す可能性があるため、特に大きな倍率は個々の呼び出しの遅延比としては解釈しない。二分木の比較は同じ整列済み値の列挙であり、任意形状の木に対応する core の型を比較しているわけではない。
 
