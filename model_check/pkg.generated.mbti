@@ -7,15 +7,30 @@ import {
 }
 
 // Values
-pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int, max_states? : Int) -> Exploration[S] raise ExplorationError
+pub fn[S : Eq, E, J] build_client(Spec[S, E, J], max_depth? : Int, max_states? : Int, max_transitions? : Int, state_hash? : (S) -> Int) -> Client[S, E, J] raise
+
+pub fn[S : Eq, E, J] client_from_states(Spec[S, E, J], Array[S]) -> Client[S, E, J] raise
+
+pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int, max_states? : Int, max_transitions? : Int, state_hash? : (S) -> Int) -> Exploration[S] raise ExplorationError
+
+pub fn[T] minimize(T, (T) -> Bool, candidates~ : (T) -> Iter[T], cost~ : (T) -> Int, max_attempts? : Int) -> Minimized[T] raise MinimizeError
 
 // Errors
+pub(all) suberror BuilderError {
+  InvalidDefinition(String)
+} derive(@debug.Debug)
+
 pub(all) suberror ExplorationError {
   InvalidDepth(Int)
   InvalidStateLimit(Int)
   InvalidEventCount(Int)
   StateLimitExceeded(Int)
+  TransitionLimitExceeded(Int)
 } derive(Eq, @debug.Debug)
+
+pub(all) suberror MinimizeError {
+  InvalidMinimization
+} derive(@debug.Debug)
 
 // Types and methods
 pub(all) struct Client[S, E, Snapshot] {
@@ -37,6 +52,20 @@ pub(all) struct Exploration[S] {
   complete : Bool
 }
 
+pub(all) struct Limits {
+  timeout_ms : Int
+  memory_mb : Int
+  max_query_bytes : Int
+  max_output_bytes : Int
+} derive(ToJson, @json.FromJson)
+pub fn Limits::new(timeout_ms? : Int, memory_mb? : Int, max_query_bytes? : Int, max_output_bytes? : Int) -> Self
+
+pub(all) struct Minimized[T] {
+  value : T
+  attempts : Int
+  exhausted : Bool
+}
+
 pub(all) struct Model[Snapshot] {
   initial : Int
   actions : Array[String]
@@ -51,6 +80,7 @@ pub(all) enum Property {
   Safety(String)
   Reachability(String)
   Response(String, String)
+  Deadlock(String)
 } derive(Eq, @debug.Debug)
 pub impl ToJson for Property
 pub impl @json.FromJson for Property
@@ -62,13 +92,23 @@ pub(all) struct Scope {
   frontier : Array[Int]
 } derive(ToJson, @json.FromJson)
 
+pub(all) struct Spec[S, E, Snapshot] {
+  initial : S
+  actions : Array[(String, E)]
+  step : (S, E) -> S?
+  predicates : Array[(String, (S) -> Bool)]
+  snapshot : (S) -> Snapshot
+  justice : Array[String]
+}
+pub fn[S, E, J] Spec::holds(Self[S, E, J], S, String) -> Bool?
+
 type WireProperty derive(@json.FromJson)
 
 pub(all) struct Witness {
   states : Array[Int]
   actions : Array[Int]
   loop_start : Int?
-} derive(ToJson, @json.FromJson)
+} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
 
 // Type aliases
 

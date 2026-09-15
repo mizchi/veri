@@ -43,11 +43,7 @@ moon test --target js
 moon prove
 ```
 
-This minimal proof uses bundled Why3 and Z3 on PATH. Runtime API use alone does
-not require a solver, Node.js, or just. Logical types, `model`, lemmas, and
-predicates are proof-only and cannot be called in ordinary runtime code.
-For complex BV/real proofs that need additional solver configuration, see the
-[verification guide](docs/verification.md).
+This minimal proof uses bundled Why3 and Z3 on PATH.
 
 ## Documentation
 
@@ -62,6 +58,7 @@ For complex BV/real proofs that need additional solver configuration, see the
 | [Proof architecture](docs/architecture.md) | Why3 / SMT-LIB bindings, runtime correspondence, and trusted boundaries |
 | [IEEE 754](docs/floating-point.md) | Float / Double APIs, reference checks, proof scope, and limitations |
 | [Temporal model checking](docs/temporal.md) | moonx, Z3 / Apalache, and TaskGroup / lease-clock examples |
+| [Practical verification workflows](docs/model-workflows.md) | CI suites, saved counterexamples, model builders, and implementation comparisons |
 
 ## License
 

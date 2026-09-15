@@ -2,13 +2,13 @@
 pub(all) enum Node {
   A
   B
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Variant {
   Vulnerable
   BoundedSkew
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) struct NodeState {
@@ -16,7 +16,7 @@ pub(all) struct NodeState {
   elapsed : Int
   held : Bool
   resident_epoch : Int
-} derive(Eq, Debug, ToJson)
+} derive(Eq, Debug, Hash, ToJson)
 
 ///|
 pub(all) struct State {
@@ -25,7 +25,7 @@ pub(all) struct State {
   b : NodeState
   owner : Node
   epoch : Int
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Event {
@@ -34,4 +34,4 @@ pub(all) enum Event {
   FenceExpiredNode(Node)
   TakeOver(Node)
   PublishCurrentOwner
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)

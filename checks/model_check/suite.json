@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "name": "job safety",
+      "driver": "temporal/driver",
+      "module_dir": "../../examples",
+      "config": {"allow_drop": false},
+      "property": {"kind": "safety", "predicate": "safe"},
+      "bound": 8,
+      "expect": "no-counterexample-up-to-bound"
+    },
+    {
+      "name": "waiting counterexample",
+      "driver": "temporal/driver",
+      "module_dir": "../../examples",
+      "config": {"allow_drop": false},
+      "property": {"kind": "response", "trigger": "pending", "goal": "done"},
+      "bound": 8,
+      "expect": "counterexample"
+    },
+    {
+      "name": "fair completion",
+      "driver": "temporal/driver",
+      "module_dir": "../../examples",
+      "config": {"allow_drop": false},
+      "property": {"kind": "response", "trigger": "pending", "goal": "done"},
+      "fair": true,
+      "bound": 8,
+      "expect": "no-counterexample-up-to-bound"
+    },
+    {
+      "name": "complete fair response",
+      "driver": "temporal/driver",
+      "module_dir": "../../examples",
+      "config": {"allow_drop": false},
+      "property": {"kind": "response", "trigger": "pending", "goal": "done"},
+      "fair": true,
+      "require_trigger": true,
+      "complete": true,
+      "expect": "safe-for-complete-model"
+    },
+    {
+      "name": "complete lost-request counterexample",
+      "driver": "temporal/driver",
+      "module_dir": "../../examples",
+      "config": {"allow_drop": true},
+      "property": {"kind": "response", "trigger": "pending", "goal": "done"},
+      "fair": true,
+      "complete": true,
+      "expect": "counterexample"
+    }
+  ]
+}

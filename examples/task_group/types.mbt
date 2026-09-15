@@ -2,7 +2,7 @@
 pub(all) enum TaskId {
   First
   Second
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Child {
@@ -12,14 +12,14 @@ pub(all) enum Child {
   Failing
   Cancelling
   Done
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Body {
   Running
   CancelRequested
   Finished
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Phase {
@@ -27,7 +27,7 @@ pub(all) enum Phase {
   Closing
   Finalizing
   Returned
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) struct Policy {
@@ -35,7 +35,7 @@ pub(all) struct Policy {
   second_no_wait : Bool
   first_allow_failure : Bool
   second_allow_failure : Bool
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) struct State {
@@ -47,7 +47,7 @@ pub(all) struct State {
   second_held : Bool
   cancel_requested : Bool
   failed : Bool
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)
 
 ///|
 pub(all) enum Event {
@@ -65,4 +65,4 @@ pub(all) enum Event {
   FinishDefers
   FailDefers
   Tick
-} derive(Eq, Debug)
+} derive(Eq, Debug, Hash)

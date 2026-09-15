@@ -36,3 +36,5 @@ Run `just verify-model-check` to check the common API and existing models.
 It reproduces the four-action two-writer trace and exhausts all 470 reachable
 states of the repaired finite model. `just apalache-lease-clock` also compares
 the bounded checks with Apalache. This example models the protocol only.
+
+[Practical workflows](model-workflows.md): suites, traces, builders, deadlocks, and implementation comparisons.

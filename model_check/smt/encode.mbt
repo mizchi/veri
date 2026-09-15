@@ -17,76 +17,122 @@ fn any(parts : Array[String]) -> String {
 }
 
 ///|
+fn symbols(model : @model_check.Model[Json]) -> Map[String, String] {
+  let result = Map([])
+  let names = model.predicates.keys().to_array()
+  names.sort()
+  for i, name in names {
+    result.set(name, "p" + i.to_string())
+  }
+  result
+}
+
+///|
 fn at(symbols : Map[String, String], name : String, i : Int) -> String {
   "(" + symbols.get(name).unwrap() + " s" + i.to_string() + ")"
 }
 
 ///|
-/// Predicate names are mapped to generated symbols; no model text becomes SMT code.
-pub fn query_source(
+/// Shared definitions and initial state, sent once to an incremental solver.
+pub fn initial_source(
   model : @model_check.Model[Json],
-  property : @model_check.Property,
-  depth : Int,
-  justice? : Array[Int] = [],
 ) -> String raise ModelError {
-  validate_query(model, property, depth, justice~)
+  validate(model)
   let lines = ["(set-logic QF_UFLIA)", "(declare-fun next (Int Int) Int)"]
   for s, row in model.transitions {
     for a, next in row {
       lines.push("(assert (= (next \{s} \{a}) \{next}))")
     }
   }
-  let symbols : Map[String, String] = Map([])
+  let names = symbols(model)
   for name, flags in model.predicates {
-    let symbol = "p" + symbols.length().to_string()
-    symbols.set(name, symbol)
     let members = []
     for s, flag in flags {
       if flag {
         members.push("(= s \{s})")
       }
     }
-    lines.push("(define-fun \{symbol} ((s Int)) Bool " + any(members) + ")")
-  }
-  for i = 0; i <= depth; i = i + 1 {
-    lines.push("(declare-const s\{i} Int)")
-    lines.push("(assert (and (<= 0 s\{i}) (< s\{i} \{model.states.length()})))")
-  }
-  lines.push("(assert (= s0 \{model.initial}))")
-  for i = 0; i < depth; i = i + 1 {
-    lines.push("(declare-const a\{i} Int)")
     lines.push(
-      "(assert (and (<= 0 a\{i}) (< a\{i} \{model.actions.length()})))",
+      "(define-fun " +
+      names.get(name).unwrap() +
+      " ((s Int)) Bool " +
+      any(members) +
+      ")",
     )
-    lines.push("(assert (= s\{i + 1} (next s\{i} a\{i})))")
   }
+  lines.push("(declare-const s0 Int)")
+  lines.push("(assert (= s0 \{model.initial}))")
+  lines.join("\n") + "\n"
+}
+
+///|
+/// Add one transition permanently, after popping the previous property's scope.
+pub fn step_source(
+  model : @model_check.Model[Json],
+  i : Int,
+) -> String raise ModelError {
+  guard i >= 0 && i < 1000000 else { raise InvalidQuery("Invalid step index") }
+  "(declare-const s\{i + 1} Int)\n" +
+  "(assert (and (<= 0 s\{i + 1}) (< s\{i + 1} \{model.states.length()})))\n" +
+  "(declare-const a\{i} Int)\n" +
+  "(assert (and (<= 0 a\{i}) (< a\{i} \{model.actions.length()})))\n" +
+  "(assert (= s\{i + 1} (next s\{i} a\{i})))\n"
+}
+
+///|
+/// Property-local definitions and assertions. The caller owns push/pop scopes.
+pub fn condition_source(
+  model : @model_check.Model[Json],
+  property : @model_check.Property,
+  depth : Int,
+  justice? : Array[Int] = [],
+) -> String raise ModelError {
+  validate_query(model, property, depth, justice~)
+  let names = symbols(model)
+  let lines = []
   let condition = match property {
     Safety(name) =>
-      any(Array::makei(depth + 1, i => "(not " + at(symbols, name, i) + ")"))
-    Reachability(name) => at(symbols, name, depth)
+      any(Array::makei(depth + 1, i => "(not " + at(names, name, i) + ")"))
+    Reachability(name) => at(names, name, depth)
+    Deadlock(terminal) => {
+      let excluded = model.exploration
+        .map(scope => scope.frontier)
+        .unwrap_or([])
+      let flags = model.predicates.get(terminal).unwrap()
+      let states = []
+      for s, row in model.transitions {
+        if !flags[s] && !excluded.contains(s) && row.all(next => next < 0) {
+          states.push("(= s \{s})")
+        }
+      }
+      lines.push("(define-fun deadlocked ((s Int)) Bool " + any(states) + ")")
+      "(deadlocked s\{depth})"
+    }
     Response(trigger, goal) => {
       lines.push("(declare-const loop Int)")
+      // Suffix goals are shared, making the lasso formula quadratic rather than cubic.
+      lines.push("(define-fun clear\{depth} () Bool true)")
+      for i = depth - 1; i >= 0; i = i - 1 {
+        lines.push(
+          "(define-fun clear\{i} () Bool (and (not " +
+          at(names, goal, i) +
+          ") clear\{i + 1}))",
+        )
+      }
+      let starts = Array::makei(depth, i => {
+        "(and " + at(names, trigger, i) + " clear\{i})"
+      })
       let loops = []
-      for loop_index = 0; loop_index < depth; loop_index = loop_index + 1 {
-        let violations = []
-        for start = 0; start < depth; start = start + 1 {
-          let parts = [at(symbols, trigger, start)]
-          for i = start; i < depth; i = i + 1 {
-            parts.push("(not " + at(symbols, goal, i) + ")")
-          }
-          for i = loop_index; i < depth; i = i + 1 {
-            parts.push("(not " + at(symbols, goal, i) + ")")
-          }
-          violations.push(all(parts))
-        }
+      for l = 0; l < depth; l = l + 1 {
         let parts = [
-          "(= loop \{loop_index})",
-          "(= s\{depth} s\{loop_index})",
-          any(violations),
+          "(= loop \{l})",
+          "(= s\{depth} s\{l})",
+          "clear\{l}",
+          any(starts),
         ]
         for action in justice {
           let progress = []
-          for i = loop_index; i < depth; i = i + 1 {
+          for i = l; i < depth; i = i + 1 {
             progress.push("(< (next s\{i} \{action}) 0)")
             progress.push("(= (next s\{i} \{action}) s\{i})")
             progress.push("(and (= a\{i} \{action}) (not (= s\{i} s\{i + 1})))")
@@ -100,6 +146,23 @@ pub fn query_source(
   }
   lines.push("(assert " + condition + ")")
   lines.join("\n") + "\n"
+}
+
+///|
+/// Standalone encoding retained for differential tests and external solvers.
+pub fn query_source(
+  model : @model_check.Model[Json],
+  property : @model_check.Property,
+  depth : Int,
+  justice? : Array[Int] = [],
+) -> String raise ModelError {
+  validate_query(model, property, depth, justice~)
+  let parts = [initial_source(model)]
+  for i = 0; i < depth; i = i + 1 {
+    parts.push(step_source(model, i))
+  }
+  parts.push(condition_source(model, property, depth, justice~))
+  parts.join("")
 }
 
 ///|

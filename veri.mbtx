@@ -10,5 +10,6 @@ import {
 async fn main {
   let args = ["run", "cmd/model-check", "--target", "wasm", "--"]
   args.append(@env.args()[1:])
-  @shell.Cmd("moon", args, stdout=Inherit, stderr=Inherit).run()
+  let status = @shell.Cmd("moon", args, stdout=Inherit, stderr=Inherit).status()
+  if status != 0 { abort("veri command failed") }
 }

@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/testing/state_machine"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+}
+
+// Values
+pub fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink + @debug.Debug, O : Eq + @debug.Debug, V : Eq + @debug.Debug] check(Model[M, C, O, V], System[S, C, O, V], count? : UInt, max_size? : UInt, max_shrinks? : UInt, seed? : UInt64) -> Unit raise
+
+pub fn[M, S, C, O : Eq, V : Eq] replay(Model[M, C, O, V], System[S, C, O, V], Array[C]) -> Replay[O, V] raise
+
+pub fn[M, C, O, V] valid_trace(Model[M, C, O, V], Array[C]) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) struct Model[M, C, O, V] {
+  initial : () -> M
+  step : (M, C) -> (M, O)?
+  observe : (M) -> V
+}
+
+pub(all) struct Replay[O, V] {
+  verdict : Verdict
+  index : Int
+  expected_output : O?
+  actual_output : O?
+  expected_state : V?
+  actual_state : V?
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct System[S, C, O, V] {
+  create : () -> S raise
+  step : (S, C) -> (S, O) raise
+  observe : (S) -> V raise
+  close : (S) -> Unit
+}
+
+pub(all) enum Verdict {
+  Matched
+  Mismatch
+  InvalidCommand
+} derive(Eq, ToJson, @debug.Debug)
+
+// Type aliases
+
+// Traits

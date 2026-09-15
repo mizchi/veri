@@ -1,0 +1,10 @@
+import {
+  "mizchi/veri/testing/state_machine",
+  "moonbitlang/async" @moon_async,
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/quickcheck/splitmix",
+  "moonbitlang/core/debug",
+}
+
+supported_targets = "wasm+native"

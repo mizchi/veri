@@ -1,6 +1,7 @@
 import {
   "mizchi/veri/model_check",
   "mizchi/veri/model_check/runner",
+  "mizchi/veri/model_check/suite",
   "moonbitlang/async",
   "moonbitlang/async/fs",
   "moonbitlang/async/stdio",

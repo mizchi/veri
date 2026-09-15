@@ -78,3 +78,59 @@ test "SMT generation validates scope and never uses predicate names as symbols" 
     assert_true(rejected)
   }
 }
+
+///|
+test "deadlock excludes normal termination and incomplete frontier rows" {
+  let graph = {
+    ..model(),
+    transitions: [[1, -1, -1], [-1, -1, -1], [-1, -1, -1]],
+  }
+  let witness : @model_check.Witness = {
+    states: [0, 1],
+    actions: [0],
+    loop_start: None,
+  }
+  assert_true(@smt.evaluate(graph, Deadlock("done"), witness))
+  assert_false(@smt.evaluate(model(), Deadlock("done"), witness))
+  assert_true(@smt.query_source(graph, Deadlock("done"), 1).contains("(= s 1)"))
+  let partial = {
+    ..graph,
+    exploration: Some({
+      complete: false,
+      max_depth: 1,
+      depths: [0, 1, 1],
+      frontier: [1],
+    }),
+  }
+  assert_false(
+    @smt.query_source(partial, Deadlock("done"), 1).contains(
+      "(define-fun deadlocked ((s Int)) Bool (or (= s 1)))",
+    ),
+  )
+}
+
+///|
+test "complete checking reaches all states and never accepts truncated graphs" {
+  let result = @smt.exhaustive(model(), Safety("safe"))
+  assert_eq(result.visited, 3)
+  assert_eq(result.witness, None)
+  let reached = @smt.exhaustive(model(), Reachability("done"))
+  assert_eq(reached.witness.unwrap().states, [0, 1, 2])
+  let partial = {
+    ..model(),
+    exploration: Some({
+      complete: false,
+      max_depth: 1,
+      depths: [0, 1, 1],
+      frontier: [1],
+    }),
+  }
+  assert_true(
+    try {
+      ignore(@smt.exhaustive(partial, Safety("safe")))
+      false
+    } catch {
+      _ => true
+    },
+  )
+}

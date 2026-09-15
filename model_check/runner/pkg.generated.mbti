@@ -3,36 +3,72 @@ package "mizchi/veri/model_check/runner"
 
 import {
   "mizchi/veri/model_check",
+  "mizchi/veri/model_check/suite",
   "moonbitlang/core/debug",
   "moonbitlang/core/json",
 }
 
 // Values
+pub async fn run_suite(@suite.Suite, base_dir? : String, z3? : String) -> SuiteReport
 
 // Errors
 pub(all) suberror RunnerError {
   InvalidResponse(String)
   SolverFailure(String)
   ReplayRejected
+  TriggerUnreachable(Int)
+  TriggerUnreachableInCompleteModel
 } derive(@debug.Debug)
 
 // Types and methods
+pub(all) struct Bundle {
+  version : Int
+  driver : Driver
+  config : Json
+  property : @model_check.Property
+  justice : Array[Int]
+  require_trigger : Bool
+  limits : @model_check.Limits
+  complete : Bool?
+  model : @model_check.Model[Json]
+  result : CheckResult
+} derive(ToJson, @json.FromJson)
+pub fn Bundle::explain(Self) -> Json raise
+pub async fn Bundle::replay(Self, module_dir? : String) -> Unit
+
+pub(all) struct CaseReport {
+  name : String
+  expected : @suite.Outcome
+  passed : Bool
+  result : CheckResult?
+  error : String?
+} derive(ToJson)
+
 pub(all) struct CheckResult {
   result : String
   bound : Int
   witness : @model_check.Witness?
-} derive(ToJson)
+} derive(ToJson, @json.FromJson)
 
 pub(all) struct Driver {
   driver_pkg : String
   module_dir : String
   target : String
-} derive(@debug.Debug)
-pub async fn Driver::check(Self, Json, @model_check.Property, bound? : Int, justice? : Array[Int], z3? : String) -> CheckResult
+} derive(ToJson, @debug.Debug, @json.FromJson)
+pub async fn Driver::check(Self, Json, @model_check.Property, bound? : Int, justice? : Array[Int], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> CheckResult
+pub async fn Driver::check_complete(Self, Json, @model_check.Property, justice? : Array[Int], require_trigger? : Bool) -> CheckResult
 pub async fn Driver::load(Self, Json) -> @model_check.Model[Json]
+pub async fn Driver::record(Self, Json, @model_check.Property, bound? : Int, justice? : Array[Int], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> Bundle
+pub async fn Driver::record_complete(Self, Json, @model_check.Property, justice? : Array[Int], require_trigger? : Bool) -> Bundle
 pub async fn Driver::replay(Self, Json, @model_check.Property, Array[@model_check.Witness], justice? : Array[Int]) -> Array[Bool]
 
 type Response[T] derive(@json.FromJson)
+
+pub(all) struct SuiteReport {
+  version : Int
+  passed : Bool
+  cases : Array[CaseReport]
+} derive(ToJson)
 
 // Type aliases
 

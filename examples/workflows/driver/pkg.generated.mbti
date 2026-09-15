@@ -1,0 +1,17 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/workflows/driver"
+
+import {
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Config derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

@@ -54,3 +54,48 @@ test "resource limits raise a typed error without returning a partial success" {
   }
   assert_eq(result, Some(@model_check.StateLimitExceeded(2)))
 }
+
+///|
+test "hashed exploration exceeds the old cap and resolves collisions" {
+  let graph = @model_check.explore(
+    0,
+    [1],
+    (s, _) => if s < 4999 { Some(s + 1) } else { None },
+    max_depth=5000,
+    max_states=5001,
+    state_hash=s => s,
+  )
+  assert_eq(graph.states.length(), 5000)
+  assert_true(graph.complete)
+  let collide = @model_check.explore(
+    0,
+    [1],
+    (s, _) => if s < 50 { Some(s + 1) } else { None },
+    max_depth=51,
+    state_hash=_ => 0,
+  )
+  let linear = @model_check.explore(
+    0,
+    [1],
+    (s, _) => if s < 50 { Some(s + 1) } else { None },
+    max_depth=51,
+  )
+  assert_eq(collide.states, linear.states)
+  assert_eq(collide.transitions, linear.transitions)
+  assert_true(
+    try {
+      ignore(
+        @model_check.explore(
+          0,
+          [1, 2],
+          (s, a) => Some(s + a),
+          max_depth=20,
+          max_transitions=4,
+        ),
+      )
+      false
+    } catch {
+      _ => true
+    },
+  )
+}

@@ -4,6 +4,7 @@ pub(all) suberror ExplorationError {
   InvalidStateLimit(Int)
   InvalidEventCount(Int)
   StateLimitExceeded(Int)
+  TransitionLimitExceeded(Int)
 } derive(Debug, Eq)
 
 ///|
@@ -29,13 +30,20 @@ pub fn[S : Eq, E] explore(
   step : (S, E) -> S?,
   max_depth~ : Int,
   max_states? : Int = 4096,
+  max_transitions? : Int = 4000000,
+  state_hash? : (S) -> Int,
 ) -> Exploration[S] raise ExplorationError {
-  guard max_depth >= 0 && max_depth <= 64 else { raise InvalidDepth(max_depth) }
-  guard max_states > 0 && max_states <= 4096 else {
-    raise InvalidStateLimit(max_states)
+  guard max_depth >= 0 && max_depth <= 1000000 else {
+    raise InvalidDepth(max_depth)
   }
-  guard events.length() > 0 && events.length() <= 64 else {
-    raise InvalidEventCount(events.length())
+  guard max_states > 0 else { raise InvalidStateLimit(max_states) }
+  guard events.length() > 0 else { raise InvalidEventCount(events.length()) }
+  guard max_transitions > 0 else {
+    raise TransitionLimitExceeded(max_transitions)
+  }
+  let buckets : Map[Int, Array[Int]] = Map([])
+  if state_hash is Some(hash) {
+    buckets.set(hash(initial), [0])
   }
   let states = [initial]
   let depths = [0]
@@ -43,13 +51,25 @@ pub fn[S : Eq, E] explore(
   let frontier = []
   let mut cursor = 0
   while cursor < states.length() {
+    guard cursor < max_transitions / events.length() else {
+      raise TransitionLimitExceeded(max_transitions)
+    }
     let row = []
     let mut omitted = false
     for event in events {
       let target = match step(states[cursor], event) {
         None => -1
         Some(next) =>
-          match states.search_by(s => s == next) {
+          match
+            (match state_hash {
+              None => states.search_by(s => s == next)
+              Some(hash) =>
+                buckets
+                .get(hash(next))
+                .bind(ids => {
+                  ids.search_by(id => states[id] == next).map(i => ids[i])
+                })
+            }) {
             Some(index) => index
             None =>
               if depths[cursor] == max_depth {
@@ -61,6 +81,13 @@ pub fn[S : Eq, E] explore(
                   raise StateLimitExceeded(max_states)
                 }
                 states.push(next)
+                if state_hash is Some(hash) {
+                  let key = hash(next)
+                  match buckets.get(key) {
+                    Some(ids) => ids.push(index)
+                    None => buckets.set(key, [index])
+                  }
+                }
                 depths.push(depths[cursor] + 1)
                 index
               }

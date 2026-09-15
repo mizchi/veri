@@ -8,6 +8,10 @@ Job・TaskGroup・lease-clock の export と反例再生を共通化する。
 共通ライブラリは `mizchi/veri/model_check`、CLI は `mizchi/veri/cmd/model-check` に置く。
 モデル固有のコードだけを `examples` に残す。これらの追加分はまだ公開していない。
 
+
+CI スイート、反例の保存、モデル構築、デッドロック、完全探索、資源制限、実装との比較は
+[実用ワークフロー](../docs/model-workflows.ja.md)を参照。
+
 ## moonx で検査する
 
 この checkout のルートで実行する。MoonBit と Z3 が必要で、CLI の実行に Node.js は使わない。
@@ -45,7 +49,8 @@ moonx mizchi/veri/cmd/model-check check my_model/driver \
 
 結果は標準出力に JSON で返す。反例が見つかった場合も問い合わせの成功として終了コード0を返す。
 入力不正、Z3 の `unknown`・タイムアウト・起動失敗、または自動再生の拒否は非ゼロ終了する。
-汎用の返り値は上限付きの結果であり、この CLI 自体が無制限の証明を返すことはない。
+通常の返り値は上限付き。`--complete` は有限モデルの全検査を別の結果名で返す。
+この CLI 自体が無制限の実装の証明を返すことはない。
 
 MoonBit のコードから直接呼ぶ場合は [runner](runner/runner.mbt) を使う。
 
@@ -101,6 +106,7 @@ Apalache では同じ `load` の結果を `finiteTla` に渡し、`decodeFiniteT
 | 安全性 | `{kind: "safety", predicate: "safe"}` | 実行中に述語が偽になる |
 | 到達可能性 | `{kind: "reachability", predicate: "done"}` | 最後の状態で述語が真になる |
 | 応答性 | `{kind: "response", trigger: "pending", goal: "done"}` | `G(trigger => F goal)` を破る無限ループがある |
+| デッドロック | `{kind: "deadlock", terminal: "terminal"}` | 終了状態ではなく、実行可能なイベントがない |
 
 `justice` は弱公平性を課すアクションの ID 配列。デフォルトは `[]` で、
 モデルが提示する `model.justice` は自動適用しない。

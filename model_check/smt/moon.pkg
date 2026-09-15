@@ -2,3 +2,7 @@ import {
   "mizchi/veri/model_check",
   "moonbitlang/core/string",
 }
+
+import {
+  "moonbitlang/core/quickcheck",
+} for "test"

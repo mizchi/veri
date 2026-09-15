@@ -217,8 +217,9 @@ verify-lease-clock: check lease-clock test-lease-clock
 # Shared model protocol, executable certificate evaluator and all three adapters.
 test-model-check:
     node --test tools/model-client.test.mjs tools/model-scope.test.mjs tools/finite-temporal.test.mjs
-    for model_target in js wasm wasm-gc native; do moon test model_check model_check/driver model_check/smt --target "$model_target" --deny-warn || exit; moon test model_check model_check/driver model_check/smt --target "$model_target" --release --deny-warn || exit; done
-    node --test tools/moon-model-cli.test.mjs
+    for model_target in js wasm wasm-gc native; do moon test model_check model_check/driver model_check/smt model_check/suite testing/state_machine --target "$model_target" --deny-warn || exit; moon test model_check model_check/driver model_check/smt model_check/suite testing/state_machine --target "$model_target" --release --deny-warn || exit; done
+    for workflow_target in wasm native; do moon test testing/state_machine/async --target "$workflow_target" --deny-warn || exit; moon test testing/state_machine/async --target "$workflow_target" --release --deny-warn || exit; done
+    node --test tools/moon-model-cli.test.mjs tools/model-suite.test.mjs tools/complete-response.test.mjs
 
 # MoonBit CLI, executed by moonx on Wasm. No Node.js is used by this command.
 [positional-arguments]
@@ -240,3 +241,7 @@ vectors-check:
     node tools/generate-runtime.mjs --check
 
 verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine negative smt temporal temporal-bridge task-group test-task-group test-model-check vectors-check test-backends test-release package-check
+
+# Expected outcomes for CI, including deliberately failing models.
+model-suite:
+    moonx veri.mbtx test checks/model_check/suite.json

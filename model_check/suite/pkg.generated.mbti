@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/model_check/suite"
+
+import {
+  "mizchi/veri/model_check",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+pub(all) suberror SuiteError {
+  InvalidSuite(String)
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct Case {
+  name : String
+  driver : String
+  module_dir : String?
+  target : String?
+  config : Json?
+  property : @model_check.Property
+  bound : Int?
+  complete : Bool?
+  fair : Bool?
+  require_trigger : Bool?
+  limits : @model_check.Limits?
+  justice : Array[Int]?
+  expect : Outcome
+} derive(@json.FromJson)
+
+pub(all) enum Outcome {
+  Counterexample
+  Witness
+  BoundedSafe
+  BoundedUnreachable
+  CompleteSafe
+  CompleteUnreachable
+} derive(Eq, @debug.Debug)
+pub fn Outcome::code(Self) -> String
+pub impl ToJson for Outcome
+pub impl @json.FromJson for Outcome
+
+pub(all) struct Suite {
+  version : Int
+  cases : Array[Case]
+}
+pub fn Suite::validate(Self) -> Unit raise SuiteError
+pub impl @json.FromJson for Suite
+
+type WireSuite derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

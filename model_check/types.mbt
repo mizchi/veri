@@ -4,6 +4,7 @@ pub(all) enum Property {
   Safety(String)
   Reachability(String)
   Response(String, String)
+  Deadlock(String)
 } derive(Eq, Debug)
 
 ///|
@@ -11,7 +12,7 @@ pub(all) struct Witness {
   states : Array[Int]
   actions : Array[Int]
   loop_start : Int?
-} derive(@json.FromJson, ToJson)
+} derive(@json.FromJson, ToJson, Eq, Debug)
 
 ///|
 pub(all) struct Scope {

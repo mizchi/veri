@@ -8,6 +8,10 @@ A new model supplies executable states, events, transitions, and predicates thro
 `mizchi/veri/model_check`, and the CLI at `mizchi/veri/cmd/model-check`.
 Only model-specific code stays in `examples`. These additions have not been published yet.
 
+
+See [practical workflows](../docs/model-workflows.md) for CI suites, saved traces,
+builders, deadlocks, complete checks, resource limits, and implementation comparison.
+
 ## Check with moonx
 
 Run from this checkout's root. The CLI requires MoonBit and Z3; it does not run Node.js.
@@ -48,7 +52,7 @@ The model's exploration depth in `--config` is separate from the CLI's SMT `--bo
 Results are JSON on stdout. Finding a counterexample is a successful query and exits
 with status 0. Invalid input, Z3 `unknown`, timeouts, process failures, and rejected
 automatic replay exit unsuccessfully. The generic CLI reports bounded results,
-not unbounded proofs.
+not unbounded proofs. `--complete` separately reports exhaustive finite-model results.
 
 The [runner](runner/runner.mbt) also exposes a MoonBit API:
 
@@ -105,6 +109,7 @@ Replay must use the same model configuration that produced the certificate.
 | Safety | `{kind: "safety", predicate: "safe"}` | The predicate becomes false along the trace |
 | Reachability | `{kind: "reachability", predicate: "done"}` | The predicate holds in the final state |
 | Response | `{kind: "response", trigger: "pending", goal: "done"}` | An infinite lasso violates `G(trigger => F goal)` |
+| Deadlock | `{kind: "deadlock", terminal: "terminal"}` | A nonterminal state has no enabled event |
 
 `justice` lists action IDs subject to weak fairness. It defaults to `[]`;
 the suggested `model.justice` is never applied automatically. Pass fairness

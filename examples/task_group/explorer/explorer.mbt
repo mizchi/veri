@@ -141,61 +141,36 @@ pub fn holds(state : @task_group.State, name : String) -> Bool {
 }
 
 ///|
-/// Enumerate the reachable closure without a depth cutoff. Integer identifiers
-/// are assigned by equality of actual immutable MoonBit states.
+/// The builder derives exported predicates and checks closure from the same step.
 pub fn explore(policy : @task_group.Policy, fault : Fault) -> Graph {
-  let states = [@task_group.initial()]
-  let transitions = []
+  let labels = [
+    "spawn-first", "spawn-second", "complete-first", "complete-second", "fail-first",
+    "fail-second", "cancel-first", "cancel-second", "cleanup-first", "cleanup-second",
+    "body-return", "body-fail", "body-cancelled", "cancel-group", "return-immediately",
+    "join", "finish-defers", "fail-defers", "tick",
+  ]
   let choices = events()
-  let mut cursor = 0
-  while cursor < states.length() {
-    let row = []
-    for event in choices {
-      let code = match transition(policy, states[cursor], event, fault) {
-        None => -1
-        Some(next) =>
-          match states.search_by(s => s == next) {
-            Some(index) => index
-            None => {
-              let index = states.length()
-              guard index < 4096 else {
-                abort("TaskGroup state space exceeds the explicit-state limit")
-              }
-              states.push(next)
-              index
-            }
-          }
-      }
-      row.push(code)
-    }
-    transitions.push(row)
-    cursor += 1
+  let names = [
+    "safe", "no_orphans", "resources", "closing", "returned", "body_done", "normal_return",
+    "failed_return",
+  ]
+  let spec : @model_check.Spec[@task_group.State, @task_group.Event, Snapshot] = {
+    initial: @task_group.initial(),
+    actions: Array::makei(choices.length(), i => (labels[i], choices[i])),
+    step: (state, event) => transition(policy, state, event, fault),
+    predicates: names.map(name => (name, s => holds(s, name))),
+    snapshot,
+    justice: [
+      "cleanup-first", "cleanup-second", "body-cancelled", "join", "finish-defers",
+    ],
   }
-  let predicates = Map([])
-  for
-    name in [
-      "safe", "no_orphans", "resources", "closing", "returned", "body_done", "normal_return",
-      "failed_return",
-    ] {
-    predicates.set(name, states.map(s => holds(s, name)))
+  let client = @model_check.build_client(spec, state_hash=state => state.hash()) catch {
+    _ => abort("Invalid TaskGroup model")
   }
-  {
-    states,
-    model: {
-      initial: 0,
-      actions: [
-        "spawn-first", "spawn-second", "complete-first", "complete-second", "fail-first",
-        "fail-second", "cancel-first", "cancel-second", "cleanup-first", "cleanup-second",
-        "body-return", "body-fail", "body-cancelled", "cancel-group", "return-immediately",
-        "join", "finish-defers", "fail-defers", "tick",
-      ],
-      states: states.map(snapshot),
-      transitions,
-      predicates,
-      justice: [8, 9, 12, 15, 16],
-      exploration: None,
-    },
+  guard client.model.exploration.unwrap().complete else {
+    abort("Incomplete TaskGroup closure")
   }
+  { states: client.states, model: { ..client.model, exploration: None, }, }
 }
 
 ///|

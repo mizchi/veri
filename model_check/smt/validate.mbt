@@ -9,7 +9,7 @@ pub(all) suberror ModelError {
 pub fn validate(model : @model_check.Model[Json]) -> Unit raise ModelError {
   let n = model.transitions.length()
   let m = model.actions.length()
-  guard n > 0 && n <= 4096 && m > 0 && m <= 64 else {
+  guard n > 0 && m > 0 && n <= 4000000 / m else {
     raise InvalidModel("State/action limit")
   }
   guard model.initial >= 0 && model.initial < n && model.states.length() == n else {
@@ -34,7 +34,7 @@ pub fn validate(model : @model_check.Model[Json]) -> Unit raise ModelError {
   validate_justice(model, model.justice)
   if model.exploration is Some(scope) {
     guard scope.max_depth >= 0 &&
-      scope.max_depth <= 64 &&
+      scope.max_depth <= 1000000 &&
       scope.depths.length() == n else {
       raise InvalidModel("Exploration depth")
     }
@@ -84,11 +84,11 @@ pub fn validate_query(
   justice? : Array[Int] = [],
 ) -> Unit raise ModelError {
   validate(model)
-  guard depth >= 0 && depth <= 16 else {
-    raise InvalidQuery("Bound must be in 0..16")
+  guard depth >= 0 && depth <= 1000000 else {
+    raise InvalidQuery("Bound must be in 0..1000000")
   }
   let names = match property {
-    Safety(name) | Reachability(name) => [name]
+    Safety(name) | Reachability(name) | Deadlock(name) => [name]
     Response(trigger, goal) => {
       guard depth > 0 else {
         raise InvalidQuery("Response requires a positive bound")

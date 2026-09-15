@@ -9,7 +9,7 @@ import {
 // Values
 pub fn accepts(Graph, @lease_clock.Variant, String, @model_check.Witness) -> Bool
 
-pub fn explore(@lease_clock.Variant, Int) -> Graph raise @model_check.ExplorationError
+pub fn explore(@lease_clock.Variant, Int, max_states? : Int) -> Graph raise
 
 // Errors
 

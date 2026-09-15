@@ -2,6 +2,7 @@
 struct Config {
   variant : Int
   bound : Int
+  max_states : Int?
 } derive(@json.FromJson)
 
 ///|
@@ -17,9 +18,13 @@ fn main {
       1 => BoundedSkew
       _ => raise InvalidConfig("Invalid lease model variant")
     }
-    guard config.bound >= 0 && config.bound <= 16 else {
+    guard config.bound >= 0 && config.bound <= 1000000 else {
       raise InvalidConfig("Invalid lease exploration depth")
     }
-    @explorer.explore(variant, config.bound).client(variant)
+    @explorer.explore(
+      variant,
+      config.bound,
+      max_states=config.max_states.unwrap_or(4096),
+    ).client(variant)
   })
 }

@@ -37,7 +37,7 @@ pub fn[S : Eq, E, Snapshot] Client::accepts(
     }
   }
   let names = match property {
-    Safety(name) | Reachability(name) => [name]
+    Safety(name) | Reachability(name) | Deadlock(name) => [name]
     Response(trigger, goal) => [trigger, goal]
   }
   for name in names {
@@ -66,6 +66,12 @@ pub fn[S : Eq, E, Snapshot] Client::accepts(
     Reachability(name) =>
       return witness.loop_start is None &&
         (self.holds)(self.states[ids[count]], name) == Some(true)
+    Deadlock(terminal) => {
+      let state = self.states[ids[count]]
+      return witness.loop_start is None &&
+        (self.holds)(state, terminal) == Some(false) &&
+        self.events.all(event => (self.step)(state, event) is None)
+    }
     Response(_, _) => ()
   }
   let start_loop = match witness.loop_start {

@@ -33,3 +33,5 @@ MoonBit の `Client`・`serve` で新しいモデルを接続し、`moonx veri.m
 export・Z3 検査・反例再生を実行できる。CLI の実行に Node.js は不要。
 例えば `moonx veri.mbtx check lease_clock/driver --module examples --config '{"variant":0,"bound":8}' --safety single_writer --bound 8`。
 `just verify-model-check` で共通 API と既存モデルを検査する。
+
+[実用ワークフロー](model-workflows.ja.md): スイート、反例、モデル構築、デッドロック、実装との比較。

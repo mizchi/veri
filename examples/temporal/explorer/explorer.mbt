@@ -5,52 +5,37 @@ pub(all) struct Snapshot {
 } derive(ToJson)
 
 ///|
-/// Retain the four-state Boolean domain and the identifiers used by the proofs.
+/// Preserve the state identifiers used by the proof clients.
 pub fn client(
   allow_drop : Bool,
 ) -> @model_check.Client[@temporal.State, @temporal.Action, Snapshot] {
-  let states = Array::makei(4, code => @temporal.state_from_code(code).unwrap())
-  let events : Array[@temporal.Action] = [Request, Complete, Wait, Drop]
-  let step = (state, action) => {
-    if action == @temporal.Drop && !allow_drop {
-      None
-    } else {
-      @temporal.step(state, action)
-    }
-  }
-  let model : @model_check.Model[Snapshot] = {
-    initial: @temporal.state_code(@temporal.initial()),
-    actions: ["Request", "Complete", "Wait", "Drop"],
-    states: states.map(s => { pending: s.pending, done: s.done, }),
-    transitions: states.map(state => {
-      events.map(event => {
-        match step(state, event) {
-          None => -1
-          Some(next) => @temporal.state_code(next)
-        }
-      })
-    }),
-    predicates: {
-      "pending": states.map(s => s.pending),
-      "done": states.map(s => s.done),
-      "safe": states.map(@temporal.safe),
-    },
-    justice: [1],
-    exploration: None,
-  }
-  {
+  let spec : @model_check.Spec[@temporal.State, @temporal.Action, Snapshot] = {
     initial: @temporal.initial(),
-    states,
-    events,
-    step,
-    model,
-    holds: (state, name) => {
-      match name {
-        "pending" => Some(state.pending)
-        "done" => Some(state.done)
-        "safe" => Some(@temporal.safe(state))
-        _ => None
+    actions: [
+      ("Request", Request),
+      ("Complete", Complete),
+      ("Wait", Wait),
+      ("Drop", Drop),
+    ],
+    step: (state, action) => {
+      if action == @temporal.Drop && !allow_drop {
+        None
+      } else {
+        @temporal.step(state, action)
       }
     },
+    predicates: [
+      ("pending", s => s.pending),
+      ("done", s => s.done),
+      ("safe", @temporal.safe),
+    ],
+    snapshot: s => { pending: s.pending, done: s.done, },
+    justice: ["Complete"],
+  }
+  @model_check.client_from_states(
+    spec,
+    Array::makei(4, code => @temporal.state_from_code(code).unwrap()),
+  ) catch {
+    _ => abort("Invalid Job definition")
   }
 }

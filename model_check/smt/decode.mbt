@@ -5,7 +5,7 @@ pub fn decode_witness(
   depth : Int,
   response~ : Bool,
 ) -> @model_check.Witness raise {
-  guard depth >= 0 && depth <= 16 else {
+  guard depth >= 0 && depth <= 1000000 else {
     raise InvalidSolverOutput("Invalid depth")
   }
   let tokens = []

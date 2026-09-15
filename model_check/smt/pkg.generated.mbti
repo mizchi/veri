@@ -7,11 +7,21 @@ import {
 }
 
 // Values
+pub fn condition_source(@model_check.Model[Json], @model_check.Property, Int, justice? : Array[Int]) -> String raise ModelError
+
 pub fn decode_witness(String, Int, response~ : Bool) -> @model_check.Witness raise
+
+pub fn describe(@model_check.Model[Json], @model_check.Property, @model_check.Witness, justice? : Array[Int]) -> Json raise
 
 pub fn evaluate(@model_check.Model[Json], @model_check.Property, @model_check.Witness, justice? : Array[Int]) -> Bool raise ModelError
 
+pub fn exhaustive(@model_check.Model[Json], @model_check.Property, justice? : Array[Int]) -> ExhaustiveResult raise
+
+pub fn initial_source(@model_check.Model[Json]) -> String raise ModelError
+
 pub fn query_source(@model_check.Model[Json], @model_check.Property, Int, justice? : Array[Int]) -> String raise ModelError
+
+pub fn step_source(@model_check.Model[Json], Int) -> String raise ModelError
 
 pub fn validate(@model_check.Model[Json]) -> Unit raise ModelError
 
@@ -27,6 +37,11 @@ pub(all) suberror ModelError {
 } derive(@debug.Debug)
 
 // Types and methods
+pub(all) struct ExhaustiveResult {
+  witness : @model_check.Witness?
+  visited : Int
+  max_depth : Int
+}
 
 // Type aliases
 

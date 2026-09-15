@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri/model_check",
+  "mizchi/veri/model_check/driver" @model_driver,
+  "mizchi/veri/model_check/smt",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")

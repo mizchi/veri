@@ -32,7 +32,7 @@ process.stdout.write(run("moon", ["package"], root));
 const archive = join(root, "_build", "publish", `${name.replaceAll("/", "-")}-${version}.zip`);
 const entries = run("unzip", ["-Z1", archive], root).trim().split("\n");
 for (const guide of ["packages", "toolkit", "collections", "numerics", "verification",
-  "benchmarks", "architecture", "floating-point", "temporal"]) {
+  "benchmarks", "architecture", "floating-point", "temporal", "model-workflows"]) {
   for (const suffix of [".md", ".ja.md"]) {
     const file = `docs/${guide}${suffix}`;
     assert.ok(entries.includes(file), `Missing packaged guide: ${file}`);
@@ -51,7 +51,10 @@ for (const required of ["LICENSE", "README.md", "README.ja.md", "moon.mod",
   "runtime/graph/topology/order.mbt", "runtime/graph/topology/cycle.mbt",
   "runtime/graph/topology/soundness.mbtp", "runtime/graph/topology.mbtp", "runtime/bytes/cursor/cursor.mbt",
   "model_check/types.mbt", "model_check/driver/driver.mbt", "model_check/smt/encode.mbt",
-  "model_check/runner/runner.mbt", "cmd/model-check/main.mbt"]) {
+  "model_check/runner/runner.mbt", "cmd/model-check/main.mbt",
+  "model_check/builder.mbt", "model_check/suite/types.mbt", "model_check/runner/artifact.mbt",
+  "model_check/runner/solver.mbt", "model_check/smt/exhaustive.mbt", "model_check/smt/response.mbt",
+  "testing/state_machine/replay.mbt", "testing/state_machine/async/replay.mbt"]) {
   assert.ok(entries.includes(required), `Missing packaged file: ${required}`);
 }
 for (const entry of entries) {
@@ -165,7 +168,39 @@ options("proof-enabled": true)
   assert.equal(cliResult.result, "counterexample");
   assert.equal(cliResult.bound, 1);
   assert.deepEqual(cliResult.witness, {states: [0, 1], actions: [0]});
-  console.log("Packaged MoonBit CLI checks and replays a separate consumer model on Wasm.");
+  const suitePath = join(consumer, "suite.json");
+  writeFileSync(suitePath, JSON.stringify({version:1,cases:[{
+    name:"packaged workflow",driver:"model-driver",module_dir:".",
+    property:{kind:"safety",predicate:"safe"},bound:1,expect:"counterexample",
+  }]}));
+  const suiteResult = JSON.parse(run("moon", ["run", "cmd/model-check", "--target", "wasm", "--deny-warn", "--",
+    "test", suitePath], join(directory,"dependency")));
+  assert.equal(suiteResult.passed,true);
+  const workflow = join(consumer,"workflow");
+  mkdirSync(workflow);
+  writeFileSync(join(workflow,"moon.pkg"), `import {
+    "mizchi/veri/model_check",
+    "mizchi/veri/testing/state_machine",
+  } for "test"
+`);
+  writeFileSync(join(workflow,"workflow_test.mbt"), `test "packaged workflow APIs" {
+    let model : @state_machine.Model[Int,Int,Int,Int] = {
+      initial:() => 0, step:(s,c) => Some((s+c,s+c)), observe:s => s,
+    }
+    let system : @state_machine.System[Int,Int,Int,Int] = {
+      create:() => 0, step:(s,c) => (s+c,s+c), observe:s => s, close:_ => (),
+    }
+    @state_machine.check(model,system,count=10,seed=20260916)
+    let spec : @model_check.Spec[Int,Int,Int] = {
+      initial:0,actions:[("finish",1)],step:(_,_) => Some(1),
+      predicates:[("safe",s => s==0)],snapshot:s => s,justice:[],
+    }
+    let client = @model_check.build_client(spec,max_depth=1,state_hash=s => s)
+    assert_true(client.accepts(Safety("safe"),{states:[0,1],actions:[0],loop_start:None}))
+  }
+`);
+  process.stdout.write(run("moon",["test","workflow","--target","js","--deny-warn"],consumer));
+  console.log("Packaged MoonBit CLI checks, replays, and runs suites against a separate consumer model.");
   console.log(`Packaged ${entries.length} files; both README quickstarts execute and prove.`);
 } finally {
   rmSync(directory, {recursive: true, force: true});

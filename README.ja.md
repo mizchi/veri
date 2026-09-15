@@ -43,10 +43,7 @@ moon test --target js
 moon prove
 ```
 
-この最小例の証明には同梱 Why3 と PATH 上の Z3 を使う。実行時 API の利用だけなら
-ソルバーや Node.js、just は不要。論理型・`model`・補題・述語は証明専用で、
-通常の実行時コードから呼ぶ関数ではない。複雑な BV・実数の証明で追加のソルバー設定が
-必要な場合は、[検証手順](docs/verification.ja.md)を参照する。
+この最小例の証明には同梱 Why3 と PATH 上の Z3 を使う。
 
 ## ドキュメント
 
@@ -61,6 +58,7 @@ moon prove
 | [証明の仕組み](docs/architecture.ja.md) | Why3 / SMT-LIB との接続、実行時型との対応、信頼する境界 |
 | [IEEE 754](docs/floating-point.ja.md) | Float / Double の API、参照検査、証明範囲と未対応機能 |
 | [時相論理のモデル検査](docs/temporal.ja.md) | moonx、Z3 / Apalache、TaskGroup・lease-clock の例 |
+| [実用ワークフロー](docs/model-workflows.ja.md) | CI スイート、反例の保存、モデル構築、実装との比較 |
 
 ## ライセンス
 

@@ -1,0 +1,42 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/testing/state_machine/async"
+
+import {
+  "mizchi/veri/testing/state_machine",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+}
+
+// Values
+pub async fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink, O : Eq, V : Eq] find_failure(@state_machine.Model[M, C, O, V], System[S, C, O, V], count? : Int, max_size? : Int, max_shrinks? : Int, seed? : UInt64, timeout_ms? : Int) -> Failure[C, O, V]?
+
+pub async fn[M, S, C, O : Eq, V : Eq] replay(@state_machine.Model[M, C, O, V], System[S, C, O, V], Array[C], timeout_ms? : Int) -> @state_machine.Replay[O, V]
+
+pub async fn[M, S, C : @shrink.Shrink, O : Eq, V : Eq] shrink_failure(@state_machine.Model[M, C, O, V], System[S, C, O, V], Array[C], max_shrinks? : Int, timeout_ms? : Int, seed? : UInt64) -> Failure[C, O, V]
+
+// Errors
+pub(all) suberror CheckError {
+  InvalidOptions
+  Exhausted
+  NotAMismatch
+} derive(@debug.Debug)
+
+// Types and methods
+pub(all) struct Failure[C, O, V] {
+  commands : Array[C]
+  replay : @state_machine.Replay[O, V]
+  shrink_attempts : Int
+  seed : UInt64
+} derive(ToJson, @debug.Debug)
+
+pub(all) struct System[S, C, O, V] {
+  create : async () -> S
+  step : async (S, C) -> (S, O)
+  observe : async (S) -> V
+  close : async (S) -> Unit
+}
+
+// Type aliases
+
+// Traits

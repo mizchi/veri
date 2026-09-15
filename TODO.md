@@ -116,11 +116,11 @@ CSR 構築と `path_to` の配列変換は差分テストで検査する。
   private な `#proof_pure` と公開契約を使い、両整数モデルで有限実行列の安全性・
   enabled・状態符号化を証明。実際の遷移表から Z3 の制約を生成し、反例を MoonBit で再生。
   全探索との照合、1,000件の shrinking 付き QuickCheck、不正証明書も検査。
-- [ ] 汎用の型付き状態遷移モデル、反例の shrinking、任意のプログラムとの対応。
-  JSON 入出力・SMT/TLA+ 生成・ループ評価の実装証明。
-  列挙済み有限モデルの Apalache との往復は実装済み・テスト対象。
-- [ ] 汎用の時相APIとバックエンド。Z3 の bounded safety / induction と、
-  必要に応じた Apalache の時相式変換を分離する。Bounded / Proved / Unknown を混同しない。
+- [x] 汎用の型付き状態遷移モデル、入力・操作列の shrinking、実装との操作列の差分テスト。
+  列挙済み有限モデルの Apalache との往復も実装済み・テスト対象。
+- [ ] 任意のプログラムとの対応、JSON 入出力・SMT/TLA+ 生成・ループ評価の実装証明。
+- [ ] 汎用モデルの帰納的証明と時相式の拡張。bounded safety / reachability / response / deadlock と
+  有限モデルの全検査は実装済み。Bounded / Proved / Unknown を混同しない。
 - [x] TaskGroup の子2個＋本体の有限モデル。no_wait・allow_failure・キャンセル・
   即時終了・終了待ち・グループ defer を扱う。共用遷移の証明、全16設定の照合、
   shrinking 付き QuickCheck、Z3 の弱公平性と故障モデルの反例、実 async の履歴検査。
@@ -137,3 +137,21 @@ CSR 構築と `path_to` の配列変換は差分テストで検査する。
   深さ上限付きの共用探索器、範囲を超えた検査の拒否、Z3/Apalache との照合、
   MoonBit 再生、独立実装・shrinking 付き QuickCheck。修正した有限モデルの470状態を全探索。
   `just verify-lease-clock` / `just apalache-lease-clock`。celld の実装には接続しない。
+
+## 実用ワークフロー
+
+- [x] 期待結果付きの CI スイート、全ケースの結果集約、不一致・unknown・実行エラーの非ゼロ終了。
+- [x] 設定・モデル・反例の保存、イベント名とフィールド差分の説明、モデル同一性を検査した再生。
+  共通の入力縮小器は複雑度の減少・失敗の保存・試行上限を要求する。
+- [x] 名前付き Spec から Client・遷移表・述語表を生成。3モデルを移行し、閉包と部分探索を区別。
+- [x] 正常終了を除くデッドロックと、応答性の前提到達性の追加検査。
+- [x] 衝突を Eq で解決する状態ハッシュ、状態数・遷移セル数・Z3 時間/メモリ/入出力の予算、
+  深さ16の制限の緩和、1セッションでの増分 SMT、完全な有限モデルの安全性・到達性・デッドロック全検査。
+- [x] 独立モデルと実装の操作列の差分テスト。同期・async の再生、fresh state と cleanup、
+  core QuickCheck による生成・操作列と値の shrinking。スケジューラ操作は adapter で明示する。
+- [x] 有限モデルの応答性・弱公平性の全検査。強連結成分から公平な lasso を構築して再生。
+  `--complete --save`、全域での前提到達性、CI スイートに接続。
+  独立した積状態の検査器との3,000件の QuickCheck・shrinking、2万状態の鎖で検査。
+
+使い方は [実用ワークフロー](docs/model-workflows.ja.md)。これらの汎用検査器の実装証明や、
+無限状態・任意の非同期スケジュールについての証明を追加したわけではない。
