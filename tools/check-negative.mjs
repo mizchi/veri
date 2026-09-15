@@ -35,7 +35,7 @@ for (const check of checks) {
     for (const entry of readdirSync(source, {withFileTypes: true})) {
       if (entry.isFile()) copyFileSync(new URL(entry.name, source), join(directory, entry.name));
     }
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\nimport { "mizchi/veri@0.1.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\nimport { "mizchi/veri@0.2.0" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' +
       JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     const sourceName = check.fixture.endsWith('.mbt.txt') ? "negative.mbt" : "negative.mbtp";

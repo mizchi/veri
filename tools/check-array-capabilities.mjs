@@ -18,7 +18,7 @@ for (const probe of probes) {
   const directory = mkdtempSync(join(tmpdir(), "veri-array-capability-"));
   try {
     const source = readFileSync(new URL(`../checks/capabilities/${probe.name}.mbt.txt`, import.meta.url), "utf8");
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/array-capability"\nimport { "mizchi/veri@0.1.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/array-capability"\nimport { "mizchi/veri@0.2.0" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' + JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     writeFileSync(join(directory, "moon.pkg"), (probe.imports.length ? `import { ${probe.imports.join(", ")} }\n` : "") + 'options("proof-enabled": true)\n');
     writeFileSync(join(directory, "probe.mbt"), source);

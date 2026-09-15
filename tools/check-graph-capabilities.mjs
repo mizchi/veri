@@ -39,7 +39,7 @@ for (const [name, parameter, expression, postcondition, expected] of probes) {
 `;
   const imports = '"mizchi/veri/runtime/graph"';
   try {
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/graph-capability"\nimport { "mizchi/veri@0.1.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/graph-capability"\nimport { "mizchi/veri@0.2.0" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' + JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     writeFileSync(join(directory, "moon.pkg"), `import { ${imports} }\noptions("proof-enabled": true)\n`);
     writeFileSync(join(directory, "probe.mbt"), source);
