@@ -1,0 +1,7 @@
+import {
+  "mizchi/veri-examples/temporal",
+  "moonbitlang/core/env",
+  "moonbitlang/core/json",
+}
+
+pkgtype(kind: "executable")

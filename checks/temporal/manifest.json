@@ -1,0 +1,47 @@
+[
+  {
+    "file": "reachable-completion.smt2",
+    "expected": "sat",
+    "kind": "positive-control",
+    "claim": "requesting and completing is possible in the actual transition model"
+  },
+  {
+    "file": "safety-initial.smt2",
+    "expected": "unsat",
+    "kind": "induction-base",
+    "claim": "the initial job state satisfies the safety invariant"
+  },
+  {
+    "file": "safety-step.smt2",
+    "expected": "unsat",
+    "kind": "induction-step",
+    "claim": "every job transition preserves the safety invariant"
+  },
+  {
+    "file": "safety-broken-step.smt2",
+    "expected": "sat",
+    "kind": "negative-control",
+    "claim": "a broken completion leaves the job pending and done"
+  },
+  {
+    "file": "response-unfair.smt2",
+    "expected": "sat",
+    "kind": "lasso",
+    "bound": 4,
+    "claim": "a requested job can wait forever without fairness"
+  },
+  {
+    "file": "response-weak-fair.smt2",
+    "expected": "unsat",
+    "kind": "lasso",
+    "bound": 4,
+    "claim": "no response-violating lasso of this length satisfies weak fairness"
+  },
+  {
+    "file": "response-dropped-weak-fair.smt2",
+    "expected": "sat",
+    "kind": "lasso",
+    "bound": 4,
+    "claim": "dropping a request can violate response even under weak fairness"
+  }
+]

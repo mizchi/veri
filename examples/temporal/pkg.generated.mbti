@@ -1,0 +1,69 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/temporal"
+
+import {
+  "mizchi/veri/runtime/list",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn action_enabled(State, Action) -> Bool
+
+pub fn decoded(Int, State?) -> Bool
+
+pub fn enabled(State, Action) -> Bool
+
+pub fn enabled_exact(State, Action) -> Unit
+
+pub fn finite_trace_safe(State, @list.List[Action]) -> Unit
+
+pub fn initial() -> State
+
+pub fn initial_safe() -> Unit
+
+pub fn initial_state(State) -> Bool
+
+pub fn replay(State, @list.List[Action]) -> State?
+
+pub fn represents(State, Int) -> Bool
+
+pub fn roundtrip(State) -> State?
+
+pub fn run(State, @list.List[Action]) -> State?
+
+pub fn safe(State) -> Bool
+
+pub fn safe_outcome(State?) -> Bool
+
+pub fn safe_state(State) -> Bool
+
+pub fn same_outcome(State?, State?) -> Bool
+
+pub fn state_code(State) -> Int
+
+pub fn state_from_code(Int) -> State?
+
+pub fn step(State, Action) -> State?
+
+pub fn step_preserves_safe(State, Action) -> Unit
+
+pub fn step_result(State, Action, State?) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) enum Action {
+  Request
+  Complete
+  Wait
+  Drop
+} derive(Eq, @debug.Debug)
+
+pub(all) struct State {
+  pending : Bool
+  done : Bool
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

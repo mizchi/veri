@@ -103,3 +103,19 @@ CSR 構築と `path_to` の配列変換は差分テストで検査する。
 - [ ] CSR 構築、`path_to`・トポロジー返却配列・ArrayView 補助APIの変換の実装証明。
 
 `just verify-extensions` で追加 API をまとめて検証する。
+
+## 時相論理・状態遷移
+
+- [x] `just temporal`: Z3 による固定ジョブモデルの安全性の帰納的検査と、
+  活性・弱公平性の bounded lasso 検査。到達する正例、壊した遷移、要求消失の反例を含む。
+  有限状態の全探索と比較し、SAT の実行列を独立に再生する。
+- [ ] `checks/temporal/Job.tla` を Apalache で実行・照合する。TLA+ の対応例は作成済みだが、
+  この環境には JVM と稼働中の Docker がなく未検証。
+- [x] 固定ジョブモデルと MoonBit の `step(state, action)` を接続。
+  private な `#proof_pure` と公開契約を使い、両整数モデルで有限実行列の安全性・
+  enabled・状態符号化を証明。実際の遷移表から Z3 の制約を生成し、反例を MoonBit で再生。
+  全探索との照合、1,000件の shrinking 付き QuickCheck、不正証明書も検査。
+- [ ] 汎用の型付き状態遷移モデル、反例の shrinking、任意のプログラムとの対応。
+  JSON 入出力・SMT 生成・ループ評価の実装証明。Apalache との往復は未実装。
+- [ ] 汎用の時相APIとバックエンド。Z3 の bounded safety / induction と、
+  必要に応じた Apalache の時相式変換を分離する。Bounded / Proved / Unknown を混同しない。

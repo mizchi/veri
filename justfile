@@ -152,6 +152,27 @@ negative *packages: setup-solvers
 smt:
     node tools/check-smt.mjs
 
+# Fixed job model: inductive safety and bounded liveness/fairness experiments.
+temporal:
+    node tools/check-temporal.mjs
+
+# Export the actual MoonBit transition table, search it, and replay certificates.
+temporal-bridge:
+    node tools/check-temporal-bridge.mjs
+
+prove-temporal: prover-config
+    moon -C examples prove temporal --why3-config ../_build/why3/why3.conf
+    moon -C examples prove temporal/client --why3-config ../_build/why3/why3.conf
+    just prove-temporal-machine
+
+prove-temporal-machine: prover-config
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove temporal --target-dir _build/temporal-machine --why3-config ../_build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove temporal/client --target-dir _build/temporal-machine --why3-config ../_build/why3/why3.conf
+
+verify-temporal: check prove-temporal temporal temporal-bridge
+    just negative examples/temporal
+    for temporal_target in js wasm wasm-gc native; do moon -C examples test temporal --target "$temporal_target" --deny-warn || exit; moon -C examples test temporal --target "$temporal_target" --release --deny-warn || exit; done
+
 vectors:
     node tools/generate-floats.mjs
     node tools/generate-runtime.mjs
@@ -160,4 +181,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine negative smt vectors-check test-backends test-release package-check
+verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine negative smt temporal temporal-bridge vectors-check test-backends test-release package-check

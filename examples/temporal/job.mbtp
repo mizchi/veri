@@ -1,0 +1,100 @@
+///|
+pub predicate safe_outcome(outcome : Option[State]) {
+  match outcome { None => true; Some(state) => safe_model(state) }
+}
+
+///|
+predicate present(outcome : Option[State]) {
+  match outcome { None => false; Some(_state) => true }
+}
+
+///|
+pub predicate same_outcome(left : Option[State], right : Option[State]) {
+  match left {
+    None => match right { None => true; Some(_state) => false }
+    Some(a) => match right {
+      None => false
+      Some(b) => a.pending == b.pending && a.done == b.done
+    }
+  }
+}
+
+///|
+pub lemma initial_safe() where {
+  proof_ensure: safe_model(initial_model()),
+} {}
+
+///|
+pub lemma step_preserves_safe(state : State, action : Action) where {
+  proof_require: safe_model(state),
+  proof_ensure: safe_outcome(step_model(state, action)),
+} {}
+
+///|
+/// The fairness guard must describe actual availability, not an assumption.
+pub lemma enabled_exact(state : State, action : Action) where {
+  proof_ensure: enabled_model(state, action) == present(step_model(state, action)),
+} {}
+
+///|
+pub fn run(state : State, actions : @list.List[Action]) -> Option[State] {
+  match actions {
+    Nil => Some(state)
+    Cons(action, rest) => match step_model(state, action) {
+      None => None
+      Some(next) => run(next, rest)
+    }
+  }
+}
+
+///|
+pub lemma finite_trace_safe(state : State, actions : @list.List[Action]) where {
+  proof_decrease: actions,
+  proof_require: safe_model(state),
+  proof_ensure: safe_outcome(run(state, actions)),
+} {
+  match actions {
+    Nil => ()
+    Cons(action, rest) => match step_model(state, action) {
+      None => ()
+      Some(next) => finite_trace_safe(next, rest)
+    }
+  }
+}
+///|
+pub predicate initial_state(state : State) { !state.pending && !state.done }
+
+///|
+pub predicate safe_state(state : State) { safe_model(state) }
+
+///|
+pub predicate action_enabled(state : State, action : Action) { enabled_model(state, action) }
+
+///|
+pub predicate step_result(state : State, action : Action, outcome : Option[State]) {
+  same_outcome(outcome, step_model(state, action))
+}
+
+///|
+pub predicate represents(state : State, code : Int) {
+  (state.pending && state.done && code == 3) ||
+  (state.pending && !state.done && code == 1) ||
+  (!state.pending && state.done && code == 2) ||
+  (!state.pending && !state.done && code == 0)
+}
+
+///|
+pub predicate decoded(code : Int, outcome : Option[State]) {
+  match outcome {
+    None => code < 0 || code > 3
+    Some(state) => represents(state, code)
+  }
+}
+
+///|
+lemma encoding_unique(left : State, right : State, code : Int) where {
+  proof_require: represents(left, code),
+  proof_require: represents(right, code),
+  proof_ensure: left.pending == right.pending,
+  proof_ensure: left.done == right.done,
+} {}

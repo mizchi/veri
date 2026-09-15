@@ -368,5 +368,19 @@
     "claim": "cycle checker rejects a self-loop (nonvacuity)",
     "machine": true,
     "timeoutMs": 300000
+  },
+  {
+    "package": "examples/temporal",
+    "fixture": "temporal-unsafe-state.mbt.txt",
+    "claim": "a broken job implementation returns a safe state",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "examples/temporal",
+    "fixture": "temporal-unsafe-state.mbt.txt",
+    "claim": "a broken job implementation returns a safe state",
+    "machine": true,
+    "timeoutMs": 300000
   }
 ]

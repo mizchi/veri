@@ -1,0 +1,7 @@
+///|
+// A broken implementation must not inherit safety from the pure model's lemmas.
+pub fn negative_control() -> State where {
+  proof_ensure: state => safe_state(state),
+} {
+  { pending: true, done: true }
+}

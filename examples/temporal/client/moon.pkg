@@ -1,0 +1,8 @@
+import {
+  "mizchi/veri-examples/temporal",
+  "mizchi/veri/runtime/list",
+}
+
+options(
+  "proof-enabled": true,
+)

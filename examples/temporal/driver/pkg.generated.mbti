@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/temporal/driver"
+
+import {
+  "moonbitlang/core/json",
+}
+
+// Values
+
+// Errors
+
+// Types and methods
+type Model derive(ToJson)
+
+type Witness derive(@json.FromJson)
+
+// Type aliases
+
+// Traits

@@ -1,0 +1,18 @@
+; Positive sanity check: requesting and completing must actually be possible.
+(set-logic QF_UF)
+(declare-const p0 Bool)
+(declare-const d0 Bool)
+(declare-const p1 Bool)
+(declare-const d1 Bool)
+(declare-const p2 Bool)
+(declare-const d2 Bool)
+(define-fun Next ((p Bool) (d Bool) (pn Bool) (dn Bool)) Bool
+  (or (and (not p) (not d) pn (not dn))
+      (and p (not d) (not pn) dn)
+      (and (= p pn) (= d dn))))
+(assert (and (not p0) (not d0)))
+(assert (Next p0 d0 p1 d1))
+(assert (Next p1 d1 p2 d2))
+(assert d2)
+(check-sat)
+(get-value (p0 d0 p1 d1 p2 d2))

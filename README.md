@@ -293,6 +293,18 @@ in the ArrayView convenience adapters remain outside this implementation proof. 
 is soundness of acceptance; completeness (accepting every valid certificate)
 has not been proved.
 
+## Temporal checking experiment
+
+`just temporal` runs a fixed job model with Z3: inductive safety, a liveness
+counterexample with indefinite waiting, and weak-fairness checks including a lost
+request. Bounded lasso checks report absence of a counterexample at the chosen
+bound, not an unbounded temporal proof. SAT traces are also replayed against an
+independent finite-state model. See [the experiment](checks/temporal/README.md)
+for the optional, not-yet-executed Apalache example. `just verify-temporal` also
+proves the shared MoonBit transition and arbitrary finite-trace safety, exports
+its actual finite transition table to Z3, and replays counterexamples in MoonBit.
+This is a development PoC, not a general public temporal API.
+
 ## Bitvector API
 
 Import `"mizchi/veri/bitvector"` in `moon.pkg` for all four widths. Bring the types into scope in a `.mbt` file:
