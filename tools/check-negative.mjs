@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { configureWhy3 } from "./why3-config.mjs";
-import { selectNegativeChecks, shardNegativeChecks } from "./negative-selection.mjs";
+import { selectNegativeChecks, shardNegativeChecks, negativeControlTimeout } from "./negative-selection.mjs";
 
 const fixtures = new URL("../checks/negative/", import.meta.url);
 let checks = selectNegativeChecks(
@@ -25,6 +25,9 @@ const config = configureWhy3();
 
 // Each false claim is isolated; ordinary moon prove contains only positive proofs.
 for (const check of checks) {
+  const timeoutMs = negativeControlTimeout(check);
+  console.log("Checking negative control (" + check.package + "): " + check.claim +
+    " (process budget " + timeoutMs + " ms)");
   const directory = mkdtempSync(join(tmpdir(), "veri-negative-"));
   try {
     const source = new URL("../" + check.package + "/", import.meta.url);
@@ -39,12 +42,15 @@ for (const check of checks) {
     writeFileSync(join(directory, sourceName), readFileSync(new URL(check.fixture, fixtures)));
     const result = spawnSync("moon", ["prove", "--why3-config", config], {
       // Some packages discharge substantial positive proofs before the false control.
-      cwd: directory, encoding: "utf8", timeout: check.timeoutMs ?? 60_000,
+      cwd: directory, encoding: "utf8", timeout: timeoutMs,
       env: {...process.env, ...(check.machine ? {
         MOON_PROVE_PRELUDE_OVERRIDE: join(homedir(), ".moon/lib/prelude_proof_machine_int"),
       } : {})},
     });
-    if (result.error) throw result.error;
+    if (result.error) {
+      throw new Error("Negative control did not finish: " + check.claim +
+        "\n" + result.stdout + result.stderr, {cause: result.error});
+    }
     const reportPath = join(directory, "_build/verif/veri-negative.proof.json");
     if (!existsSync(reportPath)) {
       throw new Error("No proof report for " + check.package + "/" + check.fixture +

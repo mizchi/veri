@@ -102,6 +102,8 @@ jobs:
     env:
       VERI_NEGATIVE_SHARD: ${{ matrix.shard }}
       VERI_NEGATIVE_SHARDS: '4'
+      # A false goal exhausts the full strategy; package proofs also need time.
+      VERI_NEGATIVE_TIMEOUT_MS: '600000'
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

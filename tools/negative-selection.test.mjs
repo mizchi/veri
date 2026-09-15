@@ -1,6 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { selectNegativeChecks, shardNegativeChecks } from "./negative-selection.mjs";
+import { selectNegativeChecks, shardNegativeChecks, negativeControlTimeout } from "./negative-selection.mjs";
+
+test("negative process budgets allow slower runners without shortening fixture budgets", () => {
+  assert.equal(negativeControlTimeout({}, {}), 60_000);
+  assert.equal(negativeControlTimeout({timeoutMs: 300_000}, {}), 300_000);
+  const ci = {VERI_NEGATIVE_TIMEOUT_MS: '600000'};
+  assert.equal(negativeControlTimeout({}, ci), 600_000);
+  assert.equal(negativeControlTimeout({timeoutMs: 300_000}, ci), 600_000);
+  assert.equal(negativeControlTimeout({timeoutMs: 900_000}, ci), 900_000);
+  for (const value of ['', '0', '-1', 'NaN', 'Infinity', '1.5', '3600001']) {
+    assert.throws(() => negativeControlTimeout({}, {VERI_NEGATIVE_TIMEOUT_MS: value}), /Invalid/);
+  }
+});
 
 test("negative shards cover each control exactly once and reject bad indices", () => {
   const checks = Array.from({length:68},(_,id)=>({id}));

@@ -1,3 +1,12 @@
+export function negativeControlTimeout(check, env = process.env) {
+  const minimum = env.VERI_NEGATIVE_TIMEOUT_MS === undefined
+    ? 60_000 : Number(env.VERI_NEGATIVE_TIMEOUT_MS);
+  if (!Number.isInteger(minimum) || minimum <= 0 || minimum > 3_600_000) {
+    throw new Error('Invalid VERI_NEGATIVE_TIMEOUT_MS');
+  }
+  return Math.max(check.timeoutMs ?? 60_000, minimum);
+}
+
 export function selectNegativeChecks(checks, packages) {
   for (const name of packages) {
     if (!checks.some(check => check.package === name)) {

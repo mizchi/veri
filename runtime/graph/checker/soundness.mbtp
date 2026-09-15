@@ -84,6 +84,7 @@ lemma parents_realize(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[
     Nil => ()
     Cons(parent, rest) => if vertex != source {
       parents_realize(n, edges, ds, ps, source, parent, weighted, rest)
+      extend_realized(edges, ds, source, parent, vertex, weighted)
     }
   }
 }

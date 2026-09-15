@@ -26,6 +26,9 @@ Dependabot で更新を提案する。ツールと依存のみをキャッシュ
 CI では `VERI_PROVER_JOBS=2` と `VERI_PROVER_FINAL_TIMEOUT=6` により、
 Why3 の同時ソルバー数と最終段階の制限秒数を調整する。ローカルの既定値は16と2。
 負例は `VERI_NEGATIVE_SHARD=0`〜`3`、`VERI_NEGATIVE_SHARDS=4` で68件を重複なく分配する。
+`VERI_NEGATIVE_TIMEOUT_MS=600000` で各負例のプロセスに最低10分を確保し、
+パッケージの証明とソルバーの全戦略が完了するのを待つ。プロセスの時間切れは失敗とし、
+偽の命題に対する検証レポートがある場合だけ負例の拒否として扱う。
 Apalache は生成した大きな遷移関係を型検査できるよう `JVM_ARGS=-Xss16m` を設定する。
 
 MoonBit の固定値は [.github/toolchain.env](../.github/toolchain.env) で管理する。

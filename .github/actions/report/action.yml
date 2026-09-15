@@ -17,6 +17,8 @@ runs:
           _build/why3/
           _build/**/*.proof.json
           _build/**/*.mlw
+          examples/_build/**/*.proof.json
+          examples/_build/**/*.mlw
           _build/apalache/**/output.log
           _build/apalache/**/*.tla
           _build/apalache/**/*.itf.json
