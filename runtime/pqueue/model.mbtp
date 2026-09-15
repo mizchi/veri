@@ -15,27 +15,36 @@ predicate all_ge(value : Int, heap : Heap) {
 predicate ordered(heap : Heap) {
   match heap {
     Empty => true
-    Node(left, value, right) => ordered(left) && ordered(right) && all_ge(value, left) && all_ge(value, right)
+    Node(left, value, right) => ordered(left) && ordered(right) && all_ge(value, left)
   }
 }
 
 ///|
-pub fn model(queue : PriorityQueue) -> @bag.Bag[Int] {
+pub fn model(queue : IntMinQueue) -> @bag.Bag[Int] {
   contents(queue.values)
 }
 
 ///|
-pub predicate valid(queue : PriorityQueue) {
-  ordered(queue.values)
+pub predicate valid(queue : IntMinQueue) {
+  ordered(queue.values) && root(queue.values)
 }
 
 ///|
-pub predicate minimum(value : Int, queue : PriorityQueue) {
+pub predicate minimum(value : Int, queue : IntMinQueue) {
   @bag.mem(value, model(queue)) &&
   (∀ other : Int, @bag.mem(other, model(queue)) → value <= other)
 }
 
 ///|
-fn total_size(left : Heap, right : Heap) -> @integer.Integer {
-  @integer.add(@bag.size(contents(left)), @bag.size(contents(right)))
+fn heap_size(heap : Heap) -> @integer.Integer {
+  @bag.size(contents(heap))
+}
+
+///|
+predicate root(heap : Heap) {
+  match heap {
+    Empty => true
+    Node(_children, _value, Empty) => true
+    Node(_children, _value, Node(_a, _x, _b)) => false
+  }
 }

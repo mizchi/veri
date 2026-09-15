@@ -6,14 +6,16 @@ pub(all) enum Tree[T] {
 } derive(Debug)
 
 ///|
-pub fn[T] empty() -> Tree[T] where {
+#as_free_fn(empty)
+pub fn[T] Tree::new() -> Tree[T] where {
   proof_ensure: result => @logic_tree.is_empty(model(result)),
 } {
   Empty
 }
 
 ///|
-pub fn[T] node(
+#as_free_fn(node)
+pub fn[T] Tree::node(
   left : Tree[T],
   value : T,
   right : Tree[T],
@@ -29,7 +31,8 @@ pub fn[T] node(
 }
 
 ///|
-pub fn[T] inorder(
+#as_free_fn(inorder)
+pub fn[T] Tree::inorder(
   tree : Tree[T],
 ) -> @linked.List[T] where {
   proof_ensure: result => {

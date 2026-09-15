@@ -1,0 +1,57 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/algebra"
+
+import {
+  "mizchi/veri/runtime/list",
+}
+
+// Values
+pub fn[T] accumulated(@list.List[T], (T, T) -> T, T) -> Bool
+
+pub fn[T] append(@list.List[T], @list.List[T]) -> @list.List[T]
+
+pub fn[T] associative((T, T) -> T) -> Bool
+
+pub fn[T] commutative((T, T) -> T) -> Bool
+
+pub fn[A, B, C] compose((B) -> C, (A) -> B, A) -> C
+
+pub fn[A, B, C] composes((B) -> C, (A) -> B, (A) -> C) -> Bool
+
+pub fn[T] fold_accumulate(@list.List[T], (T, T) -> T, T) -> Unit
+
+pub fn[T] fold_directions(@list.List[T], (T, T) -> T, T) -> Unit
+
+pub fn[A, B] fold_left((B, A) -> B, B, @list.List[A]) -> B
+
+pub fn[T] fold_partitions(@list.List[T], @list.List[T], (T, T) -> T, T) -> Unit
+
+pub fn[A, B] fold_right((A, B) -> B, @list.List[A], B) -> B
+
+pub fn[A, B] fold_split(@list.List[A], @list.List[A], (B, A) -> B) -> Unit
+
+pub fn[T] id(T) -> T
+
+pub fn[T] identity((T, T) -> T, T) -> Bool
+
+pub fn integer_addition() -> Unit
+
+pub fn[A, B] map((A) -> B, @list.List[A]) -> @list.List[B]
+
+pub fn[A, B, C] map_composition(@list.List[A], (B) -> C, (A) -> B, (A) -> C) -> Unit
+
+pub fn[T] map_identity(@list.List[T]) -> Unit
+
+pub fn[T] monoid((T, T) -> T, T) -> Bool
+
+pub fn[T] reorder_partitions(@list.List[T], @list.List[T], (T, T) -> T, T) -> Unit
+
+pub fn[A, B] split_for_all_acc(@list.List[A], @list.List[A], (B, A) -> B) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

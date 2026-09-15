@@ -6,26 +6,27 @@ import {
 }
 
 // Values
-pub fn[T] empty() -> Stack[T]
-
-pub fn[T] is_empty(Stack[T]) -> Bool
-
 pub fn[T] model(Stack[T]) -> @list.List[T]
-
-pub fn[T] peek(Stack[T]) -> T?
-
-pub fn[T] pop(Stack[T]) -> (T, Stack[T])?
-
-pub fn[T] push(Stack[T], T) -> Stack[T]
-
-pub fn[T] to_array(Stack[T]) -> Array[T]
 
 // Errors
 
 // Types and methods
-pub struct Stack[T] {
-  // private fields
+pub enum Stack[T] {
+  Stack((T, Stack[T])?)
 }
+#as_free_fn(is_empty)
+pub fn[T] Stack::is_empty(Self[T]) -> Bool
+pub fn[T] Stack::iter(Self[T]) -> Iter[T]
+#as_free_fn(empty)
+pub fn[T] Stack::new() -> Self[T]
+#as_free_fn(peek)
+pub fn[T] Stack::peek(Self[T]) -> T?
+#as_free_fn(pop)
+pub fn[T] Stack::pop(Self[T]) -> (T, Self[T])?
+#as_free_fn(push)
+pub fn[T] Stack::push(Self[T], T) -> Self[T]
+#as_free_fn(to_array)
+pub fn[T] Stack::to_array(Self[T]) -> Array[T]
 
 // Type aliases
 

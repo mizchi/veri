@@ -1,0 +1,47 @@
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv8::to_bv16(x : Bv8) -> Bv16 { Bv16::of_integer(Bv8::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv8::to_bv32(x : Bv8) -> Bv32 { Bv32::of_integer(Bv8::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv8::to_bv64(x : Bv8) -> Bv64 { Bv64::of_integer(Bv8::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv16::to_bv8(x : Bv16) -> Bv8 { Bv8::of_integer(Bv16::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv16::to_bv32(x : Bv16) -> Bv32 { Bv32::of_integer(Bv16::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv16::to_bv64(x : Bv16) -> Bv64 { Bv64::of_integer(Bv16::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv32::to_bv8(x : Bv32) -> Bv8 { Bv8::of_integer(Bv32::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv32::to_bv16(x : Bv32) -> Bv16 { Bv16::of_integer(Bv32::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv32::to_bv64(x : Bv32) -> Bv64 { Bv64::of_integer(Bv32::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv64::to_bv8(x : Bv64) -> Bv8 { Bv8::of_integer(Bv64::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv64::to_bv16(x : Bv64) -> Bv16 { Bv16::of_integer(Bv64::to_integer(x)) }
+
+///|
+/// Unsigned width conversion. Narrowing keeps the least significant bits.
+pub fn Bv64::to_bv32(x : Bv64) -> Bv32 { Bv32::of_integer(Bv64::to_integer(x)) }

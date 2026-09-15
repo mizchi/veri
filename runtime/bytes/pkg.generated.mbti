@@ -1,0 +1,71 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/bytes"
+
+import {
+  "mizchi/veri/bitvector",
+  "mizchi/veri/integer",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn byte_model(Byte) -> @bitvector.Bv8
+
+pub fn byte_model_preserves_value(Byte) -> Unit
+
+pub fn byte_to_bytes(Byte) -> Bytes
+
+pub fn byte_to_integer(Byte) -> @integer.Integer
+
+pub fn decode_byte(BytesView, Int) -> Decoded[Byte]?
+
+pub fn decode_uint16_be(BytesView, Int) -> Decoded[UInt16]?
+
+pub fn decode_uint16_le(BytesView, Int) -> Decoded[UInt16]?
+
+pub fn decode_uint64_be(BytesView, Int) -> Decoded[UInt64]?
+
+pub fn decode_uint64_le(BytesView, Int) -> Decoded[UInt64]?
+
+pub fn decode_uint_be(BytesView, Int) -> Decoded[UInt]?
+
+pub fn decode_uint_le(BytesView, Int) -> Decoded[UInt]?
+
+pub fn read_byte(BytesView, Int) -> Byte?
+
+pub fn read_end(Int, Int, Int) -> Int?
+
+pub fn read_uint16_be(BytesView, Int) -> UInt16?
+
+pub fn read_uint16_le(BytesView, Int) -> UInt16?
+
+pub fn read_uint64_be(BytesView, Int) -> UInt64?
+
+pub fn read_uint64_le(BytesView, Int) -> UInt64?
+
+pub fn read_uint_be(BytesView, Int) -> UInt?
+
+pub fn read_uint_le(BytesView, Int) -> UInt?
+
+pub fn uint16_to_be_bytes(UInt16) -> Bytes
+
+pub fn uint16_to_le_bytes(UInt16) -> Bytes
+
+pub fn uint64_to_be_bytes(UInt64) -> Bytes
+
+pub fn uint64_to_le_bytes(UInt64) -> Bytes
+
+pub fn uint_to_be_bytes(UInt) -> Bytes
+
+pub fn uint_to_le_bytes(UInt) -> Bytes
+
+// Errors
+
+// Types and methods
+pub(all) struct Decoded[T] {
+  value : T
+  next_offset : Int
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

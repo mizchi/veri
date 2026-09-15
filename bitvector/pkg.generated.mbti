@@ -10,6 +10,40 @@ import {
 // Errors
 
 // Types and methods
+pub type Bv16
+pub fn Bv16::add(Self, Self) -> Self
+pub fn Bv16::ashr(Self, Self) -> Self
+pub fn Bv16::bw_and(Self, Self) -> Self
+pub fn Bv16::bw_not(Self) -> Self
+pub fn Bv16::bw_or(Self, Self) -> Self
+pub fn Bv16::bw_xor(Self, Self) -> Self
+pub fn Bv16::eq(Self, Self) -> Bool
+pub fn Bv16::in_range(@integer.Integer) -> Bool
+pub fn Bv16::lshr(Self, Self) -> Self
+pub fn Bv16::modulus() -> @integer.Integer
+pub fn Bv16::mul(Self, Self) -> Self
+pub fn Bv16::neg(Self) -> Self
+pub fn Bv16::of_integer(@integer.Integer) -> Self
+pub fn Bv16::one() -> Self
+pub fn Bv16::ones() -> Self
+pub fn Bv16::sdiv(Self, Self) -> Self
+pub fn Bv16::shl(Self, Self) -> Self
+pub fn Bv16::sle(Self, Self) -> Bool
+pub fn Bv16::slt(Self, Self) -> Bool
+pub fn Bv16::srem(Self, Self) -> Self
+pub fn Bv16::sub(Self, Self) -> Self
+pub fn Bv16::to_bv32(Self) -> Bv32
+pub fn Bv16::to_bv64(Self) -> Bv64
+pub fn Bv16::to_bv8(Self) -> Bv8
+pub fn Bv16::to_integer(Self) -> @integer.Integer
+pub fn Bv16::udiv(Self, Self) -> Self
+pub fn Bv16::ule(Self, Self) -> Bool
+pub fn Bv16::ult(Self, Self) -> Bool
+pub fn Bv16::urem(Self, Self) -> Self
+pub fn Bv16::width() -> @integer.Integer
+pub fn Bv16::width_bv() -> Self
+pub fn Bv16::zero() -> Self
+
 pub type Bv32
 pub fn Bv32::add(Self, Self) -> Self
 pub fn Bv32::ashr(Self, Self) -> Self
@@ -32,12 +66,16 @@ pub fn Bv32::sle(Self, Self) -> Bool
 pub fn Bv32::slt(Self, Self) -> Bool
 pub fn Bv32::srem(Self, Self) -> Self
 pub fn Bv32::sub(Self, Self) -> Self
+pub fn Bv32::to_bv16(Self) -> Bv16
+pub fn Bv32::to_bv64(Self) -> Bv64
+pub fn Bv32::to_bv8(Self) -> Bv8
 pub fn Bv32::to_integer(Self) -> @integer.Integer
 pub fn Bv32::udiv(Self, Self) -> Self
 pub fn Bv32::ule(Self, Self) -> Bool
 pub fn Bv32::ult(Self, Self) -> Bool
 pub fn Bv32::urem(Self, Self) -> Self
-pub fn Bv32::width() -> Self
+pub fn Bv32::width() -> @integer.Integer
+pub fn Bv32::width_bv() -> Self
 pub fn Bv32::zero() -> Self
 
 pub type Bv64
@@ -62,13 +100,51 @@ pub fn Bv64::sle(Self, Self) -> Bool
 pub fn Bv64::slt(Self, Self) -> Bool
 pub fn Bv64::srem(Self, Self) -> Self
 pub fn Bv64::sub(Self, Self) -> Self
+pub fn Bv64::to_bv16(Self) -> Bv16
+pub fn Bv64::to_bv32(Self) -> Bv32
+pub fn Bv64::to_bv8(Self) -> Bv8
 pub fn Bv64::to_integer(Self) -> @integer.Integer
 pub fn Bv64::udiv(Self, Self) -> Self
 pub fn Bv64::ule(Self, Self) -> Bool
 pub fn Bv64::ult(Self, Self) -> Bool
 pub fn Bv64::urem(Self, Self) -> Self
-pub fn Bv64::width() -> Self
+pub fn Bv64::width() -> @integer.Integer
+pub fn Bv64::width_bv() -> Self
 pub fn Bv64::zero() -> Self
+
+pub type Bv8
+pub fn Bv8::add(Self, Self) -> Self
+pub fn Bv8::ashr(Self, Self) -> Self
+pub fn Bv8::bw_and(Self, Self) -> Self
+pub fn Bv8::bw_not(Self) -> Self
+pub fn Bv8::bw_or(Self, Self) -> Self
+pub fn Bv8::bw_xor(Self, Self) -> Self
+pub fn Bv8::eq(Self, Self) -> Bool
+pub fn Bv8::in_range(@integer.Integer) -> Bool
+pub fn Bv8::lshr(Self, Self) -> Self
+pub fn Bv8::modulus() -> @integer.Integer
+pub fn Bv8::mul(Self, Self) -> Self
+pub fn Bv8::neg(Self) -> Self
+pub fn Bv8::of_integer(@integer.Integer) -> Self
+pub fn Bv8::one() -> Self
+pub fn Bv8::ones() -> Self
+pub fn Bv8::sdiv(Self, Self) -> Self
+pub fn Bv8::shl(Self, Self) -> Self
+pub fn Bv8::sle(Self, Self) -> Bool
+pub fn Bv8::slt(Self, Self) -> Bool
+pub fn Bv8::srem(Self, Self) -> Self
+pub fn Bv8::sub(Self, Self) -> Self
+pub fn Bv8::to_bv16(Self) -> Bv16
+pub fn Bv8::to_bv32(Self) -> Bv32
+pub fn Bv8::to_bv64(Self) -> Bv64
+pub fn Bv8::to_integer(Self) -> @integer.Integer
+pub fn Bv8::udiv(Self, Self) -> Self
+pub fn Bv8::ule(Self, Self) -> Bool
+pub fn Bv8::ult(Self, Self) -> Bool
+pub fn Bv8::urem(Self, Self) -> Self
+pub fn Bv8::width() -> @integer.Integer
+pub fn Bv8::width_bv() -> Self
+pub fn Bv8::zero() -> Self
 
 // Type aliases
 

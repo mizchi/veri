@@ -1,0 +1,6 @@
+///|
+/// Mathematical range of Int; valid under either proof prelude.
+pub predicate in_range(value : @integer.Integer) {
+  @integer.le(@integer.neg(@integer.add(@integer.from_int(2147483647), @integer.one())), value) &&
+  @integer.le(value, @integer.from_int(2147483647))
+}

@@ -1,0 +1,12 @@
+// Check that every verified mutating API remains callable from a verified client.
+// In particular, local proof annotations must not make these functions ghost.
+pub fn probe(source : FixedArray[Int], target : FixedArray[Int]) -> Bool where {
+  proof_require: source.length() >= 3 && target.length() >= 3,
+  proof_ensure: result => result,
+} {
+  @runtime_array.set(source, 0, 1) &&
+  @runtime_array.swap(source, 0, 1) &&
+  @runtime_array.fill(source, 2, { start: 0, count: 3 }) &&
+  @runtime_array.copy_within(source, { start: 0, count: 2 }, 1) &&
+  @runtime_array.blit_disjoint(source, target, { start: 0, count: 3 }, 0)
+}

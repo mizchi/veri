@@ -49,7 +49,8 @@ test "quickcheck: queue operation traces agree with an array model" {
           }
         }
         let expected = reference
-        if @queue.to_array(state) != expected ||
+        if state.iter().to_array() != expected ||
+          @queue.to_array(state) != expected ||
           @queue.is_empty(state) != reference.is_empty() ||
           @queue.peek(state) != expected.get(0) ||
           @queue.to_array(before) != snapshot {

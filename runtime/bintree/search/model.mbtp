@@ -7,7 +7,7 @@ fn node_model(tree : Node) -> @logic_tree.Tree[Int] {
 }
 
 ///|
-pub fn model(tree : SearchTree) -> @logic_tree.Tree[Int] {
+pub fn model(tree : IntSet) -> @logic_tree.Tree[Int] {
   node_model(tree.root)
 }
 
@@ -31,7 +31,7 @@ predicate ordered(tree : Node) {
 
 ///|
 /// Strict search order, with no duplicates. Color balance is checked in tests.
-pub predicate valid(tree : SearchTree) {
+pub predicate valid(tree : IntSet) {
   ordered(tree.root)
 }
 
@@ -51,6 +51,6 @@ predicate inserted_node(before : Node, value : Int, after : Node) {
 }
 
 ///|
-predicate inserted(before : SearchTree, value : Int, after : SearchTree) {
+predicate inserted(before : IntSet, value : Int, after : IntSet) {
   inserted_node(before.root, value, after.root)
 }

@@ -11,6 +11,8 @@ export const catalog = new Map([
   ["bst/build-find-ascending", ["core-immut-sorted-set"]],
   ["tree/inorder-to-array-balanced", ["core-immut-sorted-set"]],
   ["tree/inorder-to-array-left-skewed", ["core-immut-sorted-set"]],
+  ["tree/to-array-balanced", ["core-immut-sorted-set"]],
+  ["tree/to-array-left-skewed", ["core-immut-sorted-set"]],
 ]);
 
 export function parseSummaries(output) {

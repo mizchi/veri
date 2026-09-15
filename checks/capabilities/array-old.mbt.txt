@@ -1,0 +1,7 @@
+pub fn probe(xs : FixedArray[Int], index : Int, value : Int) -> Unit where {
+  proof_require: 0 <= index && index < xs.length(),
+  proof_ensure: xs[index] == value,
+  proof_ensure: ∀ j : Int, (0 <= j && j < xs.length() && j != index) → xs[j] == old(xs[j]),
+} {
+  xs[index] = value
+}

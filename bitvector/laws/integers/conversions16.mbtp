@@ -1,0 +1,29 @@
+///|
+pub lemma integer_roundtrip16(value : @integer.Integer) where {
+  proof_ensure: @integer.eq(
+    Bv16::to_integer(Bv16::of_integer(value)),
+    @integer.modulo(value, Bv16::modulus()),
+  ),
+} {}
+
+///|
+pub lemma bitvector_roundtrip16(value : Bv16) where {
+  proof_ensure: Bv16::eq(Bv16::of_integer(Bv16::to_integer(value)), value),
+} {
+  proof_assert Bv16::in_range(Bv16::to_integer(value))
+  proof_assert @integer.eq(
+    Bv16::to_integer(Bv16::of_integer(Bv16::to_integer(value))),
+    Bv16::to_integer(value),
+  )
+}
+
+///|
+pub lemma unsigned_value_in_range16(value : Bv16) where {
+  proof_ensure: Bv16::in_range(Bv16::to_integer(value)),
+} {}
+
+///|
+pub lemma width_encodings16() where {
+  proof_ensure: @integer.eq(Bv16::width(), @integer.from_int(16)),
+  proof_ensure: @integer.eq(Bv16::to_integer(Bv16::width_bv()), Bv16::width()),
+} {}

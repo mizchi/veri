@@ -1,4 +1,18 @@
 ///|
+test "snapshots share stored values while preserving separate stack spines" {
+  let value = [1]
+  let original = @stack.Stack::new().push(value)
+  let extended = original.push([2])
+  let (top, rest) = extended.pop().unwrap()
+  assert_eq(top, [2])
+  value.push(3)
+  assert_eq(original.peek(), Some([1, 3]))
+  assert_eq(rest.peek(), Some([1, 3]))
+  assert_eq(extended.to_array(), [[2], [1, 3]])
+  assert_eq(original.to_array(), [[1, 3]])
+}
+
+///|
 test "LIFO and persistent snapshots" {
   let empty : @stack.Stack[Int] = @stack.empty()
   let first = @stack.push(empty, 10)
@@ -45,7 +59,8 @@ test "quickcheck: stack operation traces agree with an array model" {
           }
         }
         let expected = reference.rev()
-        if @stack.to_array(state) != expected ||
+        if state.iter().to_array() != expected ||
+          @stack.to_array(state) != expected ||
           @stack.is_empty(state) != reference.is_empty() ||
           @stack.peek(state) != expected.get(0) ||
           @stack.to_array(before) != snapshot {

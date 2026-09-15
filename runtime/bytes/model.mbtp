@@ -1,0 +1,13 @@
+///|
+/// Why3's native Byte projection, with the range 0..255.
+#proof_import("mach.int.Byte")
+pub fn byte_to_integer(value : Byte) -> @integer.Integer = "to_int"
+
+///|
+pub fn byte_model(value : Byte) -> Bv8 { Bv8::of_integer(byte_to_integer(value)) }
+
+///|
+pub lemma byte_model_preserves_value(value : Byte) where {
+ proof_ensure: @integer.eq(Bv8::to_integer(byte_model(value)), byte_to_integer(value)),
+ proof_ensure: Bv8::in_range(byte_to_integer(value)),
+} {}

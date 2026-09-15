@@ -1,0 +1,2 @@
+///| Deliberately false; must remain a rejected proof obligation.
+lemma negative_control() where { proof_ensure: associative(@integer.sub), } {}

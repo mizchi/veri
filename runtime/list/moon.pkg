@@ -4,7 +4,9 @@ import {
 }
 
 import {
+  "moonbitlang/core/list" @core_list,
   "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
 } for "test"
 
 options(

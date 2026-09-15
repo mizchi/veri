@@ -1,0 +1,8 @@
+///|
+pub fn negative_control(array : FixedArray[Int]) -> Bool where {
+  proof_require: array.length() > 0,
+  proof_ensure: result => result,
+} {
+  let _ = fill(array, 42, { start: 0, count: 1 })
+  array[0] == 0
+}

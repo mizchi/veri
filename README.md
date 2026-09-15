@@ -6,7 +6,52 @@ A small foundation for formal verification in MoonBit, with reusable logical mod
 
 Proof bindings cover finite sets, sequences, lists, bags, finite maps, binary trees, fixed-size bitvectors, total arrays, strings, and IEEE floating point. For IEEE 754, the repository checks **binary32 and binary64 / roundTiesToEven (RNE)** execution results and proves properties in Why3's IEEE models. It does not certify full compliance with the standard or prove the correctness of the MoonBit compiler or CPU.
 
-## Running
+## Use as a dependency
+
+To use a published release, add it to your own project:
+
+```sh
+moon add mizchi/veri
+```
+
+Add the import and proof setting to the consuming package's `moon.pkg`:
+
+```moonbit
+import {
+  "mizchi/veri/bounds",
+}
+
+options("proof-enabled": true)
+```
+
+Put this code in `digit.mbt`. Like core `Int::clamp`, `clamp` includes both bounds.
+Use `clamp_half_open(value, lower, upper)` for an exclusive upper bound.
+Both functions require valid bounds; their proof preconditions are not runtime checks.
+
+```moonbit
+pub fn digit(value : Int) -> Int where {
+  proof_ensure: result => 0 <= result && result <= 9,
+} {
+  @bounds.clamp(value, 0, 9)
+}
+
+test "clamp includes its upper bound" {
+  assert_eq(digit(10), 9)
+}
+```
+
+```sh
+moon test --target js
+moon prove
+```
+
+This minimal proof uses bundled Why3 and Z3 on PATH. Runtime API use alone does
+not require a solver, Node.js, or just. Logical types, `model`, lemmas, and
+predicates are proof-only and cannot be called in ordinary runtime code.
+For complex BV/real proofs that need additional solver configuration, see the
+repository verification instructions below.
+
+## Verify the repository
 
 Requirements: MoonBit, the bundled Why3 data at `~/.moon/share/why3/`, Z3 on PATH, Node.js 24+, just, and unzip. The Node scripts have no npm dependencies.
 
@@ -26,6 +71,8 @@ just prove-machine # Prove bounds, runtime bridges, and their example with machi
 just prove-collections-machine # Prove collection implementations and clients with machine integers
 just prove-foundations-machine # Prove order, arithmetic, real and IEEE error contracts with machine integers
 just core-capabilities # Probe direct calls to core from contracted functions
+just conversion-capabilities # Probe native numeric casts and UInt16 support
+just array-capabilities # Report old-state/snapshot support and mutable-alias rejection
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just negative      # Check that deliberately false claims in each model are not proved
 just negative bitvector runtime/uint32 runtime/uint64 # Select affected negative controls
@@ -40,6 +87,7 @@ just fp-capabilities # Report native Float/Double proof-lowering support
 just vectors       # Regenerate expected results from Z3
 just vectors-check # Compare checked-in reference values with the current Z3 results
 just fmt           # Format sources and generate public interfaces
+just package-check # Execute and prove both README quickstarts from the package ZIP
 ```
 
 The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, Z3 4.16.0, and CVC5 1.3.4.
@@ -48,11 +96,18 @@ The `just` proof recipes generate `_build/why3/why3.conf` with Z3 and CVC5 encod
 Proof results appear in `*.proof.json` files under each module’s `_build/verif/` directory.
 Use `just prove`: bare `moon prove` uses only the default encoding and can time out on integer/BV bridge goals.
 
+These commands run from a checkout of this repository. To reuse its generated
+solver configuration in another project, first run `just prover-config` here,
+then run `moon prove --why3-config /path/to/veri/_build/why3/why3.conf` in that
+project. The config refers to local files, so keep that checkout available.
+The package ZIP excludes the development workspace, examples, benchmarks, and
+tools; `just package-check` verifies its contents and the consumer quickstart.
+
 ## Structure and guarantees
 
 | Path | Contents | What is checked |
 | --- | --- | --- |
-| `bounds` | Clamp to a half-open interval | Given valid bounds, the result lies within the interval and preserves inputs already in range |
+| `bounds` | Inclusive clamp and explicit half-open clamp | Given valid bounds, the result lies within the interval and preserves inputs already in range |
 | `fset` | Bindings to Why3's finite-set model | Lemmas for empty sets, insertion, and union |
 | `seq` / `list` | Finite sequence and inductive list models | Concatenation, lengths, reversal, indexing; `list/conversions` connects the models |
 | `bag` / `fmap` | Multisets and finite maps | Multiplicity, union, lookup after update, domain and removal |
@@ -71,12 +126,21 @@ Use `just prove`: bare `moon prove` uses only the default encoding and can time 
 | `examples/models` | Examples importing the libraries | Cross-module proofs, including arrays with bitvector keys and string values |
 | `integer` | Unbounded integers and runtime value projections | Shared contract vocabulary for Int / UInt / Int64 / UInt64 |
 | `runtime/uint32` / `runtime/uint64` | Wrapping add/sub implementations | Direct BV contracts for add/sub/less under both integer preludes; Z3 differential checks |
-| `runtime/array` | FixedArray model and safe reads | Bounds checks and agreement with the model’s selected cell |
+| `runtime/array` | FixedArray reads, writes, swaps, fills and range copies | Safe bounds and operation contracts; full before/after correspondence is checked by QuickCheck |
+| `arrays/range` | Mathematical range and before/after models | Frame preservation, swap, fill and copy lemmas |
 | `runtime/text` | Validated SMT-compatible text | Code point length, char_at, and substring checked against Z3 |
 | `examples/bridges` | Runtime bridge clients | Contracts compose across module boundaries |
 | `runtime/float32` / `runtime/float64` | Runtime FP APIs and exact reference comparisons | Arithmetic, sqrt, neg/abs, comparisons, classification, and non-NaN bit roundtrips |
 | `runtime/float_conversions` | Precision conversion checks | Float ↔ Double compared against Z3, including rounding boundaries |
 | `examples/floating` | Runtime FP usage | Different rounding precision in Float and Double |
+| `runtime/int32` / `runtime/int64` | Checked signed add/sub/mul | Exact mathematical results or overflow rejection, proved under both integer preludes; BigInt comparisons |
+| `runtime/conversion` | 9 checked conversions and 3 unconditional widenings across signedness and widths | Representability checks proved; native cast results compared with BigInt |
+| `encoding` / `encoding/bitvector` | Positional LE/BE byte models | Roundtrips, byte bounds and lengths for 8/16/32/64 bits, plus BV correspondence |
+| `runtime/bytes` | Byte / UInt16 / UInt / UInt64 codecs over BytesView | Proved read bounds and consumed length; native codecs differential-tested |
+| `algebra` | Explicit operation laws and map/fold models | Identity/composition, ordered splits, monoid partitions and commutative reordering |
+| `graph` | Paths, reachability, weights and finite-set certificates | Composition/decomposition, closed sets, feasible-label shortest-path and BFS certificates |
+| `runtime/graph` | Immutable directed graphs, BFS and Dijkstra | Independent distance model, executable certificate checks, graph/trace shrinking |
+| `examples/toolkit` | Checked allocation, binary headers, aggregation and routes | Cross-module contracts and runtime clients |
 | `checks/` | SMT-LIB 2 checks for FP, bitvectors, arrays, and strings | Properties over all inputs and counterexamples with fixed inputs |
 | `checks/negative` | Deliberately false lemmas | False claims must not be reported as successfully proved |
 
@@ -89,6 +153,9 @@ veri/
 ├── moon.work                # members: ".", "examples"
 ├── bounds/
 ├── bitvector/
+├── encoding/
+├── algebra/
+├── graph/
 ├── arrays/
 ├── strings/
 ├── fset/
@@ -106,7 +173,8 @@ veri/
     ├── models/
     ├── bridges/
     ├── floating/
-    └── collections/
+    ├── collections/
+    └── toolkit/
 ```
 
 Workspace resolution uses the local library without downloading it from the registry.
@@ -138,15 +206,84 @@ An incorrect zero sign or a difference of even 1 ULP in a finite value fails the
 
 ## Bitvector API
 
-Import `"mizchi/veri/bitvector"` in `moon.pkg` for both widths. Bring the types into scope in a `.mbt` file:
+Import `"mizchi/veri/bitvector"` in `moon.pkg` for all four widths. Bring the types into scope in a `.mbt` file:
 
 ```moonbit
-using @bitvector {type Bv32, type Bv64}
+using @bitvector {type Bv8, type Bv16, type Bv32, type Bv64}
 ```
 
-Proofs in `.mbtp` and runtime contracts then use `Bv32::add(x, y)`, `Bv64::add(x, y)`, `Bv32::of_integer(n)`, and the corresponding type methods. The types retain their distinct Why3 `bv.BV32` / `bv.BV64` representations. The current `.mbtp` parser requires the `using` form for imported type methods. This replaces the previous per-width package imports and free functions.
+Proofs in `.mbtp` and runtime contracts then use `Bv32::add(x, y)`, `Bv64::add(x, y)`, `Bv32::of_integer(n)`, and the corresponding type methods. The types retain their distinct Why3 `bv.BV8` / `bv.BV16` / `bv.BV32` / `bv.BV64` representations. The current `.mbtp` parser requires the `using` form for imported type methods. This replaces the previous per-width package imports and free functions.
 
 Public lemmas have width suffixes, such as `@laws.addition_wraps32()` / `addition_wraps64()` in `bitvector/laws` and `integer_roundtrip32` / `integer_roundtrip64` in `bitvector/laws/integers`. Keeping integer conversion laws separate limits quantified proof context. `examples/bitvector/widths.mbtp` proves that the value 2^32 wraps in Bv32 but is preserved in Bv64 using a single package import. `just prove-machine` also checks these laws and the example with machine integers.
+
+## Checked arithmetic, codecs, algebra and graphs
+
+`runtime/int32` and `runtime/int64` provide `checked_add`, `checked_sub` and
+`checked_mul`. `Some(value)` is the exact mathematical result; `None` means the
+result is outside the destination range. Both integer preludes prove these
+contracts, including intermediate-operation safety in the machine prelude.
+`runtime/conversion` provides all 12 directed conversions among `Int`, `UInt`,
+`Int64` and `UInt64`. The nine fallible conversions use `checked_`, such as
+`checked_int_to_uint` and `checked_int64_to_int`, and return `Option`.
+The three unconditional widenings (`int_to_int64`, `uint_to_int64`,
+`uint_to_uint64`) return their native destination values directly, using core's
+casts. `can_*` proves the exact range decision; `converted_*` specifies value
+preservation (wrap a widening result in `Some` in that specification).
+These functions take native types; MoonBit does not allow this package to add
+public methods directly to builtin numeric types. Native casts are currently rejected
+by the proof frontend, so their correspondence is tested with independent
+`BigInt` arithmetic rather than assumed. `just conversion-capabilities` records
+this boundary, including unsupported UInt16 lowering.
+
+`runtime/bytes` uses MoonBit type names: `byte_to_bytes` and
+`{uint16,uint,uint64}_to_{le,be}_bytes`, following core's `to_le_bytes` /
+`to_be_bytes` convention. `read_byte` and `read_{uint16,uint,uint64}_{le,be}`
+take `(data : BytesView, offset : Int)` and return the native value as `T?`.
+For sequential parsing, `decode_byte` and `decode_{uint16,uint,uint64}_{le,be}`
+return `Decoded[T]?`, with `value` and `next_offset` relative to the view. Negative,
+overflowing and truncated offsets return `None`; trailing bytes are permitted.
+`read_end` proves the bounds check and exact consumed length. `encoding` proves
+LE/BE roundtrips, octet ranges and lengths; `encoding/bitvector` connects these to
+Bv8/Bv16/Bv32/Bv64, and `runtime/bytes.byte_model` connects native Byte to Bv8.
+Native codec values, UInt16 casts and view-offset handling are differential-tested;
+the codec bodies have no universal value-correspondence proof. UInt16 uses its
+natural MoonBit runtime type. Encoders return fresh immutable `Bytes`.
+
+`algebra` defines `associative`, `identity`, `commutative` and `monoid` over a
+supplied pure operation, and structural models over `runtime/list.List`.
+`fold_split` needs no algebraic assumptions; `fold_partitions` and
+`fold_directions` require a monoid; `reorder_partitions` also requires
+commutativity. `map_identity` and `map_composition` are proved by induction.
+Runtime `List::map(f)` and `List::fold(init=initial, f)` match core/list's
+`raise?` callbacks: they run left to right and propagate an error immediately.
+`List::from_iter` consumes a core `Iter` in order. Core differential tests,
+shrinking, law, callback error and long-list tests cover these APIs. Effects in runtime callbacks are
+outside the pure model. No law is assumed for an arbitrary operation.
+
+`runtime/graph.Graph::from_array(edges, vertex_count=n)` validates a directed graph over
+`0..<vertex_count` with nonnegative Int weights, self-loops and parallel edges.
+It copies input edges. `Graph::new(vertex_count=n)` creates vertices without edges;
+`from_iter(edges, vertex_count=n)` consumes a core `Iter`. `iter()` / `to_array()`
+traverse edges in source-vertex order, preserving input order within each source.
+Constructors and searches return values directly and `raise GraphError`, so they
+compose with MoonBit's `try ... catch`. `bfs(source)` minimizes edge count; `dijkstra(source)`
+minimizes weight using the existing FIFO and minimum-priority queues. Results
+provide `distance(vertex)` and a fresh `path_to(vertex)` including both endpoints.
+Invalid or unreachable lookup vertices return `None`; invalid sources return an
+error. Dijkstra rejects a reachable shortest distance beyond Int max, while an
+overflowing detour does not reject a representable alternative.
+`check_bfs` / `check_dijkstra` independently validate paths, edge inequalities and
+closure of the reachable set. These diagnostic checks take O(V(V+E)) time in the worst case because they
+reconstruct paths and scan adjacency lists; algorithms do not run them implicitly.
+
+`graph` proves path concatenation/decomposition, weight additivity, closure in
+`fset`, and shortest-path certificates from feasible distance labels. Its logical
+path stores successors (source omitted, target included); runtime `path_to`
+includes the source. BFS and Dijkstra implementations and executable certificate
+checkers are tested against an independent Floyd–Warshall model, including zero
+cycles, disconnected vertices and overflow. Their complete mutable algorithm
+bodies are not formally proved. `examples/toolkit` shows the runtime APIs and
+composes arithmetic, aggregation and finite-set proof contracts.
 
 ## Orders, number theory, reals, and error bounds
 
@@ -181,11 +318,110 @@ These are proofs about the Why3 IEEE model. They introduce no assumed correspond
 
 Besides native SMT and the BV arithmetic encoding, `just prover-config` generates Z3/CVC5 routes retaining Why3's float axioms and rounding-error lemmas, and a Z3 route encoding definitions as equivalent axioms to support quantified-law matching. CVC5 complements Z3 for quantified sequence laws and nonlinear real error bounds. Bundled Why3 files remain untouched; no custom assumptions or `proof_axiomatized` annotations are added. Use `just prove` normally and `just prove-foundations-machine` for checked machine integers. `just verify` includes both and the negative controls.
 
+## Runtime collection API
+
+Own types provide methods: `List::new()`, `Stack::new()`, `Queue::new()`,
+`IntMinQueue::new()`, `IntSet::new()`, and `Tree::new()`. Updates return new
+persistent values; existing versions remain usable. `IntMinQueue` is explicitly
+an Int-only minimum queue with duplicates; `IntSet` stores unique Int keys.
+The existing free functions remain aliases of the same contracted implementations.
+
+```moonbit
+// Import "mizchi/veri/runtime/queue".
+test "persistent queue and Iter" {
+  let original : @queue.Queue[Int] = @queue.Queue::new()
+  let queue = original.push(1).push(2)
+  assert_true(original.is_empty())
+  assert_eq(queue.iter().map(x => x * 2).to_array(), [2, 4])
+}
+```
+
+`iter()` creates independent consuming traversal state without first converting
+the collection to an array: list order, stack top first, queue FIFO order,
+ascending minimum-queue/set order, and inorder for trees. Iteration and array
+conversions are runtime-tested; their correspondence has no proof contract.
+List methods follow core naming: `prepend`, `concat`, and `rev`; the free aliases
+`cons(value, list)`, `append(left, right)`, and `reverse(list)` remain available.
+
+## FixedArray updates and ranges
+
+`runtime/array` directly updates built-in `FixedArray[T]` values. Ranges are
+specified by `Range { start, count }`, meaning `[start, start + count)`. Every update
+returns `true` on success and `false` for invalid indices or ranges. Invalid
+operations leave the array unchanged; an empty range at the end is valid.
+`Range` is a small `#valtype` record. Its named fields prevent confusing offsets
+and counts, while positional function calls remain usable in verified code.
+The current frontend rejects labelled calls in contracted bodies. A `Range`
+can contain invalid values; constructing it does not assert any bounds.
+
+| API | Behavior |
+| --- | --- |
+| `valid_range(length, range)` | Validate endpoints without overflowing, including for extreme invalid inputs |
+| `set(array, index, value)` | Write one cell |
+| `swap(array, left, right)` | Exchange two cells; equal indices are valid |
+| `fill(array, value, range)` | Fill a range |
+| `blit(source, target, source_range, target_start)` | Copy between arrays, allowing overlapping source and destination |
+| `blit_disjoint(source, target, source_range, target_start)` | Verified copy between **distinct arrays** |
+| `copy_within(array, source_range, target_start)` | Copy within one array, including overlapping ranges, using the original source values |
+
+`set` and `swap` take constant time; range updates take O(count) time and constant
+auxiliary space. `copy_within` copies backwards when moving towards higher
+indices, without allocating a temporary array. This states algorithmic costs,
+not measured performance parity with core. `blit` checks object identity and
+selects `copy_within` for the same array or `blit_disjoint` for distinct arrays.
+The dispatcher is runtime-tested and has no proof contract. Verified callers
+choose `copy_within` or `blit_disjoint`; Why3 rejects passing aliases to the latter.
+`range_in_bounds(length, start, count)` is a **proof-only** predicate over
+mathematical endpoints. Use `valid_range(length, range)` at runtime.
+
+```moonbit
+// Import "mizchi/veri/runtime/array".
+test "range updates" {
+  let xs : FixedArray[Int] = [0, 1, 2, 3]
+  assert_true(@array.fill(xs, 9, { start: 1, count: 2 }))
+  assert_true(@array.copy_within(xs, { start: 0, count: 3 }, 1))
+  assert_eq(xs, [0, 0, 9, 9])
+}
+```
+
+The runtime proofs cover range validation, safe indexing, arithmetic bounds and
+loop termination under both integer preludes. They also establish the value
+written by `set`, the exchanged values through local assertions in `swap`, the
+whole filled range, and equality of copied cells with the distinct source in
+`blit_disjoint`. The public `swap` and `copy_within` contracts expose success/bounds only.
+`examples/bridges.fill_and_read` proves that a caller can compose `fill` and `get`.
+
+`arrays/range` defines full before/after specifications: `unchanged_outside`,
+`filled`, `copied`, and `exchange`. Its seven proved lemmas cover single writes,
+swap/undo, empty operations, and extending a fill or copy by one cell. The models
+use mathematical indices and [Why3 map](https://why3.org/stdlib/map.html)
+range equality/exchange. `copied` always reads the **pre-state** source, including
+for overlap. These lemmas do not establish full runtime correspondence.
+
+The current compiler has no usable `old(...)` contract expression, and
+`proof_let` snapshots cause a compiler assertion failure. Consequently, complete
+before/after correspondence, preservation outside the written range, unchanged
+state on failure, and overlap copying are checked against snapshot references
+with QuickCheck; they are **not universally proved for the runtime functions**.
+The eight array-update properties run 1,000 cases each, including operation traces,
+full-width indices and nearby valid ranges, with core tuple/array shrinkers.
+A deliberately incorrect forward copy is falsified and shrunk to a three-cell
+overlap. Negative proof controls reject wrong filled values, overflowing ranges,
+out-of-range writes in the model, and copying from an already modified source.
+
+`just array-capabilities` records the compiler limitations and checks alias
+rejection in `_build/array-capabilities.json`; it is included in `just verify`.
+Predicates wrapping array reads in local proof annotations also avoid the
+compiler treating mutating functions as Why3 ghost code. No new assumed
+contracts or custom axioms are introduced. Implementation status and proof boundaries are recorded in [TODO.md](TODO.md) in the repository.
+
 ## QuickCheck properties
 
-The 37 positive properties under `bounds/` and `runtime/` use
-`moonbitlang/core/quickcheck`, each running 1,000 accepted cases with seed
-`20260914`. Generated sizes grow up to 64, or 128 for operation traces and red-black balance. They run
+Properties under `bounds/` and `runtime/` use `moonbitlang/core/quickcheck`
+with fixed seeds `20260914` and `20260915`. Most run 1,000 accepted cases;
+graph comparisons run 500 graphs and 200 edit traces, checking all source/target
+pairs against Floyd–Warshall. Generated sizes grow up to 64, or 128 for collection
+traces and red-black balance. Graphs have up to 7 vertices and 48 input edges. They run
 with `just quickcheck js` (or `wasm`, `wasm-gc`, `native`) and are also included
 in `just test`, `just test-backends`, `just test-release`, and `just verify`.
 
@@ -237,12 +473,15 @@ A separate regression test uses `@quickcheck.report` on the deliberately false
 claim that all pushed values are less than 3, then checks that the report contains
 `counterexample=[Push(3)]`. This is an intentionally false `quickcheck:*` test and verifies the
 failure/shrinking path; it is not counted as a successful 1,000-case property.
+A graph regression similarly shrinks the false law “minimum edge count equals
+minimum weight” to one edge of weight zero (`counterexample=[0]`).
 
 ## Collection benchmarks
 
 `benchmarks/collections` uses [MoonBit's benchmark API](https://docs.moonbitlang.com/en/latest/language/benchmarks.html)
-through `moon bench --release --no-parallelize`. It measures 12 workloads at
-256 and 2,048 elements, producing 30 comparisons per backend. Each implementation
+through `moon bench --release --no-parallelize`. It measures 14 workloads at
+256 and 2,048 elements, producing 34 comparisons per backend. Two direct tree
+`to_array()` workloads supplement the unchanged `inorder().to_array()` workloads. Each implementation
 runs in two opposite orders with five calibrated batches per pass. Results are
 kept with `Bench.keep`, and exact output equality is checked before timing on
 the same optimized backend. Empty inputs and repeated calls are also tested.
@@ -254,7 +493,7 @@ the same optimized backend. Empty inputs and repeated calls are also tested.
 | Queue | `core/queue` | Push and drain; repeated peek on a prebuilt queue |
 | Minimum priority queue | `core/immut/priority_queue`, `core/priority_queue`, both using `Reverse[Int]` | Push and drain, including duplicates, shuffled and ascending inputs |
 | BST | `core/immut/sorted_set` | Insert, then query every key and equally many missing keys, with shuffled and ascending insertion |
-| Binary-tree traversal | `core/immut/sorted_set` | Materialize the same ordered unique contents from balanced and left-skewed trees |
+| Binary-tree traversal | `core/immut/sorted_set` | Materialize the same contents from balanced and left-skewed trees, measuring linked-list intermediates and direct arrays separately |
 
 The generic binary tree has no direct core counterpart here; its comparator
 performs ordered enumeration, not arbitrary-shape tree manipulation. Mutable
@@ -279,12 +518,14 @@ any comparison exceeds the supplied limit in either order. Results straddling
 the limit are inconclusive and also fail this check. Benchmarks are separate
 from `just verify`, since timing depends on hardware and system load.
 
-The [recorded measurements](benchmarks/collections/RESULTS.md) show that the
+The [latest tuning measurements](benchmarks/collections/TUNING.md) show that the
 current implementations **do not meet a universal no-slowdown target**. These
 comparisons include representation, allocation, and algorithm differences; they
 do not isolate proof-contract overhead. Proof-only `seq/list/bag/fmap/bintree`
 bindings have no runtime operations to benchmark. Rerun on your deployment
 backend and workload before relying on a performance comparison.
+The [2026-09-14 measurements](benchmarks/collections/RESULTS.md) remain available
+as a historical snapshot of the previous skew-heap implementation.
 
 ## Collection models and implementations
 
@@ -326,17 +567,21 @@ These contracts have not been replaced with `#proof_axiomatized` assumptions.
 | Runtime package | Operations and representation | Cost |
 | --- | --- | --- |
 | `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`; immutable linked spine | Basic operations O(1); append/reverse/length O(n) |
-| `runtime/stack` | `empty/push/pop/peek/is_empty`; linked list | O(1) |
+| `runtime/stack` | `empty/push/pop/peek/is_empty`; linked cells also used as pop results | O(1) |
 | `runtime/queue` | `empty/push/pop/peek/is_empty`; front list and reversed back list | Push/peek O(1); pop amortized O(1), worst-case O(n) |
-| `runtime/pqueue` | `empty/push/pop/peek/is_empty`; Int skew heap, duplicates retained | Push/pop amortized O(log n), peek O(1) |
-| `runtime/bintree` | `empty/node/inorder`; generic binary tree | Constructors O(1); inorder O(n) |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`; Int two-pass pairing heap, duplicates retained | Push/peek O(1); pop O(k) for k root children, worst-case O(n) |
+| `runtime/bintree` | `empty/node/inorder/to_array`; generic binary tree | Constructors O(1); traversal O(n) |
 | `runtime/bintree/search` | `empty/insert/contains`; Int red-black tree without duplicates | Insert/contains O(log n) |
 
 Costs describe states built through the public APIs and are not formally proved. Queue updates
 normalize the front list, so repeated peeks do not repeat reversal. Amortized costs
-for the queue and skew heap apply to a single update history; branching from old
-snapshots can repeat work. The heap follows
-[Sleator–Tarjan](https://www.cs.cmu.edu/~sleator/papers/Adjusting-Heaps.htm), and the tree follows
+for the queue apply to a single update history; branching from old
+snapshots can repeat work. The priority queue follows the
+[pairing heap](https://www.cs.cmu.edu/~sleator/papers/Pairing-Heaps.htm): pair adjacent
+children from left to right, then merge the paired roots from right to left.
+Both passes are tail recursive, with proofs of termination, contents and ordering.
+Pairing and linking construct the resulting cells directly, avoiding temporary roots.
+The search tree follows
 [Okasaki's insertion algorithm](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/redblack-trees-in-a-functional-setting/62BC5EA75A2C95E3F6EE95AE3DADF0E5).
 These differ from core's complete binary heap and size-balanced search tree.
 
@@ -347,17 +592,21 @@ of order, membership preservation, and search results. Red-black invariants
 QuickCheck properties and long ascending/descending tests. Formal proofs of color
 balance and complexity, and deletion, are not implemented.
 
-The search-tree API now uses an opaque `@search.SearchTree` with internal colors.
+The search-tree API now uses an opaque `@search.IntSet` with internal colors.
 Code passing `@tree.Tree[Int]` directly must instead construct a search tree with
 `@search.empty()` and `insert`, enumerate with `@search.to_array(tree)`, and use
 `@search.model` in contracts. The generic `runtime/bintree.Tree[T]` remains available
 for arbitrary shapes. List length uses tail recursion; tree inorder uses a
 continuation list for linear traversal. Its left branch is tail-recursive, while
 its right branch and List append still use the call stack.
-Stack/Queue/PriorityQueue/SearchTree use `#valtype` wrappers, and small operations
+Direct `Tree::to_array()` uses an explicit stack for deep trees in either direction
+and avoids an intermediate linked list. Independent QuickCheck models and
+20,000-level trees test this runtime conversion.
+Stack/Queue/IntMinQueue/IntSet use `#valtype` wrappers, and small operations
 use `#inline` to reduce wrapper allocations. Updates also use `#owned` to avoid
 unnecessary reference-count operations without changing the existing content/order
-contracts. `proof_require`, `proof_ensure`, `proof_assert`, and `.mbtp` specifications
+contracts. A Stack cell is already `(value, rest)?`, so pop allocates no extra tuple.
+`proof_require`, `proof_ensure`, `proof_assert`, and `.mbtp` specifications
 are not runtime checks.
 
 `pop/uncons/peek` return `None` for empty inputs. List `length` requires its
@@ -384,15 +633,16 @@ These are proof APIs, not a runtime Z3 FFI or a general-purpose SMT-LIB 2 expres
 
 | Package | Why3 theory | Main operations |
 | --- | --- | --- |
-| `bitvector` | `bv.BV32` / `bv.BV64` | `add/sub/mul`, `udiv/urem`, `sdiv/srem`, `bw_and/or/xor/not`, `shl/lshr/ashr`, `ult/ule/slt/sle` |
+| `bitvector` | `bv.BV8` / `bv.BV16` / `bv.BV32` / `bv.BV64` | `add/sub/mul`, `udiv/urem`, `sdiv/srem`, `bw_and/or/xor/not`, `shl/lshr/ashr`, `ult/ule/slt/sle` |
 | `arrays` | `map.Map`, `map.Const` | `select`, `store`, `const_array`, extensional `eq` |
-| `strings` | `string.String` | `concat`, `length`, `char_at`, `substring`, `contains`, `prefix_of`, `suffix_of`, `index_of`, `replace`, `to_int/from_int`, `lt/le` |
+| `strings` | `string.String` | `concat`, `length`, `char_at`, `substring`, `contains`, `prefix_of`, `suffix_of`, `index_of`, `replace`, `to_integer/from_integer`, `lt/le` |
 
-Bitvectors have a fixed width; the initial API provides 32- and 64-bit types.
+Bitvectors have a fixed width: 8, 16, 32 or 64 bits.
 Signedness belongs to the operation, not the bit pattern. Addition, subtraction, and multiplication wrap modulo 2^width.
 Shift counts are bitvectors of the same width: counts at least as large as the width do not wrap around.
-`Bv32::width()` / `Bv64::width()` return the bitvector encoding of 32 or 64. Unsigned division by zero yields all ones in the SMT model;
-this is not a claim about runtime division. Arbitrary widths, extraction, and extension are not exposed yet.
+`Bv32::width()` / `Bv64::width()` return 32 or 64 as `integer.Integer`.
+Use `width_bv()` for the bitvector encoding required by shift operations. Unsigned division by zero yields all ones in the SMT model;
+this is not a claim about runtime division. Unsigned conversions between the four widths use `to_bv8/to_bv16/to_bv32/to_bv64`: widening preserves the value, narrowing keeps the low bits. Arbitrary widths, bit extraction and sign extension are not exposed yet.
 `of_integer` first reduces modulo 2^width, so it is defined for negative and oversized mathematical integers too.
 `to_integer` returns the unsigned value, `modulus()` is 2^width, and `in_range` recognizes unsigned values.
 The conversion laws prove `to_integer(of_integer(n)) = n mod 2^width` and `of_integer(to_integer(v)) = v`.
@@ -404,7 +654,8 @@ The conversion laws prove `to_integer(of_integer(n)) = n mod 2^width` and `of_in
 Length counts code points, so an astral character within that alphabet has length one;
 this is not MoonBit's runtime UTF-16 length. `char_at` returns a string, and `substring` takes a start and count.
 Invalid positions produce empty strings, unsuccessful searches return -1, and `replace` changes the first occurrence.
-`to_int/from_int` follow SMT nonnegative decimal conversion semantics; their `Int` values use the default mathematical-integer proof model.
+`to_integer/from_integer` follow SMT nonnegative decimal conversion semantics; their values, lengths and indices use `integer.Integer` under both proof preludes.
+Project runtime indices with `@integer.from_int(index)`; these logical operations are not runtime casts.
 There is no implicit conversion between `Text` and MoonBit `String`, and regex bindings are not included yet.
 
 See `examples/models/models.mbtp` for a proof combining `SmtArray[Bv64, Text]` with the bitvector and string bindings.
@@ -418,7 +669,7 @@ only establish that the false claims were not proved; the direct SAT checks supp
 | `Int`, `UInt`, `Int64`, `UInt64` | `@integer.from_int/from_uint/from_int64/from_uint64` → `Integer` | Proof-only numerical projections from the selected MoonBit prelude |
 | `UInt`, `UInt64` | `runtime/uint32`, `runtime/uint64` | `model` encodes the value as Bv32/Bv64; add/sub/less prove direct agreement with BV operations under both integer preludes |
 | `Int` / `UInt`, `Int64` / `UInt64` | Their 32-/64-bit encodings | 48 Z3 reference cases for native add/sub/mul, bitwise operations, signed/unsigned order, and valid shifts; also check the wrapping adapters |
-| `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]`, plus `a.length()` | `get` proves Some exactly in bounds with the selected model value, and None otherwise, under both preludes |
+| `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]`, plus `a.length()` | Reads, range validation and update contracts under both preludes; see the array section for the limits of before/after proofs |
 | `String` | `@text.from_string(s)` → `@text.Text?` | Validate UTF-16 and the shared alphabet; 72 Z3 reference cases for length, char_at, substring |
 | `Float` / `Double` | binary32 / binary64 encoding | 122 operation cases per format plus 62 precision conversion cases against Z3; native FP operations still lack a universal correspondence proof |
 
@@ -555,7 +806,7 @@ The Why3 logical laws and runtime differential tests are both available; a theor
 ## Trusted boundary and limitations
 
 - The type mappings, argument order, and Why3 symbol mappings in `#proof_external` / `#proof_import`, along with Why3, the solver, and MoonBit's translation, are trusted. No custom `proof_axiomatized` declarations are used.
-- Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads, collections, and their examples are also proved separately with the bundled machine-integer model. `lower < upper` is a caller precondition, not a runtime input check.
+- Default integer proofs use mathematical integers. Bounds, unsigned wrapping adapters, FixedArray reads and updates, collections, strings, and their examples are also proved separately with the bundled machine-integer model. `min <= max` for `clamp` and `lower < upper` for `clamp_half_open` are caller preconditions, not runtime input checks.
 - The runtime check profile is binary32 and binary64 with RNE. The logical API exposes five rounding modes, but runtime configuration and testing of all modes are not implemented.
 - NaN payloads, signaling versus quiet NaNs, exception flags, traps, decimal formats, runtime FMA, and floating-point string conversions are not checked. SMT-LIB's FP theory itself does not distinguish signaling from quiet NaNs.
 - Transcendental functions such as `sin` / `exp`, and proofs of error bounds relative to real-valued algorithms, require separate work.
@@ -564,7 +815,7 @@ The Why3 logical laws and runtime differential tests are both available; a theor
 - The project currently uses the local toolchain. Pinning toolchain distributions and solver versions for shared CI remains future work.
 
 Possible extensions include compiler support for native FP proof lowering, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
-additional runtime bridge contracts, regular expressions, balanced search trees, heap-based priority queues, and runtime finite maps.
+additional runtime bridge contracts, regular expressions, and runtime finite maps.
 TestFloat / SoftFloat are not integrated into this repository yet.
 
 ## References
@@ -580,3 +831,7 @@ TestFloat / SoftFloat are not integrated into this repository yet.
 - [Z3 Guide: Bitvectors](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/): Fixed widths, signed/unsigned operations, and modular arithmetic.
 - [Z3 Guide: Arrays](https://microsoft.github.io/z3guide/docs/theories/Arrays/): Select/store and extensional arrays.
 - [Z3 Guide: Strings](https://microsoft.github.io/z3guide/docs/theories/Strings/): String operations and Unicode semantics.
+
+## License
+
+[Apache-2.0](LICENSE).

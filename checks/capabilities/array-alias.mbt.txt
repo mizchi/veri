@@ -1,0 +1,9 @@
+pub fn probe(xs : FixedArray[Int]) -> Bool where {
+  proof_ensure: result => result,
+} {
+  if xs.length() >= 3 {
+    @runtime_array.blit_disjoint(xs, xs, { start: 0, count: 2 }, 1)
+  } else {
+    true
+  }
+}

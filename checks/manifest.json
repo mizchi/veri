@@ -66,5 +66,17 @@
   {
     "file": "fp/half-subnormal-error.smt2",
     "expected": "sat"
+  },
+  {
+    "file": "bv/widen-byte.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "bv/codec16-roundtrip.smt2",
+    "expected": "unsat"
+  },
+  {
+    "file": "bv/narrowing-byte-loss.smt2",
+    "expected": "sat"
   }
 ]

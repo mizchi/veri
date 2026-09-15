@@ -6,33 +6,61 @@ import {
 }
 
 // Values
+pub fn addition_wraps16() -> Unit
+
 pub fn addition_wraps32() -> Unit
 
 pub fn addition_wraps64() -> Unit
+
+pub fn addition_wraps8() -> Unit
+
+pub fn de_morgan16(@bitvector.Bv16, @bitvector.Bv16) -> Unit
 
 pub fn de_morgan32(@bitvector.Bv32, @bitvector.Bv32) -> Unit
 
 pub fn de_morgan64(@bitvector.Bv64, @bitvector.Bv64) -> Unit
 
+pub fn de_morgan8(@bitvector.Bv8, @bitvector.Bv8) -> Unit
+
+pub fn oversized_shifts16() -> Unit
+
 pub fn oversized_shifts32() -> Unit
 
 pub fn oversized_shifts64() -> Unit
+
+pub fn oversized_shifts8() -> Unit
+
+pub fn signed_unsigned_differ16() -> Unit
 
 pub fn signed_unsigned_differ32() -> Unit
 
 pub fn signed_unsigned_differ64() -> Unit
 
+pub fn signed_unsigned_differ8() -> Unit
+
+pub fn subtraction_inverts_addition16(@bitvector.Bv16, @bitvector.Bv16) -> Unit
+
 pub fn subtraction_inverts_addition32(@bitvector.Bv32, @bitvector.Bv32) -> Unit
 
 pub fn subtraction_inverts_addition64(@bitvector.Bv64, @bitvector.Bv64) -> Unit
+
+pub fn subtraction_inverts_addition8(@bitvector.Bv8, @bitvector.Bv8) -> Unit
+
+pub fn unsigned_division_by_zero16(@bitvector.Bv16) -> Unit
 
 pub fn unsigned_division_by_zero32(@bitvector.Bv32) -> Unit
 
 pub fn unsigned_division_by_zero64(@bitvector.Bv64) -> Unit
 
+pub fn unsigned_division_by_zero8(@bitvector.Bv8) -> Unit
+
+pub fn xor_self_is_zero16(@bitvector.Bv16) -> Unit
+
 pub fn xor_self_is_zero32(@bitvector.Bv32) -> Unit
 
 pub fn xor_self_is_zero64(@bitvector.Bv64) -> Unit
+
+pub fn xor_self_is_zero8(@bitvector.Bv8) -> Unit
 
 // Errors
 

@@ -6,19 +6,7 @@ import {
 }
 
 // Values
-pub fn[T] empty() -> Queue[T]
-
-pub fn[T] is_empty(Queue[T]) -> Bool
-
 pub fn[T] model(Queue[T]) -> @list.List[T]
-
-pub fn[T] peek(Queue[T]) -> T?
-
-pub fn[T] pop(Queue[T]) -> (T, Queue[T])?
-
-pub fn[T] push(Queue[T], T) -> Queue[T]
-
-pub fn[T] to_array(Queue[T]) -> Array[T]
 
 // Errors
 
@@ -26,6 +14,19 @@ pub fn[T] to_array(Queue[T]) -> Array[T]
 pub struct Queue[T] {
   // private fields
 }
+#as_free_fn(is_empty)
+pub fn[T] Queue::is_empty(Self[T]) -> Bool
+pub fn[T] Queue::iter(Self[T]) -> Iter[T]
+#as_free_fn(empty)
+pub fn[T] Queue::new() -> Self[T]
+#as_free_fn(peek)
+pub fn[T] Queue::peek(Self[T]) -> T?
+#as_free_fn(pop)
+pub fn[T] Queue::pop(Self[T]) -> (T, Self[T])?
+#as_free_fn(push)
+pub fn[T] Queue::push(Self[T], T) -> Self[T]
+#as_free_fn(to_array)
+pub fn[T] Queue::to_array(Self[T]) -> Array[T]
 
 // Type aliases
 

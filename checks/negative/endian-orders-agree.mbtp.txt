@@ -1,0 +1,4 @@
+///| Deliberately false; must remain a rejected proof obligation.
+lemma negative_control() where {
+ proof_ensure: @integer.eq(decode_le(encode_be16(@integer.from_int(4660))), @integer.from_int(4660)),
+} {}

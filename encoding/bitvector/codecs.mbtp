@@ -1,0 +1,48 @@
+///|
+/// Connect the positional codec to the unsigned bitvector interpretation.
+pub lemma bitvector_codec8(value : Bv8) where {
+ proof_ensure: Bv8::eq(Bv8::of_integer(@encoding.decode_le(@encoding.encode_le8(Bv8::to_integer(value)))), value),
+ proof_ensure: Bv8::eq(Bv8::of_integer(@encoding.decode_be(@encoding.encode_be8(Bv8::to_integer(value)))), value),
+} {
+ proof_assert Bv8::in_range(Bv8::to_integer(value))
+ proof_assert @integer.eq(Bv8::to_integer(Bv8::of_integer(Bv8::to_integer(value))), Bv8::to_integer(value))
+ proof_assert Bv8::eq(Bv8::of_integer(Bv8::to_integer(value)), value)
+ proof_assert @integer.eq(@encoding.decode_le(@encoding.encode_le8(Bv8::to_integer(value))), Bv8::to_integer(value))
+ proof_assert @integer.eq(@encoding.decode_be(@encoding.encode_be8(Bv8::to_integer(value))), Bv8::to_integer(value))
+}
+///|
+/// Connect the positional codec to the unsigned bitvector interpretation.
+pub lemma bitvector_codec16(value : Bv16) where {
+ proof_ensure: Bv16::eq(Bv16::of_integer(@encoding.decode_le(@encoding.encode_le16(Bv16::to_integer(value)))), value),
+ proof_ensure: Bv16::eq(Bv16::of_integer(@encoding.decode_be(@encoding.encode_be16(Bv16::to_integer(value)))), value),
+} {
+ proof_assert Bv16::in_range(Bv16::to_integer(value))
+ proof_assert @integer.eq(Bv16::to_integer(Bv16::of_integer(Bv16::to_integer(value))), Bv16::to_integer(value))
+ proof_assert Bv16::eq(Bv16::of_integer(Bv16::to_integer(value)), value)
+ proof_assert @integer.eq(@encoding.decode_le(@encoding.encode_le16(Bv16::to_integer(value))), Bv16::to_integer(value))
+ proof_assert @integer.eq(@encoding.decode_be(@encoding.encode_be16(Bv16::to_integer(value))), Bv16::to_integer(value))
+}
+///|
+/// Connect the positional codec to the unsigned bitvector interpretation.
+pub lemma bitvector_codec32(value : Bv32) where {
+ proof_ensure: Bv32::eq(Bv32::of_integer(@encoding.decode_le(@encoding.encode_le32(Bv32::to_integer(value)))), value),
+ proof_ensure: Bv32::eq(Bv32::of_integer(@encoding.decode_be(@encoding.encode_be32(Bv32::to_integer(value)))), value),
+} {
+ proof_assert Bv32::in_range(Bv32::to_integer(value))
+ proof_assert @integer.eq(Bv32::to_integer(Bv32::of_integer(Bv32::to_integer(value))), Bv32::to_integer(value))
+ proof_assert Bv32::eq(Bv32::of_integer(Bv32::to_integer(value)), value)
+ proof_assert @integer.eq(@encoding.decode_le(@encoding.encode_le32(Bv32::to_integer(value))), Bv32::to_integer(value))
+ proof_assert @integer.eq(@encoding.decode_be(@encoding.encode_be32(Bv32::to_integer(value))), Bv32::to_integer(value))
+}
+///|
+/// Connect the positional codec to the unsigned bitvector interpretation.
+pub lemma bitvector_codec64(value : Bv64) where {
+ proof_ensure: Bv64::eq(Bv64::of_integer(@encoding.decode_le(@encoding.encode_le64(Bv64::to_integer(value)))), value),
+ proof_ensure: Bv64::eq(Bv64::of_integer(@encoding.decode_be(@encoding.encode_be64(Bv64::to_integer(value)))), value),
+} {
+ proof_assert Bv64::in_range(Bv64::to_integer(value))
+ proof_assert @integer.eq(Bv64::to_integer(Bv64::of_integer(Bv64::to_integer(value))), Bv64::to_integer(value))
+ proof_assert Bv64::eq(Bv64::of_integer(Bv64::to_integer(value)), value)
+ proof_assert @integer.eq(@encoding.decode_le(@encoding.encode_le64(Bv64::to_integer(value))), Bv64::to_integer(value))
+ proof_assert @integer.eq(@encoding.decode_be(@encoding.encode_be64(Bv64::to_integer(value))), Bv64::to_integer(value))
+}

@@ -24,7 +24,7 @@ fn inspect_balance(node : Node) -> (Int, Int)? {
 }
 
 ///|
-fn balanced(tree : SearchTree) -> Bool {
+fn balanced(tree : IntSet) -> Bool {
   if tree.root is Branch(Red, _, _, _) {
     return false
   }

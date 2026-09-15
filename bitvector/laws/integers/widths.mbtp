@@ -1,0 +1,35 @@
+///|
+pub lemma widen_roundtrip8_16(x : Bv8) where {
+ proof_ensure: Bv8::eq(Bv16::to_bv8(Bv8::to_bv16(x)), x),
+ proof_ensure: @integer.eq(Bv16::to_integer(Bv8::to_bv16(x)), Bv8::to_integer(x)),
+} {}
+
+///|
+pub lemma widen_roundtrip8_32(x : Bv8) where {
+ proof_ensure: Bv8::eq(Bv32::to_bv8(Bv8::to_bv32(x)), x),
+ proof_ensure: @integer.eq(Bv32::to_integer(Bv8::to_bv32(x)), Bv8::to_integer(x)),
+} {}
+
+///|
+pub lemma widen_roundtrip8_64(x : Bv8) where {
+ proof_ensure: Bv8::eq(Bv64::to_bv8(Bv8::to_bv64(x)), x),
+ proof_ensure: @integer.eq(Bv64::to_integer(Bv8::to_bv64(x)), Bv8::to_integer(x)),
+} {}
+
+///|
+pub lemma widen_roundtrip16_32(x : Bv16) where {
+ proof_ensure: Bv16::eq(Bv32::to_bv16(Bv16::to_bv32(x)), x),
+ proof_ensure: @integer.eq(Bv32::to_integer(Bv16::to_bv32(x)), Bv16::to_integer(x)),
+} {}
+
+///|
+pub lemma widen_roundtrip16_64(x : Bv16) where {
+ proof_ensure: Bv16::eq(Bv64::to_bv16(Bv16::to_bv64(x)), x),
+ proof_ensure: @integer.eq(Bv64::to_integer(Bv16::to_bv64(x)), Bv16::to_integer(x)),
+} {}
+
+///|
+pub lemma widen_roundtrip32_64(x : Bv32) where {
+ proof_ensure: Bv32::eq(Bv64::to_bv32(Bv32::to_bv64(x)), x),
+ proof_ensure: @integer.eq(Bv64::to_integer(Bv32::to_bv64(x)), Bv32::to_integer(x)),
+} {}

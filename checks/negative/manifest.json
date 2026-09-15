@@ -112,11 +112,13 @@
   {
     "package": "runtime/queue",
     "fixture": "queue-is-lifo.mbt.txt",
+    "timeoutMs": 180000,
     "claim": "queue returns the newest pushed value"
   },
   {
     "package": "runtime/pqueue",
     "fixture": "pqueue-is-max.mbt.txt",
+    "timeoutMs": 180000,
     "claim": "minimum priority queue returns the maximum"
   },
   {
@@ -159,5 +161,72 @@
     "package": "ieee754/error",
     "fixture": "round64-is-exact.mbtp.txt",
     "claim": "binary64 represents one third exactly"
+  },
+  {
+    "package": "runtime/array",
+    "fixture": "fill-ignores-value.mbt.txt",
+    "machine": true,
+    "claim": "fill leaves its destination cell zero after writing 42"
+  },
+  {
+    "package": "runtime/array",
+    "fixture": "range-endpoint-overflows.mbt.txt",
+    "machine": true,
+    "claim": "range ending beyond Int max is valid"
+  },
+  {
+    "package": "arrays/range",
+    "fixture": "fill-frame-ignored.mbtp.txt",
+    "claim": "fill may also change a cell outside its range"
+  },
+  {
+    "package": "arrays/range",
+    "fixture": "copy-reads-updated-source.mbtp.txt",
+    "claim": "overlapping copy may read source cells after earlier writes"
+  },
+  {
+    "package": "runtime/int32",
+    "fixture": "checked32-overflow-succeeds.mbt.txt",
+    "claim": "checked Int addition succeeds beyond Int max",
+    "machine": true
+  },
+  {
+    "package": "runtime/int64",
+    "fixture": "checked64-overflow-succeeds.mbt.txt",
+    "claim": "checked Int64 multiplication succeeds for MIN times minus one",
+    "machine": true
+  },
+  {
+    "package": "runtime/conversion",
+    "fixture": "negative-int-is-unsigned.mbt.txt",
+    "claim": "negative Int can be represented by UInt",
+    "machine": true
+  },
+  {
+    "package": "bitvector/laws/integers",
+    "fixture": "narrowing-preserves-all-bits.mbtp.txt",
+    "claim": "narrowing 16 ones to 8 bits preserves the integer value"
+  },
+  {
+    "package": "encoding",
+    "fixture": "endian-orders-agree.mbtp.txt",
+    "claim": "decoding BE bytes as LE preserves 0x1234",
+    "timeoutMs": 300000
+  },
+  {
+    "package": "algebra",
+    "fixture": "subtraction-is-associative.mbtp.txt",
+    "claim": "mathematical subtraction is associative"
+  },
+  {
+    "package": "graph",
+    "fixture": "empty-path-changes-vertex.mbtp.txt",
+    "claim": "an empty path changes its source vertex"
+  },
+  {
+    "package": "runtime/bytes",
+    "fixture": "truncated-read-succeeds.mbt.txt",
+    "claim": "a four-byte read fits inside three bytes",
+    "machine": true
   }
 ]

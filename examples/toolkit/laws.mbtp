@@ -1,0 +1,22 @@
+///|
+/// Instantiate generic partitioned aggregation with a proved integer monoid.
+pub lemma sum_partitions(xs : List[@integer.Integer], ys : List[@integer.Integer]) where {
+ proof_ensure: @relations.same(@algebra.fold_left(@integer.add, @integer.zero(), @algebra.append(xs, ys)), @integer.add(@algebra.fold_left(@integer.add, @integer.zero(), xs), @algebra.fold_left(@integer.add, @integer.zero(), ys))),
+} {
+ proof_assert @algebra.monoid(@integer.add, @integer.zero())
+}
+
+///|
+/// The set used as a visited-set certificate must contain the start and be closed.
+pub lemma visited_contains_target(edge : (Int, Int) -> Bool, source : Int, steps : List[Int], target : Int, visited : @fset.Fset[Int]) where {
+ proof_require: @logic_graph.closed(edge, visited),
+ proof_require: @fset.mem(source, visited),
+ proof_require: @logic_graph.path(edge, source, steps, target),
+ proof_ensure: @fset.mem(target, visited),
+} {
+}
+
+///|
+fn allocation_value(count : Int, stride : Int, header : Int) -> @integer.Integer {
+ @integer.add(@integer.mul(@integer.from_int(count), @integer.from_int(stride)), @integer.from_int(header))
+}

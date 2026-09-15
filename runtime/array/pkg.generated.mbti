@@ -4,16 +4,37 @@ package "mizchi/veri/runtime/array"
 import {
   "mizchi/veri/arrays",
   "mizchi/veri/integer",
+  "moonbitlang/core/debug",
 }
 
 // Values
+pub fn[T] blit(FixedArray[T], FixedArray[T], Range, Int) -> Bool
+
+pub fn[T] blit_disjoint(FixedArray[T], FixedArray[T], Range, Int) -> Bool
+
+pub fn[T] copy_within(FixedArray[T], Range, Int) -> Bool
+
+pub fn[T] fill(FixedArray[T], T, Range) -> Bool
+
 pub fn[T] get(FixedArray[T], Int) -> T?
 
 pub fn[T] model(FixedArray[T]) -> @arrays.SmtArray[@integer.Integer, T]
 
+pub fn range_in_bounds(Int, Int, Int) -> Bool
+
+pub fn[T] set(FixedArray[T], Int, T) -> Bool
+
+pub fn[T] swap(FixedArray[T], Int, Int) -> Bool
+
+pub fn valid_range(Int, Range) -> Bool
+
 // Errors
 
 // Types and methods
+pub(all) struct Range {
+  start : Int
+  count : Int
+} derive(Eq, @debug.Debug)
 
 // Type aliases
 

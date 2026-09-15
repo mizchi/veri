@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/arrays/range"
+
+import {
+  "mizchi/veri/arrays",
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn[T] copied(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] copy_empty(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] copy_extend(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] empty_fill(@arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, T) -> Unit
+
+pub fn[T] equal_sub(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] exchange(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Bool
+
+pub fn[T] fill_extend(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, T) -> Unit
+
+pub fn[T] filled(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer, T) -> Bool
+
+pub fn[T] store_preserves_outside(@arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, T) -> Unit
+
+pub fn[T] swap(@arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer) -> @arrays.SmtArray[@integer.Integer, T]
+
+pub fn[T] swap_exchanges(@arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] swap_twice(@arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer) -> Unit
+
+pub fn[T] unchanged_outside(@arrays.SmtArray[@integer.Integer, T], @arrays.SmtArray[@integer.Integer, T], @integer.Integer, @integer.Integer, @integer.Integer) -> Bool
+
+pub fn valid(@integer.Integer, @integer.Integer, @integer.Integer) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

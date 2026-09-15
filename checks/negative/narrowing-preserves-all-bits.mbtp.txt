@@ -1,0 +1,4 @@
+///| Deliberately false; must remain a rejected proof obligation.
+lemma negative_control() where {
+ proof_ensure: @integer.eq(Bv8::to_integer(Bv16::to_bv8(Bv16::ones())), Bv16::to_integer(Bv16::ones())),
+} {}

@@ -12,7 +12,7 @@ pub fn Bv64::ones() -> Bv64 = "ones"
 
 ///|
 #proof_import("bv.BV64")
-pub fn Bv64::width() -> Bv64 = "size_bv"
+pub fn Bv64::width_bv() -> Bv64 = "size_bv"
 
 ///|
 #proof_import("bv.BV64")
@@ -93,3 +93,8 @@ pub fn Bv64::lshr(x : Bv64, count : Bv64) -> Bv64 = "lsr_bv"
 ///|
 #proof_import("bv.BV64")
 pub fn Bv64::ashr(x : Bv64, count : Bv64) -> Bv64 = "asr_bv"
+
+///|
+/// Bit width as a mathematical integer. Use width_bv for a BV shift count.
+#proof_import("bv.BV64")
+pub fn Bv64::width() -> @integer.Integer = "size"

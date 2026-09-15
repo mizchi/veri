@@ -1,0 +1,147 @@
+///|
+/// Successor vertices: Nil is a zero-edge path; source is omitted, target included.
+pub predicate[V] path(edge : (V, V) -> Bool, source : V, steps : List[V], target : V) {
+ match steps {
+  Nil => @relations.same(source, target)
+  Cons(next, rest) => edge(source, next) && path(edge, next, rest, target)
+ }
+}
+///|
+pub predicate[V] reachable(edge : (V, V) -> Bool, source : V, target : V) {
+ ∃ steps : List[V], path(edge, source, steps, target)
+}
+///|
+pub fn[V] endpoint(source : V, steps : List[V]) -> V {
+ match steps { Nil => source; Cons(next, rest) => endpoint(next, rest) }
+}
+///|
+pub fn[V] edge_count(steps : List[V]) -> @integer.Integer {
+ match steps { Nil => @integer.zero(); Cons(_, rest) => @integer.add(@integer.one(), edge_count(rest)) }
+}
+///|
+pub fn[V] path_weight(weight : (V, V) -> @integer.Integer, source : V, steps : List[V]) -> @integer.Integer {
+ match steps { Nil => @integer.zero(); Cons(next, rest) => @integer.add(weight(source, next), path_weight(weight, next, rest)) }
+}
+///|
+pub lemma[V] concatenate(edge : (V, V) -> Bool, source : V, xs : List[V], middle : V, ys : List[V], target : V) where {
+ proof_decrease: xs,
+ proof_require: path(edge, source, xs, middle),
+ proof_require: path(edge, middle, ys, target),
+ proof_ensure: path(edge, source, @algebra.append(xs, ys), target),
+} {
+ match xs { Nil => (); Cons(next, rest) => concatenate(edge, next, rest, middle, ys, target) }
+}
+///|
+pub lemma[V] decompose(edge : (V, V) -> Bool, source : V, xs : List[V], ys : List[V], target : V) where {
+ proof_decrease: xs,
+ proof_require: path(edge, source, @algebra.append(xs, ys), target),
+ proof_ensure: path(edge, source, xs, endpoint(source, xs)),
+ proof_ensure: path(edge, endpoint(source, xs), ys, target),
+} {
+ match xs { Nil => (); Cons(next, rest) => decompose(edge, next, rest, ys, target) }
+}
+///|
+pub lemma[V] weight_split(weight : (V, V) -> @integer.Integer, source : V, xs : List[V], ys : List[V]) where {
+ proof_decrease: xs,
+ proof_ensure: @integer.eq(path_weight(weight, source, @algebra.append(xs, ys)), @integer.add(path_weight(weight, source, xs), path_weight(weight, endpoint(source, xs), ys))),
+ proof_ensure: @integer.eq(edge_count(@algebra.append(xs, ys)), @integer.add(edge_count(xs), edge_count(ys))),
+} {
+ match xs { Nil => (); Cons(next, rest) => weight_split(weight, next, rest, ys) }
+}
+///|
+pub lemma[V] path_reaches(edge : (V, V) -> Bool, source : V, steps : List[V], target : V) where {
+ proof_require: path(edge, source, steps, target),
+ proof_ensure: reachable(edge, source, target),
+} {}
+///|
+/// A closed visited set is a certificate excluding every vertex outside it.
+pub predicate[V] closed(edge : (V, V) -> Bool, visited : @fset.Fset[V]) {
+ ∀ x : V, ∀ y : V, @fset.mem(x, visited) && edge(x, y) → @fset.mem(y, visited)
+}
+///|
+pub lemma[V] path_stays_in_set(edge : (V, V) -> Bool, source : V, steps : List[V], target : V, visited : @fset.Fset[V]) where {
+ proof_decrease: steps,
+ proof_require: path(edge, source, steps, target),
+ proof_require: closed(edge, visited),
+ proof_require: @fset.mem(source, visited),
+ proof_ensure: @fset.mem(target, visited),
+} {
+ match steps { Nil => (); Cons(next, rest) => path_stays_in_set(edge, next, rest, target, visited) }
+}
+///|
+pub predicate[V] feasible(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, distance : (V) -> @integer.Integer) {
+ ∀ x : V, ∀ y : V, edge(x, y) → @integer.le(distance(y), @integer.add(distance(x), weight(x, y)))
+}
+///|
+pub predicate[V] nonnegative(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer) {
+ ∀ x : V, ∀ y : V, edge(x, y) → @integer.le(@integer.zero(), weight(x, y))
+}
+///|
+pub predicate[V] shortest(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, source : V, steps : List[V], target : V) {
+ path(edge, source, steps, target) &&
+ (∀ other : List[V], path(edge, source, other, target) → @integer.le(path_weight(weight, source, steps), path_weight(weight, source, other)))
+}
+///|
+pub lemma[V] path_lower_bound(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, distance : (V) -> @integer.Integer, source : V, steps : List[V], target : V) where {
+ proof_decrease: steps,
+ proof_require: path(edge, source, steps, target),
+ proof_require: feasible(edge, weight, distance),
+ proof_ensure: @integer.le(@integer.sub(distance(target), distance(source)), path_weight(weight, source, steps)),
+} {
+ match steps { Nil => (); Cons(next, rest) => path_lower_bound(edge, weight, distance, next, rest, target) }
+}
+///|
+/// A witness matching feasible labels costs no more than any supplied competing path.
+pub lemma[V] optimality_certificate(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, distance : (V) -> @integer.Integer, source : V, witness : List[V], target : V, other : List[V]) where {
+ proof_require: feasible(edge, weight, distance),
+ proof_require: path(edge, source, witness, target),
+ proof_require: path(edge, source, other, target),
+ proof_require: @integer.eq(path_weight(weight, source, witness), @integer.sub(distance(target), distance(source))),
+ proof_ensure: @integer.le(path_weight(weight, source, witness), path_weight(weight, source, other)),
+} {
+ path_lower_bound(edge, weight, distance, source, other, target)
+}
+///|
+pub lemma[V] nonnegative_path(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, source : V, steps : List[V], target : V) where {
+ proof_decrease: steps,
+ proof_require: path(edge, source, steps, target),
+ proof_require: nonnegative(edge, weight),
+ proof_ensure: @integer.le(@integer.zero(), path_weight(weight, source, steps)),
+} {
+ match steps { Nil => (); Cons(next, rest) => nonnegative_path(edge, weight, next, rest, target) }
+}
+
+///|
+/// Universal shortest-path conclusion from the feasible-label certificate.
+pub lemma[V] shortest_certificate(edge : (V, V) -> Bool, weight : (V, V) -> @integer.Integer, distance : (V) -> @integer.Integer, source : V, witness : List[V], target : V) where {
+ proof_require: feasible(edge, weight, distance),
+ proof_require: path(edge, source, witness, target),
+ proof_require: @integer.eq(path_weight(weight, source, witness), @integer.sub(distance(target), distance(source))),
+ proof_ensure: shortest(edge, weight, source, witness, target),
+} {}
+
+///|
+pub fn[V] unit_weight(_source : V, _target : V) -> @integer.Integer { @integer.one() }
+
+///|
+pub lemma[V] unit_weight_counts_edges(source : V, steps : List[V]) where {
+ proof_decrease: steps,
+ proof_ensure: @integer.eq(path_weight(unit_weight, source, steps), edge_count(steps)),
+} {
+ match steps { Nil => (); Cons(next, rest) => unit_weight_counts_edges(next, rest) }
+}
+
+///|
+pub predicate[V] fewest_edges(edge : (V, V) -> Bool, source : V, steps : List[V], target : V) {
+ path(edge, source, steps, target) &&
+ (∀ other : List[V], path(edge, source, other, target) → @integer.le(edge_count(steps), edge_count(other)))
+}
+
+///|
+/// Unit-weight feasible labels certify BFS's minimum number of edges.
+pub lemma[V] bfs_certificate(edge : (V, V) -> Bool, distance : (V) -> @integer.Integer, source : V, witness : List[V], target : V) where {
+ proof_require: feasible(edge, unit_weight, distance),
+ proof_require: path(edge, source, witness, target),
+ proof_require: @integer.eq(edge_count(witness), @integer.sub(distance(target), distance(source))),
+ proof_ensure: fewest_edges(edge, source, witness, target),
+} {}

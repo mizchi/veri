@@ -1,0 +1,6 @@
+///|
+pub fn negative_control() -> Bool where {
+  proof_ensure: result => result,
+} {
+  valid_range(2147483647, { start: 2147483647, count: 1 })
+}

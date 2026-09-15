@@ -1,0 +1,2 @@
+///| Deliberately false; must remain a rejected proof obligation.
+pub fn negative_control() -> Bool where { proof_ensure: result => result, } { can_int_to_uint(-1) }

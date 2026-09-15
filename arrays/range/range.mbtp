@@ -1,0 +1,54 @@
+///|
+/// Model bounds use mathematical integers and start/count, including empty ranges.
+pub predicate valid(length : @integer.Integer, start : @integer.Integer, count : @integer.Integer) {
+  @integer.le(@integer.zero(), start) && @integer.le(start, length) &&
+  @integer.le(@integer.zero(), count) && @integer.le(@integer.add(start, count), length)
+}
+
+///|
+#proof_import("map.Map")
+fn[T] same(left : T, right : T) -> Bool = "(=)"
+
+///|
+/// Equality only on [start, stop); map values outside storage are unspecified.
+#proof_import("map.MapEq")
+pub fn[T] equal_sub(before : @arrays.SmtArray[@integer.Integer, T], after : @arrays.SmtArray[@integer.Integer, T], start : @integer.Integer, stop : @integer.Integer) -> Bool = "map_eq_sub"
+
+///|
+pub predicate[T] unchanged_outside(before : @arrays.SmtArray[@integer.Integer, T], after : @arrays.SmtArray[@integer.Integer, T], length : @integer.Integer, start : @integer.Integer, count : @integer.Integer) {
+  equal_sub(before, after, @integer.zero(), start) &&
+  equal_sub(before, after, @integer.add(start, count), length)
+}
+
+///|
+pub predicate[T] filled(before : @arrays.SmtArray[@integer.Integer, T], after : @arrays.SmtArray[@integer.Integer, T], length : @integer.Integer, start : @integer.Integer, count : @integer.Integer, value : T) {
+  valid(length, start, count) &&
+  unchanged_outside(before, after, length, start, count) &&
+  equal_sub(after, @arrays.const_array(value), start, @integer.add(start, count))
+}
+
+///|
+predicate[T] copied_cells(source_before : @arrays.SmtArray[@integer.Integer, T], target_after : @arrays.SmtArray[@integer.Integer, T], source_start : @integer.Integer, target_start : @integer.Integer, count : @integer.Integer) {
+  ∀ i : @integer.Integer,
+    @integer.le(@integer.zero(), i) && @integer.lt(i, count) →
+    same(@arrays.select(target_after, @integer.add(target_start, i)), @arrays.select(source_before, @integer.add(source_start, i)))
+}
+
+///|
+/// Source values are from BEFORE the operation, so this also describes overlap.
+/// For copy_within, supply the same initial map for both before parameters.
+pub predicate[T] copied(source_before : @arrays.SmtArray[@integer.Integer, T], target_before : @arrays.SmtArray[@integer.Integer, T], target_after : @arrays.SmtArray[@integer.Integer, T], source_length : @integer.Integer, target_length : @integer.Integer, source_start : @integer.Integer, target_start : @integer.Integer, count : @integer.Integer) {
+  valid(source_length, source_start, count) && valid(target_length, target_start, count) &&
+  unchanged_outside(target_before, target_after, target_length, target_start, count) &&
+  copied_cells(source_before, target_after, source_start, target_start, count)
+}
+
+///|
+pub fn[T] swap(before : @arrays.SmtArray[@integer.Integer, T], left : @integer.Integer, right : @integer.Integer) -> @arrays.SmtArray[@integer.Integer, T] {
+  @arrays.store(@arrays.store(before, left, @arrays.select(before, right)), right, @arrays.select(before, left))
+}
+
+///|
+/// Exchange includes valid indices and equality of every other in-bounds cell.
+#proof_import("map.MapExchange")
+pub fn[T] exchange(before : @arrays.SmtArray[@integer.Integer, T], after : @arrays.SmtArray[@integer.Integer, T], start : @integer.Integer, stop : @integer.Integer, left : @integer.Integer, right : @integer.Integer) -> Bool = "exchange"

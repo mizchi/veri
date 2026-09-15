@@ -1,0 +1,11 @@
+import {
+  "mizchi/veri/runtime/queue",
+  "mizchi/veri/runtime/pqueue",
+  "mizchi/veri/runtime/int32",
+}
+
+import {
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/quickcheck/shrink",
+} for "test"

@@ -1,0 +1,4 @@
+///|
+lemma negative_control(before : @arrays.SmtArray[@integer.Integer, Int]) where {
+  proof_ensure: filled(before, @arrays.store(@arrays.store(before, @integer.zero(), 42), @integer.one(), 99), @integer.from_int(3), @integer.zero(), @integer.one(), 42),
+} {}

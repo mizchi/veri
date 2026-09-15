@@ -1,0 +1,100 @@
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::zero() -> Bv16 = "zeros"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::one() -> Bv16 = "one"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::ones() -> Bv16 = "ones"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::width_bv() -> Bv16 = "size_bv"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::bw_not(x : Bv16) -> Bv16 = "bw_not"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::neg(x : Bv16) -> Bv16 = "neg"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::add(x : Bv16, y : Bv16) -> Bv16 = "add"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::sub(x : Bv16, y : Bv16) -> Bv16 = "sub"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::mul(x : Bv16, y : Bv16) -> Bv16 = "mul"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::udiv(x : Bv16, y : Bv16) -> Bv16 = "udiv"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::urem(x : Bv16, y : Bv16) -> Bv16 = "urem"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::sdiv(x : Bv16, y : Bv16) -> Bv16 = "sdiv"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::srem(x : Bv16, y : Bv16) -> Bv16 = "srem"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::bw_and(x : Bv16, y : Bv16) -> Bv16 = "bw_and"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::bw_or(x : Bv16, y : Bv16) -> Bv16 = "bw_or"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::bw_xor(x : Bv16, y : Bv16) -> Bv16 = "bw_xor"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::eq(x : Bv16, y : Bv16) -> Bool = "(=)"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::ult(x : Bv16, y : Bv16) -> Bool = "ult"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::ule(x : Bv16, y : Bv16) -> Bool = "ule"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::slt(x : Bv16, y : Bv16) -> Bool = "slt"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::sle(x : Bv16, y : Bv16) -> Bool = "sle"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::shl(x : Bv16, count : Bv16) -> Bv16 = "lsl_bv"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::lshr(x : Bv16, count : Bv16) -> Bv16 = "lsr_bv"
+
+///|
+#proof_import("bv.BV16")
+pub fn Bv16::ashr(x : Bv16, count : Bv16) -> Bv16 = "asr_bv"
+
+///|
+/// Bit width as a mathematical integer. Use width_bv for a BV shift count.
+#proof_import("bv.BV16")
+pub fn Bv16::width() -> @integer.Integer = "size"

@@ -55,7 +55,8 @@ test "quickcheck: minimum queue traces agree with sorting and core PriorityQueue
             core.clear()
           }
         }
-        if @pqueue.to_array(queue) != reference ||
+        if queue.iter().to_array() != reference ||
+          @pqueue.to_array(queue) != reference ||
           @pqueue.peek(queue) != reference.get(0) ||
           @pqueue.is_empty(queue) != reference.is_empty() ||
           @pqueue.to_array(before) != snapshot {

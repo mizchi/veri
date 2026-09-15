@@ -1,5 +1,4 @@
 import {
-  "mizchi/veri/runtime/list" @linked,
   "mizchi/veri/list" @logic_list,
 }
 

@@ -1,0 +1,30 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/toolkit"
+
+import {
+  "mizchi/veri/fset",
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/graph",
+  "mizchi/veri/runtime/list",
+}
+
+// Values
+pub fn allocation_size(Int, Int, Int) -> Int?
+
+pub fn length_as_int(UInt) -> Int?
+
+pub fn read_header(BytesView, Int) -> (UInt16, UInt, Int)?
+
+pub fn route(ArrayView[@graph.Edge], Int, Int, Int) -> Array[Int]? raise @graph.GraphError
+
+pub fn sum_partitions(@list.List[@integer.Integer], @list.List[@integer.Integer]) -> Unit
+
+pub fn visited_contains_target((Int, Int) -> Bool, Int, @list.List[Int], Int, @fset.Fset[Int]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

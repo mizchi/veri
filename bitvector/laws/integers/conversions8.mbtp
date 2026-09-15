@@ -1,0 +1,29 @@
+///|
+pub lemma integer_roundtrip8(value : @integer.Integer) where {
+  proof_ensure: @integer.eq(
+    Bv8::to_integer(Bv8::of_integer(value)),
+    @integer.modulo(value, Bv8::modulus()),
+  ),
+} {}
+
+///|
+pub lemma bitvector_roundtrip8(value : Bv8) where {
+  proof_ensure: Bv8::eq(Bv8::of_integer(Bv8::to_integer(value)), value),
+} {
+  proof_assert Bv8::in_range(Bv8::to_integer(value))
+  proof_assert @integer.eq(
+    Bv8::to_integer(Bv8::of_integer(Bv8::to_integer(value))),
+    Bv8::to_integer(value),
+  )
+}
+
+///|
+pub lemma unsigned_value_in_range8(value : Bv8) where {
+  proof_ensure: Bv8::in_range(Bv8::to_integer(value)),
+} {}
+
+///|
+pub lemma width_encodings8() where {
+  proof_ensure: @integer.eq(Bv8::width(), @integer.from_int(8)),
+  proof_ensure: @integer.eq(Bv8::to_integer(Bv8::width_bv()), Bv8::width()),
+} {}

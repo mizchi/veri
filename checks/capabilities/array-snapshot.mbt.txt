@@ -1,0 +1,8 @@
+pub fn probe(xs : FixedArray[Int], index : Int, value : Int) -> Unit where {
+  proof_require: 0 <= index && index < xs.length(),
+  proof_ensure: xs[index] == value,
+} {
+  proof_let before = @runtime_array.model(xs)
+  xs[index] = value
+  proof_assert @arrays.eq(@runtime_array.model(xs), @arrays.store(before, @integer.from_int(index), value))
+}

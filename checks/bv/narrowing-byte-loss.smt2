@@ -1,0 +1,5 @@
+(set-logic QF_BV)
+(define-fun x () (_ BitVec 16) #x0100)
+(assert (not (= ((_ zero_extend 8) ((_ extract 7 0) x)) x)))
+(check-sat)
+(get-value (x ((_ extract 7 0) x)))

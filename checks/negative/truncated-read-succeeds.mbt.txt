@@ -1,0 +1,4 @@
+///| Deliberately false; must remain a rejected proof obligation.
+pub fn negative_control() -> Int? where {
+ proof_ensure: result => match result { None => false; Some(_) => true },
+} { read_end(3, 0, 4) }

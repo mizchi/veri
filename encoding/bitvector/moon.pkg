@@ -1,0 +1,9 @@
+import {
+  "mizchi/veri/encoding",
+  "mizchi/veri/integer",
+  "mizchi/veri/bitvector" @bv,
+}
+
+options(
+  "proof-enabled": true,
+)

@@ -1,0 +1,100 @@
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::zero() -> Bv8 = "zeros"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::one() -> Bv8 = "one"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::ones() -> Bv8 = "ones"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::width_bv() -> Bv8 = "size_bv"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::bw_not(x : Bv8) -> Bv8 = "bw_not"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::neg(x : Bv8) -> Bv8 = "neg"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::add(x : Bv8, y : Bv8) -> Bv8 = "add"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::sub(x : Bv8, y : Bv8) -> Bv8 = "sub"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::mul(x : Bv8, y : Bv8) -> Bv8 = "mul"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::udiv(x : Bv8, y : Bv8) -> Bv8 = "udiv"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::urem(x : Bv8, y : Bv8) -> Bv8 = "urem"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::sdiv(x : Bv8, y : Bv8) -> Bv8 = "sdiv"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::srem(x : Bv8, y : Bv8) -> Bv8 = "srem"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::bw_and(x : Bv8, y : Bv8) -> Bv8 = "bw_and"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::bw_or(x : Bv8, y : Bv8) -> Bv8 = "bw_or"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::bw_xor(x : Bv8, y : Bv8) -> Bv8 = "bw_xor"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::eq(x : Bv8, y : Bv8) -> Bool = "(=)"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::ult(x : Bv8, y : Bv8) -> Bool = "ult"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::ule(x : Bv8, y : Bv8) -> Bool = "ule"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::slt(x : Bv8, y : Bv8) -> Bool = "slt"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::sle(x : Bv8, y : Bv8) -> Bool = "sle"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::shl(x : Bv8, count : Bv8) -> Bv8 = "lsl_bv"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::lshr(x : Bv8, count : Bv8) -> Bv8 = "lsr_bv"
+
+///|
+#proof_import("bv.BV8")
+pub fn Bv8::ashr(x : Bv8, count : Bv8) -> Bv8 = "asr_bv"
+
+///|
+/// Bit width as a mathematical integer. Use width_bv for a BV shift count.
+#proof_import("bv.BV8")
+pub fn Bv8::width() -> @integer.Integer = "size"

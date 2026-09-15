@@ -79,6 +79,8 @@ test "tree shrinking reduces nested values without discarding their parents" {
 test "quickcheck: binary tree traversal matches the recursive array model" {
   @quickcheck.check(
     (tree : GeneratedTree) => {
+      tree.0.to_array() == reference(tree.0) &&
+      tree.0.iter().to_array() == reference(tree.0) &&
       @linked.to_array(@bintree.inorder(tree.0)) == reference(tree.0)
     },
     count=1000,

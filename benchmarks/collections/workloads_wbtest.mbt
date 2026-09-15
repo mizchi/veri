@@ -311,8 +311,8 @@ fn scenarios(size : Int) -> Array[Scenario] {
   for value in ordered {
     skewed = @tree.node(skewed, value, @tree.empty())
   }
-  for
-    (shape, input) in [("balanced", balanced(0, size)), ("left-skewed", skewed)] {
+  let trees = [("balanced", balanced(0, size)), ("left-skewed", skewed)]
+  for (shape, input) in trees {
     cases.push({
       name: "tree/inorder-to-array-\{shape}",
       expected: Values(ordered),
@@ -321,6 +321,20 @@ fn scenarios(size : Int) -> Array[Scenario] {
           name: "veri",
           run: () => Values(@linked.to_array(@tree.inorder(input))),
         },
+        {
+          name: "core-immut-sorted-set",
+          run: () => Values(core_ordered.to_array()),
+        },
+      ],
+    })
+  }
+  // Append new workloads after the original ones, retaining their measurement order.
+  for (shape, input) in trees {
+    cases.push({
+      name: "tree/to-array-\{shape}",
+      expected: Values(ordered),
+      variants: [
+        { name: "veri", run: () => Values(input.to_array()), },
         {
           name: "core-immut-sorted-set",
           run: () => Values(core_ordered.to_array()),

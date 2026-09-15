@@ -2,6 +2,8 @@
 package "mizchi/veri-examples/bridges"
 
 // Values
+pub fn fill_and_read(FixedArray[Int], Int, Int, Int) -> Int?
+
 pub fn first_or(FixedArray[Int], Int) -> Int
 
 pub fn restore32(UInt, UInt) -> UInt

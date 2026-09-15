@@ -1,21 +1,24 @@
 ///|
+/// The stored spine is also the pop result, avoiding a second tuple allocation.
 #valtype
-pub struct Stack[T] {
-  priv contents : @linked.List[T]
+pub enum Stack[T] {
+  Stack((T, Stack[T])?)
 }
 
 ///|
 #inline
-pub fn[T] empty() -> Stack[T] where {
+#as_free_fn(empty)
+pub fn[T] Stack::new() -> Stack[T] where {
   proof_ensure: result => @logic_list.is_empty(model(result)),
 } {
-  { contents: @linked.empty(), }
+  Stack(None)
 }
 
 ///|
 #owned(stack, value)
 #inline
-pub fn[T] push(
+#as_free_fn(push)
+pub fn[T] Stack::push(
   stack : Stack[T],
   value : T,
 ) -> Stack[T] where {
@@ -23,13 +26,14 @@ pub fn[T] push(
     @logic_list.eq(model(result), @logic_list.cons(value, model(stack)))
   },
 } {
-  { contents: @linked.cons(value, stack.contents), }
+  Stack(Some((value, stack)))
 }
 
 ///|
 #owned(stack)
 #inline
-pub fn[T] pop(
+#as_free_fn(pop)
+pub fn[T] Stack::pop(
   stack : Stack[T],
 ) -> (T, Stack[T])? where {
   proof_ensure: result => {
@@ -40,15 +44,15 @@ pub fn[T] pop(
     }
   },
 } {
-  match stack.contents {
-    Nil => None
-    Cons(value, rest) => Some((value, { contents: rest, }))
+  match stack {
+    Stack(contents) => contents
   }
 }
 
 ///|
 #inline
-pub fn[T] peek(
+#as_free_fn(peek)
+pub fn[T] Stack::peek(
   stack : Stack[T],
 ) -> T? where {
   proof_ensure: result => {
@@ -60,24 +64,36 @@ pub fn[T] peek(
     }
   },
 } {
-  match stack.contents {
-    Nil => None
-    Cons(value, _) => Some(value)
+  match stack {
+    Stack(None) => None
+    Stack(Some((value, _))) => Some(value)
   }
 }
 
 ///|
 #inline
-pub fn[T] is_empty(
+#as_free_fn(is_empty)
+pub fn[T] Stack::is_empty(
   stack : Stack[T],
 ) -> Bool where {
   proof_ensure: result => result == @logic_list.is_empty(model(stack)),
 } {
-  @linked.is_empty(stack.contents)
+  match stack {
+    Stack(None) => true
+    Stack(Some(_)) => false
+  }
 }
 
 ///|
 /// Top first, in a fresh array. Conversion is runtime-tested.
-pub fn[T] to_array(stack : Stack[T]) -> Array[T] {
-  @linked.to_array(stack.contents)
+#owned(stack)
+#as_free_fn(to_array)
+pub fn[T] Stack::to_array(stack : Stack[T]) -> Array[T] {
+  let result = []
+  let mut rest = stack
+  while rest.pop() is Some((value, tail)) {
+    result.push(value)
+    rest = tail
+  }
+  result
 }

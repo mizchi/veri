@@ -7,17 +7,49 @@ import {
 }
 
 // Values
+pub fn bitvector_roundtrip16(@bitvector.Bv16) -> Unit
+
 pub fn bitvector_roundtrip32(@bitvector.Bv32) -> Unit
 
 pub fn bitvector_roundtrip64(@bitvector.Bv64) -> Unit
+
+pub fn bitvector_roundtrip8(@bitvector.Bv8) -> Unit
+
+pub fn integer_roundtrip16(@integer.Integer) -> Unit
 
 pub fn integer_roundtrip32(@integer.Integer) -> Unit
 
 pub fn integer_roundtrip64(@integer.Integer) -> Unit
 
+pub fn integer_roundtrip8(@integer.Integer) -> Unit
+
+pub fn unsigned_value_in_range16(@bitvector.Bv16) -> Unit
+
 pub fn unsigned_value_in_range32(@bitvector.Bv32) -> Unit
 
 pub fn unsigned_value_in_range64(@bitvector.Bv64) -> Unit
+
+pub fn unsigned_value_in_range8(@bitvector.Bv8) -> Unit
+
+pub fn widen_roundtrip16_32(@bitvector.Bv16) -> Unit
+
+pub fn widen_roundtrip16_64(@bitvector.Bv16) -> Unit
+
+pub fn widen_roundtrip32_64(@bitvector.Bv32) -> Unit
+
+pub fn widen_roundtrip8_16(@bitvector.Bv8) -> Unit
+
+pub fn widen_roundtrip8_32(@bitvector.Bv8) -> Unit
+
+pub fn widen_roundtrip8_64(@bitvector.Bv8) -> Unit
+
+pub fn width_encodings16() -> Unit
+
+pub fn width_encodings32() -> Unit
+
+pub fn width_encodings64() -> Unit
+
+pub fn width_encodings8() -> Unit
 
 // Errors
 

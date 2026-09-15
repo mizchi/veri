@@ -1,8 +1,12 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mizchi/veri/strings"
 
+import {
+  "mizchi/veri/integer",
+}
+
 // Values
-pub fn char_at(Text, Int) -> Text
+pub fn char_at(Text, @integer.Integer) -> Text
 
 pub fn concat(Text, Text) -> Text
 
@@ -20,13 +24,13 @@ pub fn empty() -> Text
 
 pub fn eq(Text, Text) -> Bool
 
-pub fn from_int(Int) -> Text
+pub fn from_integer(@integer.Integer) -> Text
 
-pub fn index_of(Text, Text, Int) -> Int
+pub fn index_of(Text, Text, @integer.Integer) -> @integer.Integer
 
 pub fn le(Text, Text) -> Bool
 
-pub fn length(Text) -> Int
+pub fn length(Text) -> @integer.Integer
 
 pub fn length_nonnegative(Text) -> Unit
 
@@ -34,7 +38,7 @@ pub fn lt(Text, Text) -> Bool
 
 pub fn missing_substring_index(Text, Text) -> Unit
 
-pub fn negative_start_is_empty(Text, Int) -> Unit
+pub fn negative_start_is_empty(Text, @integer.Integer) -> Unit
 
 pub fn prefix_of(Text, Text) -> Bool
 
@@ -42,11 +46,11 @@ pub fn replace(Text, Text, Text) -> Text
 
 pub fn replace_empty_prepends(Text, Text) -> Unit
 
-pub fn substring(Text, Int, Int) -> Text
+pub fn substring(Text, @integer.Integer, @integer.Integer) -> Text
 
 pub fn suffix_of(Text, Text) -> Bool
 
-pub fn to_int(Text) -> Int
+pub fn to_integer(Text) -> @integer.Integer
 
 // Errors
 

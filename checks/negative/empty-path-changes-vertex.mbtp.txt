@@ -1,0 +1,3 @@
+///| Deliberately false; must remain a rejected proof obligation.
+fn every_edge(_x : Int, _y : Int) -> Bool { true }
+lemma negative_control() where { proof_ensure: path(every_edge, 0, Nil, 1), } {}

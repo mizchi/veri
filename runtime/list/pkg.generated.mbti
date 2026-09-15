@@ -2,27 +2,11 @@
 package "mizchi/veri/runtime/list"
 
 // Values
-pub fn[T] append(List[T], List[T]) -> List[T]
-
 pub fn[T] cons(T, List[T]) -> List[T]
-
-pub fn[T] empty() -> List[T]
-
-pub fn[T] from_array(ArrayView[T]) -> List[T]
-
-pub fn[T] is_empty(List[T]) -> Bool
-
-pub fn[T] length(List[T]) -> Int
 
 pub fn[T] model(List[T]) -> @mizchi/veri/list.List[T]
 
 pub fn[T] model_cons(T, List[T]) -> Unit
-
-pub fn[T] reverse(List[T]) -> List[T]
-
-pub fn[T] to_array(List[T]) -> Array[T]
-
-pub fn[T] uncons(List[T]) -> (T, List[T])?
 
 // Errors
 
@@ -31,6 +15,27 @@ pub(all) enum List[T] {
   Nil
   Cons(T, List[T])
 }
+#as_free_fn(append)
+pub fn[T] List::concat(Self[T], Self[T]) -> Self[T]
+pub fn[A, B] List::fold(Self[A], init~ : B, (B, A) -> B raise?) -> B raise?
+#as_free_fn(from_array)
+pub fn[T] List::from_array(ArrayView[T]) -> Self[T]
+pub fn[T] List::from_iter(Iter[T]) -> Self[T]
+#as_free_fn(is_empty)
+pub fn[T] List::is_empty(Self[T]) -> Bool
+pub fn[T] List::iter(Self[T]) -> Iter[T]
+#as_free_fn(length)
+pub fn[T] List::length(Self[T]) -> Int
+pub fn[A, B] List::map(Self[A], (A) -> B raise?) -> Self[B] raise?
+#as_free_fn(empty)
+pub fn[T] List::new() -> Self[T]
+pub fn[T] List::prepend(Self[T], T) -> Self[T]
+#as_free_fn(reverse)
+pub fn[T] List::rev(Self[T]) -> Self[T]
+#as_free_fn(to_array)
+pub fn[T] List::to_array(Self[T]) -> Array[T]
+#as_free_fn(uncons)
+pub fn[T] List::uncons(Self[T]) -> (T, Self[T])?
 
 // Type aliases
 

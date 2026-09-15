@@ -1,0 +1,52 @@
+///|
+pub predicate fits_int(value : @integer.Integer) {
+ @integer.le(@integer.neg(@integer.add(@integer.from_int(2147483647), @integer.one())), value) && @integer.le(value, @integer.from_int(2147483647))
+}
+
+///|
+/// Specification of an exact checked conversion; not an axiom about native casts.
+pub predicate converted_int(value : @integer.Integer, result : Option[Int]) {
+ match result {
+   None => !fits_int(value)
+   Some(x) => fits_int(value) && @integer.eq(@integer.from_int(x), value)
+ }
+}
+///|
+pub predicate fits_uint(value : @integer.Integer) {
+ @integer.le(@integer.zero(), value) && @integer.le(value, @integer.from_uint(4294967295U))
+}
+
+///|
+/// Specification of an exact checked conversion; not an axiom about native casts.
+pub predicate converted_uint(value : @integer.Integer, result : Option[UInt]) {
+ match result {
+   None => !fits_uint(value)
+   Some(x) => fits_uint(value) && @integer.eq(@integer.from_uint(x), value)
+ }
+}
+///|
+pub predicate fits_int64(value : @integer.Integer) {
+ @integer.le(@integer.neg(@integer.add(@integer.from_int64(9223372036854775807L), @integer.one())), value) && @integer.le(value, @integer.from_int64(9223372036854775807L))
+}
+
+///|
+/// Specification of an exact checked conversion; not an axiom about native casts.
+pub predicate converted_int64(value : @integer.Integer, result : Option[Int64]) {
+ match result {
+   None => !fits_int64(value)
+   Some(x) => fits_int64(value) && @integer.eq(@integer.from_int64(x), value)
+ }
+}
+///|
+pub predicate fits_uint64(value : @integer.Integer) {
+ @integer.le(@integer.zero(), value) && @integer.le(value, @integer.from_uint64(18446744073709551615UL))
+}
+
+///|
+/// Specification of an exact checked conversion; not an axiom about native casts.
+pub predicate converted_uint64(value : @integer.Integer, result : Option[UInt64]) {
+ match result {
+   None => !fits_uint64(value)
+   Some(x) => fits_uint64(value) && @integer.eq(@integer.from_uint64(x), value)
+ }
+}

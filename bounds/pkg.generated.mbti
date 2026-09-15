@@ -4,6 +4,8 @@ package "mizchi/veri/bounds"
 // Values
 pub fn clamp(Int, Int, Int) -> Int
 
+pub fn clamp_half_open(Int, Int, Int) -> Int
+
 // Errors
 
 // Types and methods

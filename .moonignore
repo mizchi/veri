@@ -1,0 +1,16 @@
+# Publication excludes developer tooling and workspace members.
+# This file replaces .gitignore when moon builds the package archive.
+_build/
+target/
+.mooncakes/
+.git/
+.github/
+.DS_Store
+/moon.work
+/examples/
+/benchmarks/
+/checks/
+/tools/
+/runtime/float_conversions/
+/justfile
+/TODO.md

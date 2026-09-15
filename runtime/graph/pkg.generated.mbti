@@ -1,0 +1,50 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/graph"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+pub(all) suberror GraphError {
+  NegativeVertexCount(Int)
+  InvalidVertex(Int)
+  NegativeWeight(Int)
+  DistanceOverflow(Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub(all) struct Edge {
+  from : Int
+  to : Int
+  weight : Int
+} derive(Eq, @debug.Debug)
+
+pub struct Graph {
+  // private fields
+}
+pub fn Graph::bfs(Self, Int) -> SearchResult raise GraphError
+pub fn Graph::check_bfs(Self, SearchResult) -> Bool
+pub fn Graph::check_dijkstra(Self, SearchResult) -> Bool
+pub fn Graph::dijkstra(Self, Int) -> SearchResult raise GraphError
+pub fn Graph::edge_weight(Self, Int, Int) -> Int?
+pub fn Graph::edges(Self) -> Array[Edge]
+pub fn Graph::from_array(ArrayView[Edge], vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::from_iter(Iter[Edge], vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::iter(Self) -> Iter[Edge]
+pub fn Graph::new(vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::to_array(Self) -> Array[Edge]
+pub fn Graph::vertex_count(Self) -> Int
+
+pub struct SearchResult {
+  // private fields
+}
+pub fn SearchResult::distance(Self, Int) -> Int?
+pub fn SearchResult::path_to(Self, Int) -> Array[Int]?
+pub fn SearchResult::source(Self) -> Int
+
+// Type aliases
+
+// Traits

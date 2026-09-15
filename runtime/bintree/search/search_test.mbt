@@ -12,7 +12,8 @@ test "quickcheck: search-tree insertion preserves sorted unique contents" {
           expected.push(value)
         }
         expected.sort()
-        if @search.to_array(tree) != expected ||
+        if tree.iter().to_array() != expected ||
+          @search.to_array(tree) != expected ||
           @search.to_array(before) != snapshot ||
           !@search.contains(tree, value) {
           return false

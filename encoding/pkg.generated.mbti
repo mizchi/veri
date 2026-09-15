@@ -1,0 +1,60 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/encoding"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/list",
+}
+
+// Values
+pub fn byte_count(@list.List[@integer.Integer]) -> @integer.Integer
+
+pub fn codec16_roundtrip(@integer.Integer) -> Unit
+
+pub fn codec32_roundtrip(@integer.Integer) -> Unit
+
+pub fn codec64_roundtrip(@integer.Integer) -> Unit
+
+pub fn codec8_roundtrip(@integer.Integer) -> Unit
+
+pub fn decode_be(@list.List[@integer.Integer]) -> @integer.Integer
+
+pub fn decode_le(@list.List[@integer.Integer]) -> @integer.Integer
+
+pub fn encode_be16(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_be32(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_be64(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_be8(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_le16(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_le32(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_le64(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn encode_le8(@integer.Integer) -> @list.List[@integer.Integer]
+
+pub fn modulus16() -> @integer.Integer
+
+pub fn modulus32() -> @integer.Integer
+
+pub fn modulus64() -> @integer.Integer
+
+pub fn modulus8() -> @integer.Integer
+
+pub fn octets(@list.List[@integer.Integer]) -> Bool
+
+pub fn radix() -> @integer.Integer
+
+pub fn reverse_into(@list.List[@integer.Integer], @list.List[@integer.Integer]) -> @list.List[@integer.Integer]
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

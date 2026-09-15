@@ -12,19 +12,19 @@ pub fn concat(left : Text, right : Text) -> Text = "concat"
 
 ///|
 #proof_import("string.String")
-pub fn length(text : Text) -> Int = "length"
+pub fn length(text : Text) -> @integer.Integer = "length"
 
 ///|
 #proof_import("string.String")
-pub fn char_at(text : Text, index : Int) -> Text = "s_at"
+pub fn char_at(text : Text, index : @integer.Integer) -> Text = "s_at"
 
 ///|
 #proof_import("string.String")
-pub fn substring(text : Text, start : Int, count : Int) -> Text = "substring"
+pub fn substring(text : Text, start : @integer.Integer, count : @integer.Integer) -> Text = "substring"
 
 ///|
 #proof_import("string.String")
-pub fn index_of(text : Text, pattern : Text, start : Int) -> Int = "indexof"
+pub fn index_of(text : Text, pattern : Text, start : @integer.Integer) -> @integer.Integer = "indexof"
 
 ///|
 #proof_import("string.String")
@@ -44,11 +44,11 @@ pub fn replace(text : Text, pattern : Text, replacement : Text) -> Text = "repla
 
 ///|
 #proof_import("string.String")
-pub fn to_int(text : Text) -> Int = "to_int"
+pub fn to_integer(text : Text) -> @integer.Integer = "to_int"
 
 ///|
 #proof_import("string.String")
-pub fn from_int(value : Int) -> Text = "from_int"
+pub fn from_integer(value : @integer.Integer) -> Text = "from_int"
 
 ///|
 #proof_import("string.String")

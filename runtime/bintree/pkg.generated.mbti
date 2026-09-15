@@ -7,13 +7,7 @@ import {
 }
 
 // Values
-pub fn[T] empty() -> Tree[T]
-
-pub fn[T] inorder(Tree[T]) -> @list.List[T]
-
 pub fn[T] model(Tree[T]) -> @mizchi/veri/bintree.Tree[T]
-
-pub fn[T] node(Tree[T], T, Tree[T]) -> Tree[T]
 
 // Errors
 
@@ -22,6 +16,14 @@ pub(all) enum Tree[T] {
   Empty
   Node(Tree[T], T, Tree[T])
 } derive(@debug.Debug)
+#as_free_fn(inorder)
+pub fn[T] Tree::inorder(Self[T]) -> @list.List[T]
+pub fn[T] Tree::iter(Self[T]) -> Iter[T]
+#as_free_fn(empty)
+pub fn[T] Tree::new() -> Self[T]
+#as_free_fn(node)
+pub fn[T] Tree::node(Self[T], T, Self[T]) -> Self[T]
+pub fn[T] Tree::to_array(Self[T]) -> Array[T]
 
 // Type aliases
 

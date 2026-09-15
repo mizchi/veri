@@ -21,3 +21,9 @@ pub lemma bitvector_roundtrip64(value : Bv64) where {
 pub lemma unsigned_value_in_range64(value : Bv64) where {
   proof_ensure: Bv64::in_range(Bv64::to_integer(value)),
 } {}
+
+///|
+pub lemma width_encodings64() where {
+  proof_ensure: @integer.eq(Bv64::width(), @integer.from_int(64)),
+  proof_ensure: @integer.eq(Bv64::to_integer(Bv64::width_bv()), Bv64::width()),
+} {}

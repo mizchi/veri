@@ -1,6 +1,9 @@
 ///|
 pub fn[T] model(stack : Stack[T]) -> @logic_list.List[T] {
-  @linked.model(stack.contents)
+  match stack {
+    Stack(None) => @logic_list.empty()
+    Stack(Some((value, rest))) => @logic_list.cons(value, model(rest))
+  }
 }
 
 ///|

@@ -39,7 +39,7 @@ test("a missing size, pass, or baseline prevents a partial report from passing",
       }
     }
   }
-  assert.equal(analyzeResults(complete).length, 30);
+  assert.equal(analyzeResults(complete).length, 34);
   assert.throws(() => analyzeResults(complete.slice(1)), /Missing/);
   assert.throws(() => analyzeResults([...complete, summary("unrecognized", 1)]), /Unexpected/);
 });

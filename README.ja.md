@@ -6,7 +6,51 @@ MoonBit の形式検証を使うための小さな基盤。再利用する論理
 
 有限集合・Seq・List・Bag・有限 Map・二分木・固定幅 bitvector・全域 array・string・IEEE 浮動小数点の証明用バインディングを提供する。IEEE 754 については **binary32・binary64 / roundTiesToEven (RNE)** の実行結果を検査し、Why3 の IEEE モデル上の性質を証明する。規格全体への適合認証や、MoonBit コンパイラ・CPU の正しさの証明を提供するものではない。
 
-## 実行
+## パッケージとして使う
+
+公開版を利用する場合は、自分のプロジェクトで依存を追加する。
+
+```sh
+moon add mizchi/veri
+```
+
+利用するパッケージの `moon.pkg` に import と証明の設定を追加する。
+
+```moonbit
+import {
+  "mizchi/veri/bounds",
+}
+
+options("proof-enabled": true)
+```
+
+次のコードを `digit.mbt` に置く。`clamp` は標準の `Int::clamp` と同じ閉区間で、
+上限を含む。半開区間には `clamp_half_open(value, lower, upper)` を使う。
+どちらも有効な上下限を要求し、証明の事前条件は実行時の境界検査ではない。
+
+```moonbit
+pub fn digit(value : Int) -> Int where {
+  proof_ensure: result => 0 <= result && result <= 9,
+} {
+  @bounds.clamp(value, 0, 9)
+}
+
+test "clamp includes its upper bound" {
+  assert_eq(digit(10), 9)
+}
+```
+
+```sh
+moon test --target js
+moon prove
+```
+
+この最小例の証明には同梱 Why3 と PATH 上の Z3 を使う。実行時 API の利用だけなら
+ソルバーや Node.js、just は不要。論理型・`model`・補題・述語は証明専用で、
+通常の実行時コードから呼ぶ関数ではない。複雑な BV・実数の証明で追加のソルバー設定が
+必要な場合は、以下のリポジトリの検証手順を参照する。
+
+## リポジトリを検証する
 
 必要なものは MoonBit、`~/.moon/share/why3/` の同梱 Why3 データ、PATH 上の Z3、Node.js 24+、just、unzip。Node スクリプトに npm 依存はない。
 
@@ -26,6 +70,8 @@ just prove-machine # 機械整数 prelude で bounds・実行時ブリッジ・�
 just prove-collections-machine # コレクションの実装・利用例を機械整数で証明
 just prove-foundations-machine # 順序・算術・実数・IEEE 誤差の契約を機械整数で証明
 just core-capabilities # core の関数を契約内から直接呼べるかを調査
+just conversion-capabilities # ネイティブ変換と UInt16 の証明変換対応を検査
+just array-capabilities # 更新前の状態・snapshot の対応状況と共有参照の拒否を確認
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just negative bitvector runtime/uint32 runtime/uint64 # 関連する負例だけを選択
@@ -40,6 +86,7 @@ just fp-capabilities # Float/Double の証明変換の対応状況を確認
 just vectors      # Z3 から期待値を再生成
 just vectors-check # 生成済み期待値と現在の Z3 の結果を照合
 just fmt          # フォーマット・公開インターフェース生成
+just package-check # 公開用 ZIP から日英 README の最小例を実行・証明
 ```
 
 手元で確認した環境は moon 0.1.20260904、moonc v0.10.12+1634b282e、Z3 4.16.0、CVC5 1.3.4。
@@ -48,11 +95,18 @@ just fmt          # フォーマット・公開インターフェース生成
 証明結果は各モジュールの `_build/verif/` 配下の `*.proof.json` に出力される。
 `just prove` を使う。`moon prove` 単体の既定の変換経路では、整数と BV の対応証明が時間切れになる場合がある。
 
+この節のコマンドはリポジトリのチェックアウト内で実行する。生成したソルバー設定を
+自分のプロジェクトで使う場合は、ここで `just prover-config` を実行してから、
+利用側で `moon prove --why3-config /path/to/veri/_build/why3/why3.conf` を実行する。
+設定はローカルファイルを参照するため、生成元のチェックアウトも保持する。
+公開用 ZIP からは開発用 workspace・examples・benchmarks・tools を除外し、
+`just package-check` で内容と利用者向けの最小例を検査する。
+
 ## 構成と保証
 
 | パス | 内容 | 確認すること |
 | --- | --- | --- |
-| `bounds` | 半開区間への clamp | 有効な上下限に対し結果が区間内に入り、元から区間内の値を保存する |
+| `bounds` | 閉区間の clamp と明示的な半開区間の clamp | 有効な上下限に対し結果が区間内に入り、元から区間内の値を保存する |
 | `fset` | Why3 の有限集合への接続 | 空集合・要素追加・和集合の補題 |
 | `seq` / `list` | 有限列と帰納的リストのモデル | 連結・長さ・反転・添字、`list/conversions` による相互変換 |
 | `bag` / `fmap` | 多重集合と有限写像 | 出現回数・和・更新後の参照・定義域・削除 |
@@ -71,12 +125,21 @@ just fmt          # フォーマット・公開インターフェース生成
 | `examples/models` | ライブラリを import する利用例 | 別モジュールでの証明と、bitvector をキー・string を値に持つ array |
 | `integer` | 数学的整数と実行時の値の射影 | Int / UInt / Int64 / UInt64 の契約で共用する型 |
 | `runtime/uint32` / `runtime/uint64` | 循環加減算の実装 | 両整数モデルで add/sub/less の BV との一致を直接証明し、Z3 参照値とも照合 |
-| `runtime/array` | FixedArray のモデルと安全な読み取り | 境界検査とモデル内の要素との一致 |
+| `runtime/array` | FixedArray の読み書き・swap・fill・範囲コピー | 境界の安全性と操作契約。更新前後の完全な対応は QuickCheck で検査 |
+| `arrays/range` | 数学的な範囲と更新前後のモデル | 範囲外の保存・swap・fill・コピーの補題 |
 | `runtime/text` | 検証済み入力を持つ SMT 互換文字列 | コードポイント単位の長さ・char_at・substring を Z3 と照合 |
 | `examples/bridges` | 実行時ブリッジの利用例 | 別モジュールから契約を組み合わせた証明 |
 | `runtime/float32` / `runtime/float64` | 実行時 FP API と参照値比較 | 算術・sqrt・neg/abs・比較・分類・非 NaN のビット往復を照合 |
 | `runtime/float_conversions` | 精度変換の検査 | Float ↔ Double を丸め境界を含めて Z3 と照合 |
 | `examples/floating` | 実行時 FP の利用例 | Float と Double での丸め精度の違い |
+| `runtime/int32` / `runtime/int64` | 符号付き checked add/sub/mul | 正確な数学的結果またはオーバーフロー拒否を両整数モデルで証明し、BigInt と比較 |
+| `runtime/conversion` | 符号・幅をまたぐ9種類の checked 変換と3種類の無条件の拡幅 | 表現可能性を証明し、ネイティブ変換結果を BigInt と比較 |
+| `encoding` / `encoding/bitvector` | LE/BE の位取りモデル | 8/16/32/64 bit の往復、各バイトの範囲、長さ、BV との対応 |
+| `runtime/bytes` | BytesView 上の Byte / UInt16 / UInt / UInt64 codec | 読み取り境界と消費長を証明し、ネイティブ codec を差分検査 |
+| `algebra` | 演算の明示的な法則と map/fold モデル | 恒等・合成、順序を保つ分割、monoid の分割集計、可換演算の並べ替え |
+| `graph` | 経路・到達性・重み・有限集合の証明 | 連結と分解、閉じた集合、距離ラベルによる最短経路・BFS の証明書 |
+| `runtime/graph` | 不変の有向グラフ、BFS、Dijkstra | 独立距離モデル、実行可能な結果検査、グラフと操作列の shrinking |
+| `examples/toolkit` | 安全な確保サイズ、ヘッダ読取、集計、経路 | 別モジュールでの契約の合成と実行例 |
 | `checks/` | FP・bitvector・array・string の SMT-LIB 2 検査 | 全入力に対する性質と、固定入力の反例 |
 | `checks/negative` | 意図的に誤った補題 | 誤った主張を検証経路が成功扱いしないこと |
 
@@ -89,6 +152,9 @@ veri/
 ├── moon.work                # members: ".", "examples"
 ├── bounds/
 ├── bitvector/
+├── encoding/
+├── algebra/
+├── graph/
 ├── arrays/
 ├── strings/
 ├── fset/
@@ -106,7 +172,8 @@ veri/
     ├── models/
     ├── bridges/
     ├── floating/
-    └── collections/
+    ├── collections/
+    └── toolkit/
 ```
 
 workspace 内の依存はローカルの本体へ解決され、レジストリから取得しない。
@@ -137,15 +204,78 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 
 ## Bitvector API
 
-`moon.pkg` で `"mizchi/veri/bitvector"` を import すると両方の幅を使える。`.mbt` ファイルで型を取り込む:
+`moon.pkg` で `"mizchi/veri/bitvector"` を import すると4種類の幅を使える。`.mbt` ファイルで型を取り込む:
 
 ```moonbit
-using @bitvector {type Bv32, type Bv64}
+using @bitvector {type Bv8, type Bv16, type Bv32, type Bv64}
 ```
 
-`.mbtp` の証明と実行時の契約では `Bv32::add(x, y)`、`Bv64::add(x, y)`、`Bv32::of_integer(n)` などの型メソッドを使う。型はそれぞれ Why3 の `bv.BV32` / `bv.BV64` に対応する。現在の `.mbtp` パーサでは、別パッケージの型メソッドを呼ぶためにこの `using` が必要。従来の幅別パッケージと自由関数から、この API に置き換えた。
+`.mbtp` の証明と実行時の契約では `Bv32::add(x, y)`、`Bv64::add(x, y)`、`Bv32::of_integer(n)` などの型メソッドを使う。型はそれぞれ Why3 の `bv.BV8` / `bv.BV16` / `bv.BV32` / `bv.BV64` に対応する。現在の `.mbtp` パーサでは、別パッケージの型メソッドを呼ぶためにこの `using` が必要。従来の幅別パッケージと自由関数から、この API に置き換えた。
 
 公開補題は幅を末尾につけ、`bitvector/laws` の `@laws.addition_wraps32()` / `addition_wraps64()`、`bitvector/laws/integers` の `integer_roundtrip32` / `integer_roundtrip64` として提供する。整数変換の補題は別パッケージに保ち、量化式の探索を抑える。`examples/bitvector/widths.mbtp` では、1つのパッケージの import で、2^32 が Bv32 ではゼロに循環し、Bv64 では保持されることを証明する。これらの補題と利用例は `just prove-machine` でも検証する。
+
+## 安全な整数演算・codec・代数法則・グラフ
+
+`runtime/int32` / `runtime/int64` は `checked_add`・`checked_sub`・`checked_mul`
+を提供する。`Some(value)` は正確な数学的結果、`None` は結果が型の範囲外であることを
+表す。両整数モデルで契約を証明し、機械整数モデルでは中間演算の安全性も検査する。
+`runtime/conversion` は `Int`・`UInt`・`Int64`・`UInt64` の全12方向を
+提供する。失敗しうる9方向は `checked_int_to_uint`・`checked_int64_to_int` のように
+`checked_` を付け、`Option` を返す。必ず成功する3方向の拡幅
+（`int_to_int64`・`uint_to_int64`・`uint_to_uint64`）は core のキャストで値を直接返す。
+`can_*` で正確な範囲判定を証明し、`converted_*` で値保存の仕様を定義する
+（拡幅の結果をこの仕様に渡すときは `Some` で包む）。
+組み込み数値型には外部パッケージから直接公開メソッドを追加できないため、
+標準型を直接受け取る関数として提供する。
+現行の証明フロントエンドはネイティブ変換を扱えないため、その対応は仮定せず
+独立した `BigInt` 演算で差分検査する。`just conversion-capabilities` で
+UInt16 の変換を含む対応状況を記録する。
+
+`runtime/bytes` は MoonBit の型名に合わせ、`byte_to_bytes` と
+`{uint16,uint,uint64}_to_{le,be}_bytes` を提供する。core の `to_le_bytes` /
+`to_be_bytes` と同じ命名で、32 bit 整数は実行時の `UInt` に合わせて `uint` とする。
+`read_byte`・`read_{uint16,uint,uint64}_{le,be}` は
+`(data : BytesView, offset : Int)` を受け取り、標準型の値を `T?` で返す。
+逐次解析用の `decode_byte`・`decode_{uint16,uint,uint64}_{le,be}` は
+`Decoded[T]?` を返し、`value` とビュー先頭からの `next_offset` を持つ。
+負数・オーバーフロー・切れた入力は `None`、読み取り後の余剰バイトは許容する。
+`read_end` は範囲判定と消費長を証明する。`encoding` は LE/BE の往復、バイトの範囲、
+長さを証明し、`encoding/bitvector` で Bv8/Bv16/Bv32/Bv64 と接続する。
+`runtime/bytes.byte_model` は Byte と Bv8 の値保存を証明する。
+ネイティブ codec の値、UInt16 のキャスト、ビュー内オフセットは差分検査の対象で、
+codec 本体の全入力の値保存は未証明。16 bit は MoonBit の `UInt16` を使い、
+エンコード結果は新しい不変の `Bytes` を返す。
+
+`algebra` は供給された純粋な演算に対する `associative`・`identity`・`commutative`・
+`monoid` と、`runtime/list.List` 上の構造的モデルを定義する。`fold_split` は法則を
+仮定せず、`fold_partitions` / `fold_directions` は monoid、`reorder_partitions` は
+さらに可換則を要求する。`map_identity` / `map_composition` は構造帰納法で証明する。
+実行時の `List::map(f)` / `List::fold(init=initial, f)` は core/list と同じ
+`raise?` の callback を左から順に呼び、例外をその場で伝播する。
+`List::from_iter` は標準 `Iter` を順に消費する。core との QuickCheck 比較と shrinking、
+法則・例外時の呼び出し順・長いリストをテストする。callback の副作用は純粋なモデルの対象外。
+任意の演算が法則を満たすという仮定は追加しない。
+
+`runtime/graph.Graph::from_array(edges, vertex_count=n)` は頂点 `0..<n`、非負の
+Int 重みを持つ有向グラフを検査し、入力辺をコピーする。自己辺と多重辺を許容する。
+`Graph::new(vertex_count=n)` は辺のないグラフ、`from_iter(edges, vertex_count=n)` は
+標準 `Iter` から構築する。`iter()` / `to_array()` は始点の頂点番号順、同じ始点の辺は
+入力順で走査する。構築と探索は値を直接返し、`raise GraphError` により
+MoonBit の `try ... catch` でエラーを扱える。
+`bfs(source)` は最小辺数、`dijkstra(source)` は最小重みを求め、既存の FIFO queue と
+最小 priority queue を使う。結果の `distance(vertex)` と `path_to(vertex)` は、
+無効・到達不能な頂点で `None` を返す。経路は始点と終点を含む新しい配列。
+無効な始点はエラーになり、到達可能な頂点の最小距離が Int を超える場合もエラーにする。
+オーバーフローする迂回路があっても、表現可能な最短経路は拒否しない。
+`check_bfs` / `check_dijkstra` は経路・辺の不等式・到達集合の閉包を独立して検査する。
+この診断用検査は経路の再構成と隣接辺の走査により最悪 O(V(V+E)) 時間で、探索時には自動実行しない。
+
+`graph` は経路の連結・分解、重みの加法性、`fset` 内の閉包、距離ラベルからの
+最短性の証明書を用意する。論理経路は後続頂点列（始点を省き、終点を含む）で、
+実行時の `path_to` は始点も含む。探索と実行可能な結果検査は、独立した
+Floyd–Warshall モデルと比較し、ゼロ重み閉路・非連結・オーバーフローもテストする。
+可変状態を使うアルゴリズム本体全体は未証明。`examples/toolkit` に実行例と、
+整数演算・集計・有限集合の契約を合成する証明例がある。
 
 ## 順序・整数論・実数と誤差評価
 
@@ -180,11 +310,104 @@ RNE で理想的な実数結果を `z` とすると、オーバーフローし�
 
 `just prover-config` は既存の native SMT と整数による BV 検証に加え、Why3 の浮動小数点の公理・丸め誤差補題を保持する Z3 / CVC5 の経路、および定義を等価な公理として符号化して補題の照合を助ける Z3 の経路を生成する。CVC5 は列の量化式や非線形な実数の誤差評価で Z3 を補完する。同梱 Why3 のファイルは変更せず、独自の仮定や `proof_axiomatized` は追加しない。通常は `just prove`、機械整数での追加検証は `just prove-foundations-machine` を使う。`just verify` は両方と負例検査を実行する。
 
+## 実行時コレクションの API
+
+独自型には `List::new()`・`Stack::new()`・`Queue::new()`・`IntMinQueue::new()`・
+`IntSet::new()`・`Tree::new()` とメソッドを用意する。更新は新しい値を返し、
+元の値も引き続き使える。`IntMinQueue` は重複を保持する Int 専用の最小優先キュー、
+`IntSet` は重複のない Int の集合。既存の自由関数は同じ契約付き実装へのエイリアスとして残す。
+
+```moonbit
+// "mizchi/veri/runtime/queue" を import。
+test "persistent queue and Iter" {
+  let original : @queue.Queue[Int] = @queue.Queue::new()
+  let queue = original.push(1).push(2)
+  assert_true(original.is_empty())
+  assert_eq(queue.iter().map(x => x * 2).to_array(), [2, 4])
+}
+```
+
+`iter()` は中間の配列を作らず、独立した走査状態を返す。順序はリスト順、スタックの
+先頭順、キューの FIFO 順、最小優先キュー・集合の昇順、木の中間順。
+イテレーターと配列変換の対応は実行時テストで検査し、証明契約は付けていない。
+List のメソッド名は core に合わせて `prepend`・`concat`・`rev` とし、自由関数の
+`cons(value, list)`・`append(left, right)`・`reverse(list)` も使える。
+
+## FixedArray の更新と範囲操作
+
+`runtime/array` は組み込みの `FixedArray[T]` を直接更新する。範囲は
+`Range { start, count }` で指定し、`[start, start + count)` を意味する。
+更新操作は成功時に `true`、不正な添字・範囲では変更せず `false` を返す。
+配列末尾の空範囲も有効。
+`Range` は `#valtype` の小さなレコード。フィールド名で開始位置と個数を区別し、
+証明対象でも呼べる位置引数の API にしている。現行の証明変換は契約付き本体での
+名前付き引数の呼び出しに未対応。`Range` の構築自体は境界検査を行わず、
+不正な値は各操作が検査する。
+
+| API | 動作 |
+| --- | --- |
+| `valid_range(length, range)` | 極端な不正入力でも加減算をオーバーフローさせず範囲を検査 |
+| `set(array, index, value)` | 単一要素の書き込み |
+| `swap(array, left, right)` | 2要素の交換。同じ添字も有効 |
+| `fill(array, value, range)` | 指定範囲を同じ値で埋める |
+| `blit(source, target, source_range, target_start)` | 同一配列の重複範囲を含むコピー |
+| `blit_disjoint(source, target, source_range, target_start)` | **異なる配列間**の契約付きコピー |
+| `copy_within(array, source_range, target_start)` | 同一配列内のコピー。重複範囲でも更新前のコピー元の値を使う |
+
+`set`・`swap` は定数時間、範囲更新は O(count) 時間・定数の補助領域で動作する。
+`copy_within` は大きい添字へ移動するときに後ろから書き込み、一時配列を作らない。
+これは計算量の説明であり、core との実測性能の同等性を保証するものではない。
+`blit` は参照の同一性を調べ、同一配列には `copy_within`、別配列には
+`blit_disjoint` を使う。この振り分けは実行時テストで検査し、証明契約は持たない。
+証明対象のコードでは `copy_within` または `blit_disjoint` を選ぶ。
+後者に同じ配列を渡す呼び出しは Why3 が共有参照として拒否する。
+`range_in_bounds(length, start, count)` は数学的な端点を扱う **証明専用** の述語。
+実行時の範囲検査には `valid_range(length, range)` を使う。
+
+```moonbit
+// "mizchi/veri/runtime/array" を import。
+test "range updates" {
+  let xs : FixedArray[Int] = [0, 1, 2, 3]
+  assert_true(@array.fill(xs, 9, { start: 1, count: 2 }))
+  assert_true(@array.copy_within(xs, { start: 0, count: 3 }, 1))
+  assert_eq(xs, [0, 0, 9, 9])
+}
+```
+
+通常・機械整数の両モデルで、範囲検査、安全な添字アクセス、整数演算の範囲、
+ループの停止性を証明する。加えて、`set` が書く値、`swap` の交換する値
+（関数内の assertion）、`fill` の全対象要素、`blit_disjoint` の対象要素と異なるコピー元の
+一致を証明する。公開される `swap`・`copy_within` の契約は成功条件・範囲まで。
+`examples/bridges.fill_and_read` では別モジュールから `fill` と `get` を合成する。
+
+`arrays/range` は更新前後の完全な仕様として `unchanged_outside`・`filled`・
+`copied`・`exchange` を定義する。7個の補題は単一書き込み、swap とその取り消し、
+空操作、fill・コピーを1要素延ばすときの性質を証明する。添字は数学的整数で、
+[Why3 map](https://why3.org/stdlib/map.html) の範囲等価・交換を利用する。
+`copied` は重複範囲でも必ず**更新前**のコピー元を参照する。
+このモデルの証明だけで実行時実装との完全な対応が証明されるわけではない。
+
+現行コンパイラでは契約内の `old(...)` が使えず、`proof_let` による snapshot は
+内部の assertion failure になる。そのため、更新前後の完全な対応、更新範囲外の保存、
+失敗時に変更しないこと、重複コピーの内容は、snapshot を使う独立した参照実装と
+QuickCheck で比較する。**実行時関数についての全入力の形式証明には未対応**。
+配列更新の8個の性質は各1,000件で、操作列、全幅の整数、有効範囲付近の入力を検査し、
+core のタプル・配列 shrinker を使う。誤った前向きコピーが3要素の重複ケースまで
+縮小される回帰テストもある。負例の証明検査では、誤った fill の値、範囲の桁あふれ、
+モデルでの範囲外書き込み、変更済みコピー元の参照を拒否する。
+
+`just array-capabilities` はコンパイラの制約と共有参照の拒否を検査し、
+`_build/array-capabilities.json` に記録する。`just verify` にも含む。
+ローカルの証明注釈では配列参照を predicate にまとめ、コンパイラが更新関数を
+Why3 の ghost コードとして扱う問題も回避している。新たな仮定付き契約や独自公理は
+追加していない。実装状況と証明範囲はリポジトリの [TODO.md](TODO.md) を参照。
+
 ## QuickCheck による性質テスト
 
-`bounds/` と `runtime/` の37個の正例の性質を `moonbitlang/core/quickcheck` で、
-固定 seed `20260914` でそれぞれ1,000件の有効入力に対して検査する。
-生成サイズは最大64、操作列と赤黒木の平衡検査は最大128。`just quickcheck js`（または `wasm`、
+`bounds/` と `runtime/` の性質を `moonbitlang/core/quickcheck` で、
+固定 seed `20260914` / `20260915` により検査する。通常は1,000件、
+グラフは500個と編集操作列200件について、全始点・終点を Floyd–Warshall と比較する。
+生成サイズは最大64、コレクション操作列と赤黒木は最大128、グラフは最大7頂点・入力辺48本。`just quickcheck js`（または `wasm`、
 `wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
 `just test-release`・`just verify` にも含まれる。
 
@@ -233,13 +456,16 @@ Push の値を縮める。二分木には、部分木への置き換えと内部
 別の回帰テストでは「Push される値はすべて3未満」という意図的に偽の性質を
 `@quickcheck.report` に渡し、`counterexample=[Push(3)]` まで縮小されたことを
 検査する。これは意図的に偽の `quickcheck:*` テストで、失敗と縮小の経路を確認するもの。
+グラフでも「最短辺数と最短重みは等しい」という偽の性質を、重み0の1辺
+（`counterexample=[0]`）へ縮小する。
 1,000件成功する正例の性質には数えない。
 
 ## コレクションのベンチマーク
 
 `benchmarks/collections` で [MoonBit のベンチマーク API](https://docs.moonbitlang.com/ja/latest/language/benchmarks.html)
 を使い、`moon bench --release --no-parallelize` で計測する。
-12種類の処理を256要素と2,048要素で実行し、各バックエンドで30組を比較する。
+14種類の処理を256要素と2,048要素で実行し、各バックエンドで34組を比較する。
+木の直接 `to_array()` を2処理追加し、従来の `inorder().to_array()` も残している。
 実装の測定順を逆転した2回の測定を行い、各回は自動調整した5バッチ。
 `Bench.keep` で結果を保持し、同じ最適化済みバックエンド上で、計測前に正確な
 出力の一致を確認する。空入力と繰り返し実行も別途テストする。
@@ -251,7 +477,7 @@ Push の値を縮める。二分木には、部分木への置き換えと内部
 | Queue | `core/queue` | 投入と取り出し、構築済みキューへの連続 peek |
 | 最小優先キュー | `core/immut/priority_queue`・`core/priority_queue` に `Reverse[Int]` を指定 | 重複を含む入力の push と取り出し。シャッフル順・昇順 |
 | BST | `core/immut/sorted_set` | 挿入後、全キーと同数の存在しないキーを検索。シャッフル順・昇順 |
-| 二分木の走査 | `core/immut/sorted_set` | 平衡した木・左に偏った木から、同じ整列済みの一意な値を配列化 |
+| 二分木の走査 | `core/immut/sorted_set` | 平衡した木・左に偏った木から同じ値を配列化。中間リスト経由と直接配列化を別々に計測 |
 
 汎用二分木には直接対応する core の型がないため、走査の比較対象は整列した値の
 列挙であり、任意の形状の木の操作ではない。可変の比較対象は現在の状態だけを使い、
@@ -274,11 +500,13 @@ Markdown の比較表を `_build/benchmarks/collections-<target>.*` に保存す
 このチェックでは失敗にする。時間は環境負荷やハードウェアに依存するため、
 ベンチマークは `just verify` から独立させている。
 
-[記録した測定結果](benchmarks/collections/RESULTS.md) では、現実装は
+[最新のチューニング結果](benchmarks/collections/TUNING.md) では、現実装は
 **一律に core より遅くならないという目標を満たしていない**。
 表現・確保・アルゴリズムの違いを含む比較であり、証明契約だけの追加コストを
 切り分けるものではない。証明専用の `seq/list/bag/fmap/bintree` バインディングには
 計測対象となる実行時の操作がない。利用するバックエンドと処理内容で再測定する。
+[2026-09-14の測定結果](benchmarks/collections/RESULTS.md) は、以前の skew heap
+実装の記録として保存している。
 
 ## コレクションのモデルと実装
 
@@ -318,16 +546,19 @@ core の実装本体の正しさを証明するものではない。core に証�
 | 実行時パッケージ | 操作と表現 | 計算量 |
 | --- | --- | --- |
 | `runtime/list` | `empty/cons/uncons/is_empty/append/reverse/length`。不変の連結構造 | 基本操作 O(1)、連結・反転・長さ O(n) |
-| `runtime/stack` | `empty/push/pop/peek/is_empty`。連結リスト | O(1) |
+| `runtime/stack` | `empty/push/pop/peek/is_empty`。pop の戻り値を兼ねる連結セル | O(1) |
 | `runtime/queue` | `empty/push/pop/peek/is_empty`。前方リストと逆順の後方リスト | Push/peek O(1)、pop は償却 O(1)・最悪 O(n) |
-| `runtime/pqueue` | `empty/push/pop/peek/is_empty`。Int の skew heap で重複を保持 | Push/pop は償却 O(log n)、peek O(1) |
-| `runtime/bintree` | `empty/node/inorder`。汎用二分木 | 構築 O(1)、inorder O(n) |
+| `runtime/pqueue` | `empty/push/pop/peek/is_empty`。Int の two-pass pairing heap、重複を保持 | Push/peek O(1)、pop O(k)。k は根の子の数、最悪 O(n) |
+| `runtime/bintree` | `empty/node/inorder/to_array`。汎用二分木 | 構築 O(1)、走査 O(n) |
 | `runtime/bintree/search` | `empty/insert/contains`。重複のない Int の赤黒木 | Insert/contains O(log n) |
 
 計算量は公開 API から構築した状態での実装の説明であり、形式証明の対象にはしていない。Queue は更新後の前方リストを
-正規化し、繰り返しの peek で反転しない。Queue と skew heap の償却計算量は、単一の
+正規化し、繰り返しの peek で反転しない。Queue の償却計算量は、単一の
 更新履歴に対するもの。古いスナップショットから分岐すると同じ処理を繰り返す場合がある。
-Skew heap は [Sleator–Tarjan のアルゴリズム](https://www.cs.cmu.edu/~sleator/papers/Adjusting-Heaps.htm)、
+優先キューは [pairing heap](https://www.cs.cmu.edu/~sleator/papers/Pairing-Heaps.htm) の
+隣接する子を左から組にして結合し、その結果を右から結合する方式を使う。
+2つの走査は末尾再帰で、停止性・内容と順序の保存を証明する。
+組み合わせと結合は結果のセルを直接構築し、一時的な根の確保を省く。
 赤黒木は [Okasaki の挿入アルゴリズム](https://www.cambridge.org/core/journals/journal-of-functional-programming/article/redblack-trees-in-a-functional-setting/62BC5EA75A2C95E3F6EE95AE3DADF0E5)
 に基づく。core の完全二分ヒープ・サイズ平衡木とは実装が異なる。
 
@@ -336,14 +567,17 @@ BST の `valid(tree)` は従来と同じ厳密な探索順序を表し、`empty`
 （黒い根、赤の連続禁止、等しい黒高さ）は shrinking 付き QuickCheck と長い昇順・降順の
 テストで検査する。色の不変条件の保存と計算量の形式証明、削除は未実装。
 
-探索木の型は、色を内部に持つ `@search.SearchTree` に変更した。
+探索木の型は、色を内部に持つ `@search.IntSet` に変更した。
 `@tree.Tree[Int]` を直接渡すコードは `@search.empty()` と `insert` で構築し、列挙には
 `@search.to_array(tree)` を使う。仕様側のモデルは `@tree.model` から `@search.model` に移る。
 汎用の `runtime/bintree.Tree[T]` は引き続き任意形状の木に使う。
 List の長さは末尾再帰、木の inorder は継続リストを使う線形走査とした。
 inorder は左の枝を末尾再帰にするが、右の枝と List の append は呼び出しスタックを使う。
-Stack/Queue/PriorityQueue/SearchTree のラッパーは `#valtype`、小さな操作は `#inline` で
+直接 `Tree::to_array()` は明示的な作業スタックで両方向の深い木に対応し、中間リストを
+確保しない。この配列変換は独立モデルとの QuickCheck と2万段の木で検査する。
+Stack/Queue/IntMinQueue/IntSet のラッパーは `#valtype`、小さな操作は `#inline` で
 余分なラッパー確保を抑える。更新には `#owned` も使い、不要な参照カウント操作を減らす。
+Stack は保存したセルが `(value, rest)?` そのものなので、pop で別のタプルを確保しない。
 これらは実行時コードの最適化であり、既存の内容・順序の契約を変更しない。
 `proof_require`・`proof_ensure`・`proof_assert` と `.mbtp` は実行時の検査ではない。
 
@@ -369,14 +603,15 @@ checks/**/*.smt2 ──────────────────→ SMT-L
 
 | パッケージ | Why3 の理論 | 主な演算 |
 | --- | --- | --- |
-| `bitvector` | `bv.BV32` / `bv.BV64` | `add/sub/mul`、`udiv/urem`、`sdiv/srem`、`bw_and/or/xor/not`、`shl/lshr/ashr`、`ult/ule/slt/sle` |
+| `bitvector` | `bv.BV8` / `bv.BV16` / `bv.BV32` / `bv.BV64` | `add/sub/mul`、`udiv/urem`、`sdiv/srem`、`bw_and/or/xor/not`、`shl/lshr/ashr`、`ult/ule/slt/sle` |
 | `arrays` | `map.Map`、`map.Const` | `select`、`store`、`const_array`、外延的な `eq` |
-| `strings` | `string.String` | `concat`、`length`、`char_at`、`substring`、`contains`、`prefix_of`、`suffix_of`、`index_of`、`replace`、`to_int/from_int`、`lt/le` |
+| `strings` | `string.String` | `concat`、`length`、`char_at`、`substring`、`contains`、`prefix_of`、`suffix_of`、`index_of`、`replace`、`to_integer/from_integer`、`lt/le` |
 
-bitvector は固定幅で、初版は 32 / 64 bit を提供する。signed / unsigned はビット列の型ではなく演算で区別し、
+bitvector は固定幅で、8 / 16 / 32 / 64 bit を提供する。signed / unsigned はビット列の型ではなく演算で区別し、
 加減乗算は 2^width を法として循環する。シフト量も同じ幅の bitvector で、幅以上のシフト量を剰余で折り返さない。
-`Bv32::width()` / `Bv64::width()` は 32 または 64 を表す bitvector。SMT モデルでは符号なしのゼロ除算は全ビット1になるが、
-実行時の除算についての保証ではない。任意幅、切り出し、拡張はまだ公開していない。
+`Bv32::width()` / `Bv64::width()` は `integer.Integer` の 32 または 64。
+シフト演算に渡す bitvector 表現には `width_bv()` を使う。SMT モデルでは符号なしのゼロ除算は全ビット1になるが、
+実行時の除算についての保証ではない。`to_bv8/to_bv16/to_bv32/to_bv64` は4幅の間の符号なし変換で、拡幅では数値を保存し、縮幅では下位ビットを残す。任意幅、切り出し、符号拡張はまだ公開していない。
 `of_integer` は最初に 2^width で剰余を取り、負数や幅を超える数学的整数も変換できる。
 `to_integer` は符号なし数値、`modulus()` は 2^width を返し、`in_range` は符号なしの範囲を判定する。
 `to_integer(of_integer(n)) = n mod 2^width` と `of_integer(to_integer(v)) = v` を補題で証明する。
@@ -388,7 +623,8 @@ bitvector は固定幅で、初版は 32 / 64 bit を提供する。signed / uns
 長さはコードポイント数なので、この範囲内の補助平面の文字も1であり、
 MoonBit の実行時の UTF-16 長とは異なる。`char_at` の返り値は文字列、`substring` の引数は開始位置と個数。
 不正な位置は空文字列、検索失敗は -1 となり、`replace` は最初の一致を置換する。
-`to_int/from_int` は SMT の非負整数の10進変換規則に従い、その `Int` は既定の数学的整数モデルで扱う。
+`to_integer/from_integer` は SMT の非負整数の10進変換規則に従い、値・長さ・添字は両整数 prelude で `integer.Integer` を使う。
+実行時の添字は `@integer.from_int(index)` で射影する。これらは証明用であり、実行時のキャストではない。
 `Text` と MoonBit `String` の暗黙変換はなく、正規表現のバインディングもまだ含まない。
 
 `examples/models/models.mbtp` に `SmtArray[Bv64, Text]` を組み合わせる証明例がある。
@@ -402,7 +638,7 @@ MoonBit の実行時の UTF-16 長とは異なる。`char_at` の返り値は文
 | `Int`・`UInt`・`Int64`・`UInt64` | `@integer.from_int/from_uint/from_int64/from_uint64` → `Integer` | 選択した MoonBit prelude から数値を取り出す証明専用の射影 |
 | `UInt`・`UInt64` | `runtime/uint32`・`runtime/uint64` | `model` で Bv32/Bv64 に写し、add/sub/less と BV 演算の一致を両整数モデルで直接証明 |
 | `Int` / `UInt`・`Int64` / `UInt64` | 32 / 64 bit のビット表現 | 組み込みの加減乗算・ビット演算・符号付き/符号なし比較・有効なシフトと循環演算アダプターを Z3 の 48 ケースで照合 |
-| `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]` と `a.length()` | `get` が範囲内でモデルの要素を Some で返し、範囲外では None を返すことを両モデルで証明 |
+| `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]` と `a.length()` | 読み取り・範囲検査・更新の契約を両モデルで証明。更新前後の証明範囲は配列の節を参照 |
 | `String` | `@text.from_string(s)` → `@text.Text?` | UTF-16 と共通の文字集合を検査し、長さ・char_at・substring を Z3 の 72 ケースで照合 |
 | `Float` / `Double` | binary32 / binary64 のビット表現 | 各型 122 演算ケースと精度変換 62 ケースを Z3 と照合。実演算との全入力の一致証明は未対応 |
 
@@ -539,7 +775,7 @@ Why3 モデル上の証明と実行時の差分検査を用意し、その両者
 ## 信頼する境界と未対応
 
 - `#proof_external` / `#proof_import` の型・引数順・Why3 記号の対応、Why3、ソルバー、MoonBit の変換処理を信頼する。独自の `proof_axiomatized` は使わない。
-- 通常の整数証明は数学的整数モデル。bounds・循環演算・FixedArray の読み取り・コレクション・利用例は同梱の機械整数モデルでも別途証明する。`lower < upper` は呼び出し側の事前条件であり、実行時の入力検査ではない。
+- 通常の整数証明は数学的整数モデル。bounds・循環演算・FixedArray の読み取りと更新・コレクション・利用例は同梱の機械整数モデルでも別途証明する。`clamp` の `min <= max` と `clamp_half_open` の `lower < upper` は呼び出し側の事前条件であり、実行時の入力検査ではない。
 - 実行時の検査プロファイルは binary32・binary64 の RNE。論理 API は 5 丸めモードを持つが、実行時に全モードを設定・検査する機能はない。
 - NaN ペイロード、signaling / quiet NaN、例外フラグ、trap、decimal、実行時 FMA、浮動小数点の文字列変換は未検査。SMT-LIB の FP 理論自体も signaling / quiet NaN を区別しない。
 - 超越関数の `sin` / `exp` などや、実数アルゴリズムに対する誤差上限の証明は別途必要。
@@ -547,8 +783,8 @@ Why3 モデル上の証明と実行時の差分検査を用意し、その両者
 - 依存パッケージを仮定する対象指定の証明だけに頼らず、`just prove` で workspace の両モジュールを証明する。
 - 現在はローカルツールチェインを利用する。共有 CI のための配布物・ソルバーのバージョン固定は今後の課題。
 
-次はコンパイラの実演算 FP 証明変換、Berkeley TestFloat / SoftFloat のケース取り込み、bitvector の切り出し・拡張、
-実行時のブリッジ契約の拡充、正規表現、平衡探索木、ヒープによる優先キュー、実行時の有限 Map を拡張できる。
+次はコンパイラの実演算 FP 証明変換、Berkeley TestFloat / SoftFloat のケース取り込み、bitvector の切り出し・符号拡張、
+実行時のブリッジ契約の拡充、正規表現、実行時の有限 Map を拡張できる。
 TestFloat / SoftFloat はこのリポジトリにはまだ組み込んでいない。
 
 ## 参考
@@ -564,3 +800,7 @@ TestFloat / SoftFloat はこのリポジトリにはまだ組み込んでいな�
 - [Z3 Guide: Bitvectors](https://microsoft.github.io/z3guide/docs/theories/Bitvectors/): 固定幅、signed/unsigned 演算、剰余算術。
 - [Z3 Guide: Arrays](https://microsoft.github.io/z3guide/docs/theories/Arrays/): select/store と外延的な配列。
 - [Z3 Guide: Strings](https://microsoft.github.io/z3guide/docs/theories/Strings/): 文字列演算と Unicode の意味論。
+
+## ライセンス
+
+[Apache-2.0](LICENSE)。

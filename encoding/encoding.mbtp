@@ -1,0 +1,178 @@
+///|
+/// Why3 Byte's mathematical radix (256), without a runtime integer projection.
+#proof_import("mach.int.Byte")
+pub fn radix() -> @integer.Integer = "radix"
+///|
+fn place2() -> @integer.Integer { @integer.mul(radix(), radix()) }
+///|
+fn place3() -> @integer.Integer { @integer.mul(place2(), radix()) }
+///|
+fn place4() -> @integer.Integer { @integer.mul(place3(), radix()) }
+///|
+fn place5() -> @integer.Integer { @integer.mul(place4(), radix()) }
+///|
+fn place6() -> @integer.Integer { @integer.mul(place5(), radix()) }
+///|
+fn place7() -> @integer.Integer { @integer.mul(place6(), radix()) }
+///|
+fn place8() -> @integer.Integer { @integer.mul(place7(), radix()) }
+///|
+pub fn modulus8() -> @integer.Integer { radix() }
+///|
+pub fn modulus16() -> @integer.Integer { place2() }
+///|
+pub fn modulus32() -> @integer.Integer { place4() }
+///|
+pub fn modulus64() -> @integer.Integer { place8() }
+
+///|
+/// Little-endian positional value of logical octets. No native cast is assumed.
+pub fn decode_le(xs : List[@integer.Integer]) -> @integer.Integer {
+ match xs {
+  Nil => @integer.zero()
+  Cons(x, rest) => @integer.add(x, @integer.mul(radix(), decode_le(rest)))
+ }
+}
+///|
+pub fn reverse_into(xs : List[@integer.Integer], acc : List[@integer.Integer]) -> List[@integer.Integer] {
+ match xs { Nil => acc; Cons(x, rest) => reverse_into(rest, Cons(x, acc)) }
+}
+///|
+pub fn decode_be(xs : List[@integer.Integer]) -> @integer.Integer {
+ decode_le(reverse_into(xs, Nil))
+}
+///|
+pub predicate octets(xs : List[@integer.Integer]) {
+ match xs { Nil => true; Cons(x, rest) => @integer.le(@integer.zero(), x) && @integer.lt(x, radix()) && octets(rest) }
+}
+///|
+pub fn byte_count(xs : List[@integer.Integer]) -> @integer.Integer {
+ match xs { Nil => @integer.zero(); Cons(_, rest) => @integer.add(@integer.one(), byte_count(rest)) }
+}
+///|
+pub fn encode_le8(value : @integer.Integer) -> List[@integer.Integer] {
+  Cons(
+    @integer.modulo(@integer.div(value, @integer.one()), radix()),
+    Nil,
+  )
+}
+///|
+pub fn encode_be8(value : @integer.Integer) -> List[@integer.Integer] { reverse_into(encode_le8(value), Nil) }
+///|
+pub lemma codec8_roundtrip(value : @integer.Integer) where {
+ proof_require: @integer.le(@integer.zero(), value),
+ proof_require: @integer.le(value, @integer.sub(modulus8(), @integer.one())),
+ proof_ensure: @integer.eq(decode_le(encode_le8(value)), value),
+ proof_ensure: @integer.eq(decode_be(encode_be8(value)), value),
+ proof_ensure: octets(encode_le8(value)),
+ proof_ensure: octets(encode_be8(value)),
+ proof_ensure: @integer.eq(byte_count(encode_le8(value)), @integer.from_int(1)),
+ proof_ensure: @integer.eq(byte_count(encode_be8(value)), @integer.from_int(1)),
+} {}
+///|
+pub fn encode_le16(value : @integer.Integer) -> List[@integer.Integer] {
+  Cons(
+    @integer.modulo(@integer.div(value, @integer.one()), radix()),
+    Cons(
+      @integer.modulo(@integer.div(value, radix()), radix()),
+      Nil,
+    ),
+  )
+}
+///|
+pub fn encode_be16(value : @integer.Integer) -> List[@integer.Integer] { reverse_into(encode_le16(value), Nil) }
+///|
+pub lemma codec16_roundtrip(value : @integer.Integer) where {
+ proof_require: @integer.le(@integer.zero(), value),
+ proof_require: @integer.le(value, @integer.sub(modulus16(), @integer.one())),
+ proof_ensure: @integer.eq(decode_le(encode_le16(value)), value),
+ proof_ensure: @integer.eq(decode_be(encode_be16(value)), value),
+ proof_ensure: octets(encode_le16(value)),
+ proof_ensure: octets(encode_be16(value)),
+ proof_ensure: @integer.eq(byte_count(encode_le16(value)), @integer.from_int(2)),
+ proof_ensure: @integer.eq(byte_count(encode_be16(value)), @integer.from_int(2)),
+} {}
+///|
+pub fn encode_le32(value : @integer.Integer) -> List[@integer.Integer] {
+  Cons(
+    @integer.modulo(@integer.div(value, @integer.one()), radix()),
+    Cons(
+      @integer.modulo(@integer.div(value, radix()), radix()),
+      Cons(
+        @integer.modulo(@integer.div(value, place2()), radix()),
+        Cons(
+          @integer.modulo(@integer.div(value, place3()), radix()),
+          Nil,
+        ),
+      ),
+    ),
+  )
+}
+///|
+pub fn encode_be32(value : @integer.Integer) -> List[@integer.Integer] { reverse_into(encode_le32(value), Nil) }
+///|
+pub lemma codec32_roundtrip(value : @integer.Integer) where {
+ proof_require: @integer.le(@integer.zero(), value),
+ proof_require: @integer.le(value, @integer.sub(modulus32(), @integer.one())),
+ proof_ensure: @integer.eq(decode_le(encode_le32(value)), value),
+ proof_ensure: @integer.eq(decode_be(encode_be32(value)), value),
+ proof_ensure: octets(encode_le32(value)),
+ proof_ensure: octets(encode_be32(value)),
+ proof_ensure: @integer.eq(byte_count(encode_le32(value)), @integer.from_int(4)),
+ proof_ensure: @integer.eq(byte_count(encode_be32(value)), @integer.from_int(4)),
+} {
+ proof_assert @integer.eq(@integer.div(value, place3()), @integer.add(@integer.modulo(@integer.div(value, place3()), radix()), @integer.mul(radix(), @integer.zero())))
+ proof_assert @integer.eq(@integer.div(value, place2()), @integer.add(@integer.modulo(@integer.div(value, place2()), radix()), @integer.mul(radix(), @integer.div(value, place3()))))
+ proof_assert @integer.eq(@integer.div(value, radix()), @integer.add(@integer.modulo(@integer.div(value, radix()), radix()), @integer.mul(radix(), @integer.div(value, place2()))))
+ proof_assert @integer.eq(value, @integer.add(@integer.modulo(value, radix()), @integer.mul(radix(), @integer.div(value, radix()))))
+}
+///|
+pub fn encode_le64(value : @integer.Integer) -> List[@integer.Integer] {
+  Cons(
+    @integer.modulo(@integer.div(value, @integer.one()), radix()),
+    Cons(
+      @integer.modulo(@integer.div(value, radix()), radix()),
+      Cons(
+        @integer.modulo(@integer.div(value, place2()), radix()),
+        Cons(
+          @integer.modulo(@integer.div(value, place3()), radix()),
+          Cons(
+            @integer.modulo(@integer.div(value, place4()), radix()),
+            Cons(
+              @integer.modulo(@integer.div(value, place5()), radix()),
+              Cons(
+                @integer.modulo(@integer.div(value, place6()), radix()),
+                Cons(
+                  @integer.modulo(@integer.div(value, place7()), radix()),
+                  Nil,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  )
+}
+///|
+pub fn encode_be64(value : @integer.Integer) -> List[@integer.Integer] { reverse_into(encode_le64(value), Nil) }
+///|
+pub lemma codec64_roundtrip(value : @integer.Integer) where {
+ proof_require: @integer.le(@integer.zero(), value),
+ proof_require: @integer.le(value, @integer.sub(modulus64(), @integer.one())),
+ proof_ensure: @integer.eq(decode_le(encode_le64(value)), value),
+ proof_ensure: @integer.eq(decode_be(encode_be64(value)), value),
+ proof_ensure: octets(encode_le64(value)),
+ proof_ensure: octets(encode_be64(value)),
+ proof_ensure: @integer.eq(byte_count(encode_le64(value)), @integer.from_int(8)),
+ proof_ensure: @integer.eq(byte_count(encode_be64(value)), @integer.from_int(8)),
+} {
+ proof_assert @integer.eq(@integer.div(value, place7()), @integer.add(@integer.modulo(@integer.div(value, place7()), radix()), @integer.mul(radix(), @integer.zero())))
+ proof_assert @integer.eq(@integer.div(value, place6()), @integer.add(@integer.modulo(@integer.div(value, place6()), radix()), @integer.mul(radix(), @integer.div(value, place7()))))
+ proof_assert @integer.eq(@integer.div(value, place5()), @integer.add(@integer.modulo(@integer.div(value, place5()), radix()), @integer.mul(radix(), @integer.div(value, place6()))))
+ proof_assert @integer.eq(@integer.div(value, place4()), @integer.add(@integer.modulo(@integer.div(value, place4()), radix()), @integer.mul(radix(), @integer.div(value, place5()))))
+ proof_assert @integer.eq(@integer.div(value, place3()), @integer.add(@integer.modulo(@integer.div(value, place3()), radix()), @integer.mul(radix(), @integer.div(value, place4()))))
+ proof_assert @integer.eq(@integer.div(value, place2()), @integer.add(@integer.modulo(@integer.div(value, place2()), radix()), @integer.mul(radix(), @integer.div(value, place3()))))
+ proof_assert @integer.eq(@integer.div(value, radix()), @integer.add(@integer.modulo(@integer.div(value, radix()), radix()), @integer.mul(radix(), @integer.div(value, place2()))))
+ proof_assert @integer.eq(value, @integer.add(@integer.modulo(value, radix()), @integer.mul(radix(), @integer.div(value, radix()))))
+}

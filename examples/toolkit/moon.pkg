@@ -1,0 +1,16 @@
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/relations",
+  "mizchi/veri/algebra",
+  "mizchi/veri/graph" @logic_graph,
+  "mizchi/veri/fset",
+  "mizchi/veri/runtime/list",
+  "mizchi/veri/runtime/int32",
+  "mizchi/veri/runtime/conversion",
+  "mizchi/veri/runtime/bytes",
+  "mizchi/veri/runtime/graph",
+}
+
+options(
+  "proof-enabled": true,
+)

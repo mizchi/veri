@@ -50,3 +50,30 @@ pub fn restore64(
 } {
   @uint64.sub(@uint64.add(value, delta), delta)
 }
+
+///|
+/// A client can use fill's postcondition through a module boundary.
+pub fn fill_and_read(
+  array : FixedArray[Int],
+  start : Int,
+  count : Int,
+  value : Int,
+) -> Int? where {
+  proof_ensure: result => {
+    match result {
+      Some(found) =>
+        found == value &&
+        count > 0 &&
+        @runtime_array.range_in_bounds(array.length(), start, count)
+      None =>
+        count <= 0 ||
+        @runtime_array.range_in_bounds(array.length(), start, count) == false
+    }
+  },
+} {
+  if @runtime_array.fill(array, value, { start, count, }) && count > 0 {
+    @runtime_array.get(array, start)
+  } else {
+    None
+  }
+}

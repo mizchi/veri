@@ -1,6 +1,7 @@
 ///|
 /// Persistent min-priority queue of Int values, retaining duplicates.
-/// Skew heap: amortized O(log n) push/pop along a linear update history, O(1) peek.
+/// Pairing heap: O(1) push/peek; pop uses two passes over the root children.
+/// Node fields represent first child, value and next sibling.
 priv enum Heap {
   Empty
   Node(Heap, Int, Heap)
@@ -8,13 +9,14 @@ priv enum Heap {
 
 ///|
 #valtype
-pub struct PriorityQueue {
+pub struct IntMinQueue {
   priv values : Heap
 }
 
 ///|
 #inline
-pub fn empty() -> PriorityQueue where {
+#as_free_fn(empty)
+pub fn IntMinQueue::new() -> IntMinQueue where {
   proof_ensure: result => valid(result),
   proof_ensure: result => @bag.eq(model(result), @bag.empty()),
 } {
@@ -22,49 +24,105 @@ pub fn empty() -> PriorityQueue where {
 }
 
 ///|
-/// Skew-heap meld: exchange children on every step.
-fn merge(
-  left : Heap,
-  right : Heap,
+/// Link an implicit root (children, value) with an existing heap. Avoid allocating
+/// a temporary root just to discard it during the link.
+#owned(children, heap)
+fn link(
+  children : Heap,
+  value : Int,
+  heap : Heap,
 ) -> Heap where {
-  proof_decrease: total_size(left, right),
-  proof_require: ordered(left) && ordered(right),
-  proof_ensure: result => ordered(result),
+  proof_require: ordered(children) && all_ge(value, children),
+  proof_require: ordered(heap) && root(heap),
+  proof_ensure: result => ordered(result) && root(result),
   proof_ensure: result => {
-    @bag.eq(contents(result), @bag.union(contents(left), contents(right)))
+    @bag.eq(
+      contents(result),
+      @bag.union(@bag.add(value, contents(children)), contents(heap)),
+    )
   },
 } {
-  match (left, right) {
-    (Empty, _) => right
-    (_, Empty) => left
-    (Node(a, x, b), Node(c, y, d)) =>
-      if x <= y {
-        Node(merge(b, right), x, a)
+  match heap {
+    Empty => Node(children, value, Empty)
+    Node(other, head, _) =>
+      if value <= head {
+        match children {
+          Empty => Node(heap, value, Empty)
+          Node(_, _, _) => Node(Node(other, head, children), value, Empty)
+        }
       } else {
-        Node(merge(left, d), y, c)
+        Node(Node(children, value, other), head, Empty)
       }
   }
 }
 
 ///|
-pub fn push(
-  queue : PriorityQueue,
+/// Pair siblings from left to right, storing merged roots in reverse order.
+#owned(forest, acc)
+fn pair_roots(
+  forest : Heap,
+  acc : Heap,
+) -> Heap where {
+  proof_decrease: heap_size(forest),
+  proof_require: ordered(forest) && ordered(acc),
+  proof_ensure: result => ordered(result),
+  proof_ensure: result => {
+    @bag.eq(contents(result), @bag.union(contents(forest), contents(acc)))
+  },
+} {
+  match forest {
+    Empty => acc
+    Node(a, x, Empty) => Node(a, x, acc)
+    Node(a, x, Node(b, y, rest)) =>
+      if x <= y {
+        pair_roots(rest, Node(Node(b, y, a), x, acc))
+      } else {
+        pair_roots(rest, Node(Node(a, x, b), y, acc))
+      }
+  }
+}
+
+///|
+/// Merge paired roots from right to left. Both passes are tail recursive.
+#owned(forest, acc)
+fn merge_roots(
+  forest : Heap,
+  acc : Heap,
+) -> Heap where {
+  proof_decrease: forest,
+  proof_require: ordered(forest) && ordered(acc) && root(acc),
+  proof_ensure: result => ordered(result) && root(result),
+  proof_ensure: result => {
+    @bag.eq(contents(result), @bag.union(contents(forest), contents(acc)))
+  },
+} {
+  match forest {
+    Empty => acc
+    Node(children, value, rest) => merge_roots(rest, link(children, value, acc))
+  }
+}
+
+///|
+#owned(queue)
+#as_free_fn(push)
+pub fn IntMinQueue::push(
+  queue : IntMinQueue,
   value : Int,
-) -> PriorityQueue where {
+) -> IntMinQueue where {
   proof_require: valid(queue),
   proof_ensure: result => valid(result),
   proof_ensure: result => @bag.eq(model(result), @bag.add(value, model(queue))),
 } {
-  let singleton = Node(Empty, value, Empty)
-  proof_assert @bag.eq(contents(singleton), @bag.singleton(value))
-  { values: merge(singleton, queue.values), }
+  { values: link(Empty, value, queue.values), }
 }
 
 ///|
+#owned(queue)
 #inline
-pub fn pop(
-  queue : PriorityQueue,
-) -> (Int, PriorityQueue)? where {
+#as_free_fn(pop)
+pub fn IntMinQueue::pop(
+  queue : IntMinQueue,
+) -> (Int, IntMinQueue)? where {
   proof_require: valid(queue),
   proof_ensure: result => {
     match result {
@@ -78,14 +136,18 @@ pub fn pop(
 } {
   match queue.values {
     Empty => None
-    Node(left, value, right) => Some((value, { values: merge(left, right), }))
+    Node(children, value, _) =>
+      Some(
+        (value, { values: merge_roots(pair_roots(children, Empty), Empty), }),
+      )
   }
 }
 
 ///|
 #inline
-pub fn peek(
-  queue : PriorityQueue,
+#as_free_fn(peek)
+pub fn IntMinQueue::peek(
+  queue : IntMinQueue,
 ) -> Int? where {
   proof_require: valid(queue),
   proof_ensure: result => {
@@ -102,8 +164,9 @@ pub fn peek(
 }
 
 ///|
-pub fn is_empty(
-  queue : PriorityQueue,
+#as_free_fn(is_empty)
+pub fn IntMinQueue::is_empty(
+  queue : IntMinQueue,
 ) -> Bool where {
   proof_ensure: result => result == @bag.eq(model(queue), @bag.empty()),
 } {
@@ -115,7 +178,8 @@ pub fn is_empty(
 
 ///|
 /// Ascending order; fresh array, checked by runtime tests.
-pub fn to_array(queue : PriorityQueue) -> Array[Int] {
+#as_free_fn(to_array)
+pub fn IntMinQueue::to_array(queue : IntMinQueue) -> Array[Int] {
   let result = []
   let mut rest = queue
   while pop(rest) is Some((value, tail)) {

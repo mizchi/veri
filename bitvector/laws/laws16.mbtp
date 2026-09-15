@@ -1,0 +1,37 @@
+///|
+pub lemma xor_self_is_zero16(x : Bv16) where {
+  proof_ensure: Bv16::eq(Bv16::bw_xor(x, x), Bv16::zero()),
+} {}
+
+///|
+pub lemma de_morgan16(x : Bv16, y : Bv16) where {
+  proof_ensure: Bv16::eq(Bv16::bw_not(Bv16::bw_and(x, y)), Bv16::bw_or(Bv16::bw_not(x), Bv16::bw_not(y))),
+} {}
+
+///|
+pub lemma addition_wraps16() where {
+  proof_ensure: Bv16::eq(Bv16::add(Bv16::ones(), Bv16::one()), Bv16::zero()),
+} {}
+
+///|
+pub lemma subtraction_inverts_addition16(x : Bv16, y : Bv16) where {
+  proof_ensure: Bv16::eq(Bv16::sub(Bv16::add(x, y), y), x),
+} {}
+
+///|
+pub lemma signed_unsigned_differ16() where {
+  proof_ensure: Bv16::slt(Bv16::ones(), Bv16::zero()),
+  proof_ensure: Bv16::ult(Bv16::ones(), Bv16::zero()) == false,
+} {}
+
+///|
+pub lemma oversized_shifts16() where {
+  proof_ensure: Bv16::eq(Bv16::shl(Bv16::one(), Bv16::width_bv()), Bv16::zero()),
+  proof_ensure: Bv16::eq(Bv16::lshr(Bv16::ones(), Bv16::width_bv()), Bv16::zero()),
+  proof_ensure: Bv16::eq(Bv16::ashr(Bv16::ones(), Bv16::width_bv()), Bv16::ones()),
+} {}
+
+///| SMT bitvector division is total, unlike many runtime division operators.
+pub lemma unsigned_division_by_zero16(x : Bv16) where {
+  proof_ensure: Bv16::eq(Bv16::udiv(x, Bv16::zero()), Bv16::ones()),
+} {}

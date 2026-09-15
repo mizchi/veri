@@ -1,0 +1,37 @@
+///|
+pub lemma xor_self_is_zero8(x : Bv8) where {
+  proof_ensure: Bv8::eq(Bv8::bw_xor(x, x), Bv8::zero()),
+} {}
+
+///|
+pub lemma de_morgan8(x : Bv8, y : Bv8) where {
+  proof_ensure: Bv8::eq(Bv8::bw_not(Bv8::bw_and(x, y)), Bv8::bw_or(Bv8::bw_not(x), Bv8::bw_not(y))),
+} {}
+
+///|
+pub lemma addition_wraps8() where {
+  proof_ensure: Bv8::eq(Bv8::add(Bv8::ones(), Bv8::one()), Bv8::zero()),
+} {}
+
+///|
+pub lemma subtraction_inverts_addition8(x : Bv8, y : Bv8) where {
+  proof_ensure: Bv8::eq(Bv8::sub(Bv8::add(x, y), y), x),
+} {}
+
+///|
+pub lemma signed_unsigned_differ8() where {
+  proof_ensure: Bv8::slt(Bv8::ones(), Bv8::zero()),
+  proof_ensure: Bv8::ult(Bv8::ones(), Bv8::zero()) == false,
+} {}
+
+///|
+pub lemma oversized_shifts8() where {
+  proof_ensure: Bv8::eq(Bv8::shl(Bv8::one(), Bv8::width_bv()), Bv8::zero()),
+  proof_ensure: Bv8::eq(Bv8::lshr(Bv8::ones(), Bv8::width_bv()), Bv8::zero()),
+  proof_ensure: Bv8::eq(Bv8::ashr(Bv8::ones(), Bv8::width_bv()), Bv8::ones()),
+} {}
+
+///| SMT bitvector division is total, unlike many runtime division operators.
+pub lemma unsigned_division_by_zero8(x : Bv8) where {
+  proof_ensure: Bv8::eq(Bv8::udiv(x, Bv8::zero()), Bv8::ones()),
+} {}

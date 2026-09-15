@@ -1,0 +1,61 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/graph"
+
+import {
+  "mizchi/veri/fset",
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/list",
+}
+
+// Values
+pub fn[V] bfs_certificate((V, V) -> Bool, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
+pub fn[V] closed((V, V) -> Bool, @fset.Fset[V]) -> Bool
+
+pub fn[V] concatenate((V, V) -> Bool, V, @list.List[V], V, @list.List[V], V) -> Unit
+
+pub fn[V] decompose((V, V) -> Bool, V, @list.List[V], @list.List[V], V) -> Unit
+
+pub fn[V] edge_count(@list.List[V]) -> @integer.Integer
+
+pub fn[V] endpoint(V, @list.List[V]) -> V
+
+pub fn[V] feasible((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.Integer) -> Bool
+
+pub fn[V] fewest_edges((V, V) -> Bool, V, @list.List[V], V) -> Bool
+
+pub fn[V] nonnegative((V, V) -> Bool, (V, V) -> @integer.Integer) -> Bool
+
+pub fn[V] nonnegative_path((V, V) -> Bool, (V, V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
+pub fn[V] optimality_certificate((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.Integer, V, @list.List[V], V, @list.List[V]) -> Unit
+
+pub fn[V] path((V, V) -> Bool, V, @list.List[V], V) -> Bool
+
+pub fn[V] path_lower_bound((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
+pub fn[V] path_reaches((V, V) -> Bool, V, @list.List[V], V) -> Unit
+
+pub fn[V] path_stays_in_set((V, V) -> Bool, V, @list.List[V], V, @fset.Fset[V]) -> Unit
+
+pub fn[V] path_weight((V, V) -> @integer.Integer, V, @list.List[V]) -> @integer.Integer
+
+pub fn[V] reachable((V, V) -> Bool, V, V) -> Bool
+
+pub fn[V] shortest((V, V) -> Bool, (V, V) -> @integer.Integer, V, @list.List[V], V) -> Bool
+
+pub fn[V] shortest_certificate((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
+pub fn[V] unit_weight(V, V) -> @integer.Integer
+
+pub fn[V] unit_weight_counts_edges(V, @list.List[V]) -> Unit
+
+pub fn[V] weight_split((V, V) -> @integer.Integer, V, @list.List[V], @list.List[V]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

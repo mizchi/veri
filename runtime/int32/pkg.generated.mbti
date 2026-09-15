@@ -1,0 +1,23 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/int32"
+
+import {
+  "mizchi/veri/integer",
+}
+
+// Values
+pub fn checked_add(Int, Int) -> Int?
+
+pub fn checked_mul(Int, Int) -> Int?
+
+pub fn checked_sub(Int, Int) -> Int?
+
+pub fn in_range(@integer.Integer) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

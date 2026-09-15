@@ -1,0 +1,109 @@
+///|
+/// Laws are conditions on the supplied pure operation, never axioms about it.
+pub predicate[T] associative(op : (T, T) -> T) {
+ ∀ x : T, ∀ y : T, ∀ z : T, @relations.same(op(op(x, y), z), op(x, op(y, z)))
+}
+///|
+pub predicate[T] commutative(op : (T, T) -> T) {
+ ∀ x : T, ∀ y : T, @relations.same(op(x, y), op(y, x))
+}
+///|
+pub predicate[T] identity(op : (T, T) -> T, unit : T) {
+ ∀ x : T, @relations.same(op(unit, x), x) && @relations.same(op(x, unit), x)
+}
+///|
+pub predicate[T] monoid(op : (T, T) -> T, unit : T) {
+ associative(op) && identity(op, unit)
+}
+///|
+pub fn[T] id(x : T) -> T { x }
+///|
+pub fn[A, B, C] compose(f : (B) -> C, g : (A) -> B, x : A) -> C { f(g(x)) }
+///|
+pub fn[T] append(xs : List[T], ys : List[T]) -> List[T] {
+ match xs { Nil => ys; Cons(x, rest) => Cons(x, append(rest, ys)) }
+}
+///|
+pub fn[A, B] map(f : (A) -> B, xs : List[A]) -> List[B] {
+ match xs { Nil => Nil; Cons(x, rest) => Cons(f(x), map(f, rest)) }
+}
+///|
+pub fn[A, B] fold_left(op : (B, A) -> B, acc : B, xs : List[A]) -> B {
+ match xs { Nil => acc; Cons(x, rest) => fold_left(op, op(acc, x), rest) }
+}
+///|
+pub fn[A, B] fold_right(op : (A, B) -> B, xs : List[A], acc : B) -> B {
+ match xs { Nil => acc; Cons(x, rest) => op(x, fold_right(op, rest, acc)) }
+}
+///|
+pub lemma[T] map_identity(xs : List[T]) where {
+ proof_decrease: xs,
+ proof_ensure: @relations.same(map(id, xs), xs),
+} {
+ match xs { Nil => (); Cons(_, rest) => map_identity(rest) }
+}
+///|
+pub predicate[A, B, C] composes(f : (B) -> C, g : (A) -> B, h : (A) -> C) {
+ ∀ x : A, @relations.same(h(x), compose(f, g, x))
+}
+///|
+pub lemma[A, B, C] map_composition(xs : List[A], f : (B) -> C, g : (A) -> B, h : (A) -> C) where {
+ proof_decrease: xs,
+ proof_require: composes(f, g, h),
+ proof_ensure: @relations.same(map(f, map(g, xs)), map(h, xs)),
+} {
+ match xs { Nil => (); Cons(_, rest) => map_composition(rest, f, g, h) }
+}
+///|
+pub predicate[A, B] split_for_all_acc(xs : List[A], ys : List[A], op : (B, A) -> B) {
+ ∀ acc : B, @relations.same(fold_left(op, acc, append(xs, ys)), fold_left(op, fold_left(op, acc, xs), ys))
+}
+///|
+/// Sequential split needs no algebraic laws.
+pub lemma[A, B] fold_split(xs : List[A], ys : List[A], op : (B, A) -> B) where {
+ proof_decrease: xs,
+ proof_ensure: split_for_all_acc(xs, ys, op),
+} {
+ match xs { Nil => (); Cons(_, rest) => fold_split(rest, ys, op) }
+}
+///|
+pub predicate[T] accumulated(xs : List[T], op : (T, T) -> T, unit : T) {
+ ∀ acc : T, @relations.same(fold_left(op, acc, xs), op(acc, fold_right(op, xs, unit)))
+}
+///|
+pub lemma[T] fold_accumulate(xs : List[T], op : (T, T) -> T, unit : T) where {
+ proof_decrease: xs,
+ proof_require: monoid(op, unit),
+ proof_ensure: accumulated(xs, op, unit),
+} {
+ match xs { Nil => (); Cons(_, rest) => fold_accumulate(rest, op, unit) }
+}
+///|
+pub lemma[T] fold_directions(xs : List[T], op : (T, T) -> T, unit : T) where {
+ proof_require: monoid(op, unit),
+ proof_ensure: @relations.same(fold_left(op, unit, xs), fold_right(op, xs, unit)),
+} { fold_accumulate(xs, op, unit) }
+///|
+/// Combine independently aggregated partitions, retaining their order.
+pub lemma[T] fold_partitions(xs : List[T], ys : List[T], op : (T, T) -> T, unit : T) where {
+ proof_require: monoid(op, unit),
+ proof_ensure: @relations.same(fold_left(op, unit, append(xs, ys)), op(fold_left(op, unit, xs), fold_left(op, unit, ys))),
+} {
+ fold_split(xs, ys, op)
+ fold_accumulate(ys, op, unit)
+ fold_directions(ys, op, unit)
+}
+///|
+pub lemma[T] reorder_partitions(xs : List[T], ys : List[T], op : (T, T) -> T, unit : T) where {
+ proof_require: monoid(op, unit),
+ proof_require: commutative(op),
+ proof_ensure: @relations.same(fold_left(op, unit, append(xs, ys)), fold_left(op, unit, append(ys, xs))),
+} {
+ fold_partitions(xs, ys, op, unit)
+ fold_partitions(ys, xs, op, unit)
+}
+///|
+pub lemma integer_addition() where {
+ proof_ensure: monoid(@integer.add, @integer.zero()),
+ proof_ensure: commutative(@integer.add),
+} {}

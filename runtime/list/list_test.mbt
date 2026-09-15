@@ -26,6 +26,7 @@ test "quickcheck: persistent list append and reverse agree with arrays" {
       let right = @list.from_array(ys)
       @list.to_array(@list.append(left, right)) == xs + ys &&
       @list.to_array(@list.reverse(left)) == xs.rev() &&
+      left.iter().to_array() == xs &&
       @list.to_array(left) == xs &&
       @list.length(left) == xs.length()
     },

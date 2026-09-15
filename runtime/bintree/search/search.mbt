@@ -13,12 +13,13 @@ priv enum Node {
 ///|
 /// Persistent red-black search tree of unique Int keys.
 #valtype
-pub struct SearchTree {
+pub struct IntSet {
   priv root : Node
 }
 
 ///|
-pub fn empty() -> SearchTree where {
+#as_free_fn(empty)
+pub fn IntSet::new() -> IntSet where {
   proof_ensure: result => valid(result),
   proof_ensure: result => @logic_tree.is_empty(model(result)),
 } {
@@ -100,10 +101,11 @@ fn insert_node(
 
 ///|
 /// Persistent insertion with rebalancing; equal keys are kept only once.
-pub fn insert(
-  tree : SearchTree,
+#as_free_fn(insert)
+pub fn IntSet::insert(
+  tree : IntSet,
   value : Int,
-) -> SearchTree where {
+) -> IntSet where {
   proof_require: valid(tree),
   proof_ensure: result => valid(result),
   proof_ensure: result => inserted(tree, value, result),
@@ -138,8 +140,9 @@ fn contains_node(
 }
 
 ///|
-pub fn contains(
-  tree : SearchTree,
+#as_free_fn(contains)
+pub fn IntSet::contains(
+  tree : IntSet,
   value : Int,
 ) -> Bool where {
   proof_require: valid(tree),
@@ -150,7 +153,8 @@ pub fn contains(
 
 ///|
 /// Sorted unique contents in a fresh array. Conversion is runtime-tested.
-pub fn to_array(tree : SearchTree) -> Array[Int] {
+#as_free_fn(to_array)
+pub fn IntSet::to_array(tree : IntSet) -> Array[Int] {
   fn visit(node : Node, output : Array[Int]) -> Unit {
     match node {
       Empty => ()

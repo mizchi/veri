@@ -1,0 +1,11 @@
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/relations",
+  "mizchi/veri/algebra",
+  "mizchi/veri/fset",
+  "mizchi/veri/runtime/list",
+}
+
+options(
+  "proof-enabled": true,
+)

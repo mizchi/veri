@@ -1,4 +1,4 @@
-import { copyFileSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,13 +30,19 @@ for (const check of checks) {
     const sourceName = check.fixture.endsWith('.mbt.txt') ? "negative.mbt" : "negative.mbtp";
     writeFileSync(join(directory, sourceName), readFileSync(new URL(check.fixture, fixtures)));
     const result = spawnSync("moon", ["prove", "--why3-config", config], {
-      cwd: directory, encoding: "utf8", timeout: 60_000,
+      // Some packages discharge substantial positive proofs before the false control.
+      cwd: directory, encoding: "utf8", timeout: check.timeoutMs ?? 60_000,
       env: {...process.env, ...(check.machine ? {
         MOON_PROVE_PRELUDE_OVERRIDE: join(homedir(), ".moon/lib/prelude_proof_machine_int"),
       } : {})},
     });
     if (result.error) throw result.error;
-    const report = JSON.parse(readFileSync(join(directory, "_build/verif/veri-negative.proof.json"), "utf8"));
+    const reportPath = join(directory, "_build/verif/veri-negative.proof.json");
+    if (!existsSync(reportPath)) {
+      throw new Error("No proof report for " + check.package + "/" + check.fixture +
+        "\n" + result.stdout + result.stderr);
+    }
+    const report = JSON.parse(readFileSync(reportPath, "utf8"));
     if (result.status === 0 || report.result === "success" ||
         !report.failures.some(failure => JSON.stringify(failure).includes("negative_control"))) {
       throw new Error("False claim was not rejected as a proof obligation: " + check.claim +

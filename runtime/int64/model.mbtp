@@ -1,0 +1,6 @@
+///|
+/// Mathematical range of Int64; valid under either proof prelude.
+pub predicate in_range(value : @integer.Integer) {
+  @integer.le(@integer.neg(@integer.add(@integer.from_int64(9223372036854775807L), @integer.one())), value) &&
+  @integer.le(value, @integer.from_int64(9223372036854775807L))
+}

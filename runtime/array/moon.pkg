@@ -1,10 +1,13 @@
 import {
   "mizchi/veri/arrays",
+  "mizchi/veri/arrays/range",
   "mizchi/veri/integer",
 }
 
 import {
   "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+  "moonbitlang/core/debug",
 } for "test"
 
 options(

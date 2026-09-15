@@ -10,7 +10,7 @@ pub fn stack_last(
     }
   },
 } {
-  @stack.peek(@stack.push(@stack.push(@stack.empty(), first), last))
+  @stack.Stack::new().push(first).push(last).peek()
 }
 
 ///|
@@ -25,7 +25,7 @@ pub fn queue_first(
     }
   },
 } {
-  @queue.peek(@queue.push(@queue.push(@queue.empty(), first), last))
+  @queue.Queue::new().push(first).push(last).peek()
 }
 
 ///|
@@ -41,7 +41,7 @@ pub fn minimum_of_two(
     }
   },
 } {
-  @pqueue.peek(@pqueue.push(@pqueue.push(@pqueue.empty(), first), last))
+  @pqueue.IntMinQueue::new().push(first).push(last).peek()
 }
 
 ///|
@@ -50,7 +50,7 @@ pub fn inserted_is_found(
 ) -> Bool where {
   proof_ensure: result => result,
 } {
-  @search.contains(@search.insert(@search.empty(), value), value)
+  @search.IntSet::new().insert(value).contains(value)
 }
 
 ///|
@@ -59,5 +59,5 @@ pub fn empty_search_misses(
 ) -> Bool where {
   proof_ensure: result => result == false,
 } {
-  @search.contains(@search.empty(), value)
+  @search.IntSet::new().contains(value)
 }

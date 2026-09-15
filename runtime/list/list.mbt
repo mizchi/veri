@@ -6,7 +6,8 @@ pub(all) enum List[T] {
 }
 
 ///|
-pub fn[T] empty() -> List[T] where {
+#as_free_fn(empty)
+pub fn[T] List::new() -> List[T] where {
   proof_ensure: result => @logic_list.eq(model(result), @logic_list.empty()),
 } {
   let result : List[T] = Nil
@@ -29,7 +30,9 @@ pub fn[T] cons(
 }
 
 ///|
-pub fn[T] is_empty(
+#inline
+#as_free_fn(is_empty)
+pub fn[T] List::is_empty(
   xs : List[T],
 ) -> Bool where {
   proof_ensure: result => result == @logic_list.is_empty(model(xs)),
@@ -42,7 +45,8 @@ pub fn[T] is_empty(
 
 ///|
 #inline
-pub fn[T] uncons(
+#as_free_fn(uncons)
+pub fn[T] List::uncons(
   xs : List[T],
 ) -> (T, List[T])? where {
   proof_ensure: result => {
@@ -60,7 +64,9 @@ pub fn[T] uncons(
 }
 
 ///|
-pub fn[T] append(
+#owned(xs, ys)
+#as_free_fn(append)
+pub fn[T] List::concat(
   xs : List[T],
   ys : List[T],
 ) -> List[T] where {
@@ -79,6 +85,7 @@ pub fn[T] append(
 }
 
 ///|
+#owned(xs, acc)
 fn[T] reverse_into(
   xs : List[T],
   acc : List[T],
@@ -101,7 +108,9 @@ fn[T] reverse_into(
 }
 
 ///|
-pub fn[T] reverse(
+#owned(xs)
+#as_free_fn(reverse)
+pub fn[T] List::rev(
   xs : List[T],
 ) -> List[T] where {
   proof_ensure: result => {
@@ -113,7 +122,8 @@ pub fn[T] reverse(
 
 ///|
 /// The mathematical length must fit in a runtime Int.
-pub fn[T] length(
+#as_free_fn(length)
+pub fn[T] List::length(
   xs : List[T],
 ) -> Int where {
   proof_require: @integer.le(
@@ -153,7 +163,8 @@ fn[T] length_from(
 
 ///|
 /// Convenience conversion, covered by runtime property tests.
-pub fn[T] from_array(values : ArrayView[T]) -> List[T] {
+#as_free_fn(from_array)
+pub fn[T] List::from_array(values : ArrayView[T]) -> List[T] {
   let mut result = Nil
   for index = values.length() - 1; index >= 0; index = index - 1 {
     result = Cons(values[index], result)
@@ -163,7 +174,9 @@ pub fn[T] from_array(values : ArrayView[T]) -> List[T] {
 
 ///|
 /// A fresh array in list order; does not mutate the input spine.
-pub fn[T] to_array(xs : List[T]) -> Array[T] {
+#owned(xs)
+#as_free_fn(to_array)
+pub fn[T] List::to_array(xs : List[T]) -> Array[T] {
   let result = []
   let mut rest = xs
   while rest is Cons(value, tail) {

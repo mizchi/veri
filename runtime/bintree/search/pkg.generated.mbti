@@ -6,24 +6,25 @@ import {
 }
 
 // Values
-pub fn contains(SearchTree, Int) -> Bool
+pub fn model(IntSet) -> @bintree.Tree[Int]
 
-pub fn empty() -> SearchTree
-
-pub fn insert(SearchTree, Int) -> SearchTree
-
-pub fn model(SearchTree) -> @bintree.Tree[Int]
-
-pub fn to_array(SearchTree) -> Array[Int]
-
-pub fn valid(SearchTree) -> Bool
+pub fn valid(IntSet) -> Bool
 
 // Errors
 
 // Types and methods
-pub struct SearchTree {
+pub struct IntSet {
   // private fields
 }
+#as_free_fn(contains)
+pub fn IntSet::contains(Self, Int) -> Bool
+#as_free_fn(insert)
+pub fn IntSet::insert(Self, Int) -> Self
+pub fn IntSet::iter(Self) -> Iter[Int]
+#as_free_fn(empty)
+pub fn IntSet::new() -> Self
+#as_free_fn(to_array)
+pub fn IntSet::to_array(Self) -> Array[Int]
 
 // Type aliases
 

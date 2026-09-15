@@ -7,3 +7,28 @@ pub fn[T] model(array : FixedArray[T]) -> @arrays.SmtArray[@integer.Integer, T] 
 ///|
 #proof_import("map.Map")
 fn[T] same(left : T, right : T) -> Bool = "(=)"
+
+///|
+/// Proof-only predicate over mathematical endpoints. For runtime checks, use
+/// valid_range(length, { start, count }), which avoids invalid-sum overflow.
+pub predicate range_in_bounds(length : Int, start : Int, count : Int) {
+  @range.valid(@integer.from_int(length), @integer.from_int(start), @integer.from_int(count))
+}
+
+///|
+/// Keep reads under named predicates in body annotations. With this compiler,
+/// spelling same(array[index], value) directly in an assertion/invariant makes
+/// mutating functions ghost in WhyML and prevents verified clients calling them.
+predicate[T] cells_same(array : FixedArray[T], index : Int, value : T) {
+  same(array[index], value)
+}
+
+///|
+predicate[T] filled_prefix(array : FixedArray[T], start : Int, count : Int, value : T) {
+  ∀ j : Int, (start <= j && j < start + count) → same(array[j], value)
+}
+
+///|
+predicate[T] copied_prefix(source : FixedArray[T], source_start : Int, target : FixedArray[T], target_start : Int, count : Int) {
+  ∀ j : Int, (0 <= j && j < count) → same(target[target_start + j], source[source_start + j])
+}

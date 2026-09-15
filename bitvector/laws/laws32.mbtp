@@ -26,9 +26,9 @@ pub lemma signed_unsigned_differ32() where {
 
 ///|
 pub lemma oversized_shifts32() where {
-  proof_ensure: Bv32::eq(Bv32::shl(Bv32::one(), Bv32::width()), Bv32::zero()),
-  proof_ensure: Bv32::eq(Bv32::lshr(Bv32::ones(), Bv32::width()), Bv32::zero()),
-  proof_ensure: Bv32::eq(Bv32::ashr(Bv32::ones(), Bv32::width()), Bv32::ones()),
+  proof_ensure: Bv32::eq(Bv32::shl(Bv32::one(), Bv32::width_bv()), Bv32::zero()),
+  proof_ensure: Bv32::eq(Bv32::lshr(Bv32::ones(), Bv32::width_bv()), Bv32::zero()),
+  proof_ensure: Bv32::eq(Bv32::ashr(Bv32::ones(), Bv32::width_bv()), Bv32::ones()),
 } {}
 
 ///| SMT bitvector division is total, unlike many runtime division operators.

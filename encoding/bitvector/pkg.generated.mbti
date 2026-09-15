@@ -1,0 +1,19 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/encoding/bitvector"
+
+// Values
+pub fn bitvector_codec16(@mizchi/veri/bitvector.Bv16) -> Unit
+
+pub fn bitvector_codec32(@mizchi/veri/bitvector.Bv32) -> Unit
+
+pub fn bitvector_codec64(@mizchi/veri/bitvector.Bv64) -> Unit
+
+pub fn bitvector_codec8(@mizchi/veri/bitvector.Bv8) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

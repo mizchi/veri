@@ -6,30 +6,31 @@ import {
 }
 
 // Values
-pub fn empty() -> PriorityQueue
+pub fn minimum(Int, IntMinQueue) -> Bool
 
-pub fn is_empty(PriorityQueue) -> Bool
+pub fn model(IntMinQueue) -> @bag.Bag[Int]
 
-pub fn minimum(Int, PriorityQueue) -> Bool
-
-pub fn model(PriorityQueue) -> @bag.Bag[Int]
-
-pub fn peek(PriorityQueue) -> Int?
-
-pub fn pop(PriorityQueue) -> (Int, PriorityQueue)?
-
-pub fn push(PriorityQueue, Int) -> PriorityQueue
-
-pub fn to_array(PriorityQueue) -> Array[Int]
-
-pub fn valid(PriorityQueue) -> Bool
+pub fn valid(IntMinQueue) -> Bool
 
 // Errors
 
 // Types and methods
-pub struct PriorityQueue {
+pub struct IntMinQueue {
   // private fields
 }
+#as_free_fn(is_empty)
+pub fn IntMinQueue::is_empty(Self) -> Bool
+pub fn IntMinQueue::iter(Self) -> Iter[Int]
+#as_free_fn(empty)
+pub fn IntMinQueue::new() -> Self
+#as_free_fn(peek)
+pub fn IntMinQueue::peek(Self) -> Int?
+#as_free_fn(pop)
+pub fn IntMinQueue::pop(Self) -> (Int, Self)?
+#as_free_fn(push)
+pub fn IntMinQueue::push(Self, Int) -> Self
+#as_free_fn(to_array)
+pub fn IntMinQueue::to_array(Self) -> Array[Int]
 
 // Type aliases
 
