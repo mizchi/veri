@@ -26,6 +26,7 @@ Dependabot で更新を提案する。ツールと依存のみをキャッシュ
 CI では `VERI_PROVER_JOBS=2` と `VERI_PROVER_FINAL_TIMEOUT=6` により、
 Why3 の同時ソルバー数と最終段階の制限秒数を調整する。ローカルの既定値は16と2。
 負例は `VERI_NEGATIVE_SHARD=0`〜`3`、`VERI_NEGATIVE_SHARDS=4` で68件を重複なく分配する。
+Apalache は生成した大きな遷移関係を型検査できるよう `JVM_ARGS=-Xss16m` を設定する。
 
 MoonBit の固定値は [.github/toolchain.env](../.github/toolchain.env) で管理する。
 上流の版別アーカイブは60日で削除されるため、この pin は2026年11月8日より前に更新する。

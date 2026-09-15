@@ -132,6 +132,9 @@ jobs:
     name: Apalache cross-checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
+    env:
+      # Generated finite relations exceed Linux's default JVM stack during typechecking.
+      JVM_ARGS: -Xss16m
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

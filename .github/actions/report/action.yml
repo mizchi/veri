@@ -17,5 +17,14 @@ runs:
           _build/why3/
           _build/**/*.proof.json
           _build/**/*.mlw
+          _build/apalache/**/output.log
+          _build/apalache/**/*.tla
+          _build/apalache/**/*.itf.json
+          _build/apalache/report.json
+          _build/lease-clock/**/output.log
+          _build/lease-clock/**/*.tla
+          _build/lease-clock/**/*.itf.json
+          _build/lease-clock/report.json
+          _build/lease-clock/apalache-report.json
         if-no-files-found: ignore
         retention-days: 7

@@ -29,6 +29,7 @@ CI sets `VERI_PROVER_JOBS=2` and `VERI_PROVER_FINAL_TIMEOUT=6` to bound Why3's
 solver concurrency and increase the final-stage time budget in seconds. Local
 defaults remain 16 and 2. `VERI_NEGATIVE_SHARD=0` through `3` with
 `VERI_NEGATIVE_SHARDS=4` partition the 68 negative controls without duplication.
+Apalache uses `JVM_ARGS=-Xss16m` for typechecking large generated transition relations.
 
 [.github/toolchain.env](../.github/toolchain.env) contains the MoonBit pin.
 Upstream versioned archives expire after 60 days, so refresh this pin before
