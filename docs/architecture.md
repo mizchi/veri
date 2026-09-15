@@ -139,7 +139,8 @@ incorrectly specified as addition, to detect a proof path accepting invalid corr
 - Transcendental functions such as `sin` / `exp`, and proofs of error bounds relative to real-valued algorithms, require separate work.
 - `unknown` and timeouts mean unproved; they do not establish truth or falsity. Positive SMT checks fail unless the expected `unsat` result is returned. The negative control only checks that a false theorem remains unproved; it does not claim that the solver produced a counterexample.
 - Use `just prove` to verify both workspace modules, rather than relying only on targeted proofs that assume dependency packages.
-- The project currently uses the local toolchain. Pinning toolchain distributions and solver versions for shared CI remains future work.
+- Shared CI pins MoonBit and solver distributions by version and SHA-256.
+  See the [verification guide](verification.md) for checks and update steps.
 
 Possible extensions include compiler support for native FP proof lowering, cases from Berkeley TestFloat / SoftFloat, bitvector extraction and extension,
 additional runtime bridge contracts, regular expressions, and runtime finite maps.

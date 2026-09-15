@@ -1,0 +1,136 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: 'true'
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  check:
+    name: Format and API checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just ci-check 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: check
+
+  test:
+    name: Tests (${{ matrix.target }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [js, wasm, wasm-gc, native]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just ci-test '${{ matrix.target }}' 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: test-${{ matrix.target }}
+
+  models:
+    name: Model checks and tool tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just ci-models 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: models
+
+  prove:
+    name: Proofs (${{ matrix.mode }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [mathematical, machine]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just 'ci-prove-${{ matrix.mode }}' 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: prove-${{ matrix.mode }}
+
+  package:
+    name: Package consumer checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just package-check 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: package
+
+  apalache:
+    name: Apalache cross-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - uses: cachix/install-nix-action@13d8dd58da0234aa297dedd986986ccb8e7f3e24 # v31.11.1
+        with:
+          extra_nix_config: experimental-features = nix-command flakes
+      - run: just apalache apalache-lease-clock 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: apalache
+
+  result:
+    name: CI result
+    if: ${{ always() }}
+    needs: [check, test, models, prove, package, apalache]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - name: Require every job to pass
+        env:
+          JOB_RESULTS: ${{ toJSON(needs) }}
+        run: |
+          node -e 'const jobs = JSON.parse(process.env.JOB_RESULTS); for (const [name, job] of Object.entries(jobs)) { console.log(name + ": " + job.result); if (job.result !== "success") process.exitCode = 1; }'

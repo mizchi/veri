@@ -1,0 +1,48 @@
+name: Set up veri toolchain
+description: Install the pinned MoonBit, Z3, CVC5, Node.js and just toolchain.
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: '24.21.0'
+        package-manager-cache: false
+    - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 # v4
+      with:
+        just-version: '1.58.0'
+    - name: Restore toolchain
+      id: toolchain
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ~/.moon/bin
+          ~/.moon/lib
+          ~/.moon/include
+          ~/.moon/share
+          _build/ci-tools
+          _build/solvers
+        key: toolchain-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/toolchain.env', '.github/scripts/setup-toolchain.sh', 'tools/cvc5.mjs') }}
+    - name: Install toolchain
+      if: steps.toolchain.outputs.cache-hit != 'true'
+      shell: bash
+      run: bash .github/scripts/setup-toolchain.sh
+    - name: Add tools to PATH
+      shell: bash
+      run: |
+        source .github/toolchain.env
+        echo "$HOME/.moon/bin" >> "$GITHUB_PATH"
+        echo "$GITHUB_WORKSPACE/_build/ci-tools/z3-$VERI_Z3_VERSION-x64-glibc-2.39/bin" >> "$GITHUB_PATH"
+    - name: Restore MoonBit dependencies
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: |
+          ~/.moon/registry
+          ~/.moon/cache/deps
+          .mooncakes
+          examples/.mooncakes
+        key: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('.github/toolchain.env', '**/moon.mod', '**/moon.mod.json') }}
+    - name: Record toolchain and resolve dependencies
+      shell: bash
+      run: |
+        just doctor
+        moon update

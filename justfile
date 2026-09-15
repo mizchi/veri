@@ -245,3 +245,22 @@ verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabil
 # Expected outcomes for CI, including deliberately failing models.
 model-suite:
     moonx veri.mbtx test checks/model_check/suite.json
+
+# CI entrypoints also run locally with the same toolchain.
+ci-check: check vectors-check fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities
+    moon info
+    git diff --exit-code -- '*.mbti'
+
+ci-test target:
+    # With moon.work, an unqualified test includes the library and examples.
+    moon test --target {{target}} --deny-warn
+    moon test --target {{target}} --release --deny-warn
+
+# Avoid compiler lock contention between separate Node test files on small runners.
+ci-models:
+    node --test --test-concurrency=1 tools/*.test.mjs
+    just smt temporal temporal-bridge task-group lease-clock model-suite
+
+ci-prove-mathematical: prove negative
+
+ci-prove-machine: prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine

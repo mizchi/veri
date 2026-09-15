@@ -1,0 +1,19 @@
+name: Save CI diagnostics
+description: Upload the job log and generated verification reports.
+inputs:
+  name:
+    description: Unique artifact name for this job.
+    required: true
+runs:
+  using: composite
+  steps:
+    - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      with:
+        name: ${{ inputs.name }}
+        path: |
+          ci.log
+          _build/*-report.json
+          _build/*-capabilities.json
+          _build/why3/
+        if-no-files-found: ignore
+        retention-days: 7

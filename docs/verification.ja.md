@@ -2,6 +2,31 @@
 
 [English](verification.md) | [README](../README.ja.md)
 
+## GitHub Actions
+
+[CI](../.github/workflows/ci.yml) は `main` への push、pull request、手動実行で動く。
+Ubuntu 24.04 上で以下を独立したジョブに分け、最後の `CI result` が全成功を要求する。
+
+| 検査 | ローカルでも使えるコマンド |
+| --- | --- |
+| フォーマット・型・公開 API・参照値・コンパイラ対応範囲 | `just ci-check` |
+| 本体と examples の debug / release、4バックエンド | `just ci-test js`（`wasm` / `wasm-gc` / `native` も実行） |
+| ツールのテスト、SMT・時相モデル・期待結果付きスイート | `just ci-models` |
+| 通常整数の証明と、偽の命題を拒否する負例 | `just ci-prove-mathematical` |
+| 機械整数の証明 | `just ci-prove-machine` |
+| 配布物を別プロジェクトから利用・証明 | `just package-check` |
+| Nix の Apalache と Z3 の照合 | `just apalache apalache-lease-clock` |
+
+MoonBit `0.10.12+1634b282e`、Z3 `4.16.0`、CVC5 `1.3.4` を固定し、
+取得したアーカイブの SHA-256 を照合する。Node.js は `24.21.0`、just は `1.58.0`、
+Apalache は `flake.lock` に基づく `0.62.2`。Actions もコミット SHA に固定し、
+Dependabot で更新を提案する。ツールと依存のみをキャッシュし、検査は毎回実行する。
+ログと生成した検証レポートは7日間の artifact として残す。
+
+MoonBit の固定値は [.github/toolchain.env](../.github/toolchain.env) で管理する。
+上流の版別アーカイブは60日で削除されるため、この pin は2026年11月8日より前に更新する。
+更新時はコンパイラと core を同じ版に揃え、SHA-256 と全ジョブの結果を確認する。
+
 ## リポジトリを検証する
 
 必要なものは MoonBit、`~/.moon/share/why3/` の同梱 Why3 データ、PATH 上の Z3、Node.js 24+、just、unzip。Node スクリプトに npm 依存はない。
