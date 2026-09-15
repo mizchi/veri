@@ -1,0 +1,44 @@
+///|
+/// Ascending order on the current FixedArray contents.
+pub predicate ordered(xs : FixedArray[Int]) {
+  ∀ i : Int, ∀ j : Int, 0 <= i && i <= j && j < xs.length() → xs[i] <= xs[j]
+}
+
+///|
+predicate ordered_prefix(xs : FixedArray[Int], stop : Int) {
+  ∀ i : Int, ∀ j : Int, 0 <= i && i <= j && j < stop → xs[i] <= xs[j]
+}
+
+///|
+pub predicate lower_partition(xs : FixedArray[Int], value : Int, index : Int) {
+  0 <= index && index <= xs.length() &&
+  (∀ i : Int, 0 <= i && i < index → xs[i] < value) &&
+  (∀ i : Int, index <= i && i < xs.length() → value <= xs[i])
+}
+
+///|
+pub predicate upper_partition(xs : FixedArray[Int], value : Int, index : Int) {
+  0 <= index && index <= xs.length() &&
+  (∀ i : Int, 0 <= i && i < index → xs[i] <= value) &&
+  (∀ i : Int, index <= i && i < xs.length() → value < xs[i])
+}
+
+///|
+predicate lower_left(xs : FixedArray[Int], value : Int, index : Int) {
+  ∀ i : Int, 0 <= i && i < index → xs[i] < value
+}
+///|
+predicate lower_right(xs : FixedArray[Int], value : Int, index : Int) {
+  ∀ i : Int, index <= i && i < xs.length() → value <= xs[i]
+}
+///|
+predicate upper_left(xs : FixedArray[Int], value : Int, index : Int) {
+  ∀ i : Int, 0 <= i && i < index → xs[i] <= value
+}
+///|
+predicate upper_right(xs : FixedArray[Int], value : Int, index : Int) {
+  ∀ i : Int, index <= i && i < xs.length() → value < xs[i]
+}
+
+///|
+fn width(left : Int, right : Int) -> @integer.Integer { @integer.sub(@integer.from_int(right), @integer.from_int(left)) }

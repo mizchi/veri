@@ -1,0 +1,44 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/bytes/cursor"
+
+// Values
+pub fn byte() -> Parser[Byte]
+
+pub fn length_prefixed_uint_be() -> Parser[BytesView]
+
+pub fn take(Int) -> Parser[BytesView]
+
+pub fn uint16_be() -> Parser[UInt16]
+
+pub fn uint16_le() -> Parser[UInt16]
+
+pub fn uint64_be() -> Parser[UInt64]
+
+pub fn uint64_le() -> Parser[UInt64]
+
+pub fn uint_be() -> Parser[UInt]
+
+pub fn uint_le() -> Parser[UInt]
+
+// Errors
+
+// Types and methods
+pub struct Cursor {
+  // private fields
+}
+pub fn Cursor::new(BytesView) -> Self
+pub fn Cursor::position(Self) -> Int
+pub fn[T] Cursor::read(Self, Parser[T]) -> (T, Self)?
+pub fn Cursor::remaining(Self) -> Int
+
+pub struct Parser[T] {
+  // private fields
+}
+pub fn[A, B] Parser::and_then(Self[A], (A) -> Self[B]) -> Self[B]
+pub fn[A, B] Parser::map(Self[A], (A) -> B) -> Self[B]
+pub fn[T] Parser::or_else(Self[T], Self[T]) -> Self[T]
+pub fn[A, B] Parser::zip(Self[A], Self[B]) -> Self[(A, B)]
+
+// Type aliases
+
+// Traits

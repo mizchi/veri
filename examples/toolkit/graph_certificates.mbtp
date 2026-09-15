@@ -1,0 +1,40 @@
+///|
+fn triangle_edge(source : Int, target : Int) -> Bool {
+  if source == 0 {
+    if target == 1 { true } else { target == 2 }
+  } else {
+    if source == 1 { target == 2 } else { false }
+  }
+}
+
+///|
+fn triangle_weight(source : Int, target : Int) -> @integer.Integer {
+  if source == 0 {
+    if target == 2 { @integer.from_int(3) } else { @integer.one() }
+  } else { @integer.one() }
+}
+
+///|
+fn weighted_distance(vertex : Int) -> @integer.Integer {
+  if vertex == 0 { @integer.zero() } else {
+    if vertex == 1 { @integer.one() } else { @integer.from_int(2) }
+  }
+}
+
+///|
+fn unweighted_distance(vertex : Int) -> @integer.Integer {
+  if vertex == 0 { @integer.zero() } else { @integer.one() }
+}
+
+///|
+/// The two-edge route costs 2; the one-edge route costs 3. Each algorithm has a
+/// different optimum, derived from its own feasible labels and path witness.
+lemma triangle_certificates() where {
+  proof_ensure: @logic_graph.shortest(triangle_edge, triangle_weight, 0, Cons(1, Cons(2, Nil)), 2),
+  proof_ensure: @logic_graph.fewest_edges(triangle_edge, 0, Cons(2, Nil), 2),
+} {
+  proof_assert @logic_graph.feasible(triangle_edge, triangle_weight, weighted_distance)
+  proof_assert @logic_graph.feasible(triangle_edge, @logic_graph.unit_weight, unweighted_distance)
+  proof_assert @integer.eq(@logic_graph.path_weight(triangle_weight, 0, Cons(1, Cons(2, Nil))), @integer.from_int(2))
+  proof_assert @integer.eq(@logic_graph.edge_count(Cons(2, Nil)), @integer.one())
+}

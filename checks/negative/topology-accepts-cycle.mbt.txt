@@ -1,0 +1,7 @@
+///|
+fn negative_control() -> Bool where { proof_ensure: accepted => accepted } {
+  let edges : FixedArray[@checker.Edge] = [
+    { from: 0, to: 1, weight: 0 }, { from: 1, to: 0, weight: 0 },
+  ]
+  check_topological_order(2, edges, [0, 1])
+}

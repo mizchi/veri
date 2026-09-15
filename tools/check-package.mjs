@@ -35,7 +35,13 @@ for (const required of ["LICENSE", "README.md", "README.ja.md", "moon.mod",
   "bitvector/bv32.mbtp", "bitvector/bv8.mbtp", "bitvector/bv16.mbtp",
   "runtime/int32/checked.mbt", "runtime/int64/checked.mbt", "runtime/conversion/conversion.mbt",
   "runtime/bytes/codec.mbt", "encoding/encoding.mbtp", "algebra/algebra.mbtp",
-  "graph/graph.mbtp", "runtime/graph/graph.mbt"]) {
+  "graph/graph.mbtp", "runtime/graph/graph.mbt",
+  "runtime/map/map.mbt", "runtime/set/set.mbt", "runtime/search/search.mbt",
+  "runtime/union_find/union_find.mbt", "union_find/partition.mbtp",
+  "runtime/graph/checker/relaxation.mbt", "runtime/graph/checker/soundness.mbtp",
+  "runtime/graph/checker/certificate.mbt", "runtime/graph/certificate.mbtp",
+  "runtime/graph/topology/order.mbt", "runtime/graph/topology/cycle.mbt",
+  "runtime/graph/topology/soundness.mbtp", "runtime/graph/topology.mbtp", "runtime/bytes/cursor/cursor.mbt"]) {
   assert.ok(entries.includes(required), `Missing packaged file: ${required}`);
 }
 for (const entry of entries) {
@@ -56,6 +62,11 @@ try {
   const toolkit = join(consumer, "toolkit");
   mkdirSync(toolkit);
   writeFileSync(join(toolkit, "moon.pkg"), `import {
+    "mizchi/veri/runtime/map",
+    "mizchi/veri/runtime/set",
+    "mizchi/veri/runtime/search",
+    "mizchi/veri/runtime/union_find",
+    "mizchi/veri/runtime/bytes/cursor",
     "mizchi/veri/runtime/int32",
     "mizchi/veri/runtime/int64",
     "mizchi/veri/runtime/conversion",
@@ -67,6 +78,17 @@ try {
   } for "test"
 `);
   writeFileSync(join(toolkit, "toolkit_test.mbt"), `test "packaged toolkit APIs compose" {
+    let map : @map.Map[Int, Int] = Map([(1, 2)])
+    let set : @set.Set[Int] = Set([1])
+    assert_true(@map.matches_entries(map, [(1, 2)]))
+    assert_true(@set.matches_elements(set, [1]))
+    assert_eq(@search.lower_bound([1, 2, 2], 2), 1)
+    let uf = @union_find.UnionFind::new(2)
+    assert_true(uf.union(0, 1))
+    assert_true(uf.same(0, 1))
+    let (byte, rest) = @cursor.Cursor::new(b"x"[:]).read(@cursor.byte()).unwrap()
+    assert_eq(byte, b'x')
+    assert_eq(rest.remaining(), 0)
     assert_eq(@int32.checked_add(2147483647, 1), None)
     assert_eq(@int64.checked_mul(6L, 7L), Some(42L))
     assert_eq(@conversion.checked_int_to_uint(-1), None)
@@ -89,6 +111,9 @@ try {
     let result = graph.dijkstra(0)
     assert_eq(result.distance(1), Some(7))
     assert_true(graph.check_dijkstra(result))
+    assert_true(graph.check_topology(graph.topological_sort()))
+    let cyclic = @graph.Graph::from_array([{ from: 0, to: 0, weight: 0 }], vertex_count=1)
+    assert_true(cyclic.check_topology(cyclic.topological_sort()))
     let copy = @graph.Graph::from_iter(graph.iter(), vertex_count=2)
     assert_eq(copy.to_array(), graph.to_array())
   }
@@ -96,6 +121,13 @@ try {
   process.stdout.write(run("moon", ["test", "toolkit", "--target", "js", "--deny-warn"], consumer));
   process.stdout.write(run("moon", ["test", ".", "--target", "js", "--deny-warn"], consumer));
   process.stdout.write(run("moon", ["prove", ".", "--deny-warn"], consumer));
+  const graphContracts = join(consumer, "graph-contracts");
+  mkdirSync(graphContracts);
+  writeFileSync(join(graphContracts, "moon.pkg"), `import { "mizchi/veri/runtime/graph" }
+options("proof-enabled": true)
+`);
+  writeFileSync(join(graphContracts, "client.mbt"), readFileSync(join(root, "examples/toolkit/checked_graph.mbt")));
+  process.stdout.write(run("moon", ["prove", "graph-contracts", "--deny-warn"], consumer));
   console.log(`Packaged ${entries.length} files; both README quickstarts execute and prove.`);
 } finally {
   rmSync(directory, {recursive: true, force: true});

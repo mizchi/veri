@@ -1,0 +1,157 @@
+///|
+predicate has_value(value : Option[Int], expected : Int) {
+  match value { None => false; Some(actual) => actual == expected }
+}
+
+///|
+predicate absent(value : Option[Int]) {
+  match value { None => true; Some(_actual) => false }
+}
+
+///|
+predicate parent_link(ps : FixedArray[Option[Int]], vertex : Int, parent : Int) {
+  0 <= vertex && vertex < ps.length() && has_value(ps[vertex], parent)
+}
+
+///|
+predicate labeled(ds : FixedArray[Option[Int]], vertex : Int) {
+  0 <= vertex && vertex < ds.length() &&
+  match ds[vertex] { None => false; Some(_cost) => true }
+}
+
+///|
+fn distance(ds : FixedArray[Option[Int]], vertex : Int) -> @integer.Integer {
+  match ds[vertex] { None => @integer.zero(); Some(cost) => @integer.from_int(cost) }
+}
+
+///|
+fn edge_cost(edge : Edge, weighted : Bool) -> @integer.Integer {
+  if weighted { @integer.from_int(edge.weight) } else { @integer.one() }
+}
+
+///|
+predicate shape(n : Int, ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int) {
+  0 <= source && source < n && ds.length() == n && ps.length() == n &&
+  has_value(ds[source], 0) && absent(ps[source])
+}
+
+///|
+predicate valid_edge(n : Int, edge : Edge) {
+  0 <= edge.from && edge.from < n && 0 <= edge.to && edge.to < n && edge.weight >= 0
+}
+
+///|
+predicate edges_valid(n : Int, edges : FixedArray[Edge], stop : Int) {
+  ∀ i : Int, 0 <= i && i < stop → valid_edge(n, edges[i])
+}
+
+///|
+predicate tight(edge : Edge, ds : FixedArray[Option[Int]], parent : Int, vertex : Int, weighted : Bool) {
+  edge.from == parent && edge.to == vertex && labeled(ds, parent) && labeled(ds, vertex) &&
+  @integer.eq(distance(ds, vertex), @integer.add(distance(ds, parent), edge_cost(edge, weighted)))
+}
+
+///|
+predicate tight_prefix(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], parent : Int, vertex : Int, weighted : Bool, stop : Int) {
+  ∃ i : Int, 0 <= i && i < stop && tight(edges[i], ds, parent, vertex, weighted)
+}
+
+///|
+/// The list records predecessor vertices, starting at the target's parent.
+predicate parent_path(ps : FixedArray[Option[Int]], source : Int, vertex : Int, steps : List[Int]) {
+  match steps {
+    Nil => vertex == source
+    Cons(parent, rest) => parent_link(ps, vertex, parent) &&
+      parent_path(ps, source, parent, rest)
+  }
+}
+
+///|
+predicate anchored(ps : FixedArray[Option[Int]], source : Int, vertex : Int) {
+  ∃ steps : List[Int], parent_path(ps, source, vertex, steps)
+}
+
+///|
+lemma anchor_root(ps : FixedArray[Option[Int]], source : Int) where {
+  proof_ensure: anchored(ps, source, source),
+} {
+  proof_assert parent_path(ps, source, source, Nil)
+}
+
+///|
+lemma anchor_cons(ps : FixedArray[Option[Int]], source : Int, vertex : Int, parent : Int, rest : List[Int]) where {
+  proof_require: parent_link(ps, vertex, parent),
+  proof_require: parent_path(ps, source, parent, rest),
+  proof_ensure: anchored(ps, source, vertex),
+} {
+  proof_assert parent_path(ps, source, vertex, Cons(parent, rest))
+}
+
+///|
+lemma anchor_step(ps : FixedArray[Option[Int]], source : Int, vertex : Int, parent : Int) where {
+  proof_require: parent_link(ps, vertex, parent),
+  proof_require: anchored(ps, source, parent),
+  proof_ensure: anchored(ps, source, vertex),
+} {}
+
+///|
+fn fuel_size(fuel : Int) -> @integer.Integer { @integer.from_int(fuel) }
+
+///|
+predicate parent_tight(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool) {
+  if vertex == source { true } else {
+    match ps[vertex] {
+      None => false
+      Some(parent) => tight_prefix(edges, ds, parent, vertex, weighted, edges.length())
+    }
+  }
+}
+
+///|
+predicate vertex_data(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool) {
+  match ds[vertex] {
+    None => absent(ps[vertex])
+    Some(cost) => cost >= 0 && parent_tight(edges, ds, ps, source, vertex, weighted)
+  }
+}
+
+///|
+predicate rooted_label(ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int) {
+  labeled(ds, vertex) → anchored(ps, source, vertex)
+}
+
+///|
+predicate vertex_valid(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool) {
+  vertex_data(edges, ds, ps, source, vertex, weighted) && rooted_label(ds, ps, source, vertex)
+}
+
+///|
+lemma vertex_anchored(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool) where {
+  proof_require: labeled(ds, vertex),
+  proof_require: vertex_valid(edges, ds, ps, source, vertex, weighted),
+  proof_ensure: anchored(ps, source, vertex),
+} {
+
+}
+
+///|
+predicate vertices_valid(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, weighted : Bool, stop : Int) {
+  ∀ vertex : Int, 0 <= vertex && vertex < stop → vertex_valid(edges, ds, ps, source, vertex, weighted)
+}
+
+///|
+predicate feasible_edge(edge : Edge, ds : FixedArray[Option[Int]], weighted : Bool) {
+  labeled(ds, edge.from) → labeled(ds, edge.to) &&
+    @integer.le(distance(ds, edge.to), @integer.add(distance(ds, edge.from), edge_cost(edge, weighted)))
+}
+
+///|
+predicate feasible_prefix(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], weighted : Bool, stop : Int) {
+  ∀ i : Int, 0 <= i && i < stop → feasible_edge(edges[i], ds, weighted)
+}
+
+///|
+pub predicate certificate(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, weighted : Bool) {
+  shape(n, ds, ps, source) && edges_valid(n, edges, edges.length()) &&
+  vertices_valid(edges, ds, ps, source, weighted, n) && feasible_prefix(edges, ds, weighted, edges.length())
+}

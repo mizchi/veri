@@ -1,0 +1,11 @@
+///|
+fn negative_control() -> Bool where {
+  proof_ensure: accepted => accepted,
+} {
+  let edges : FixedArray[Edge] = [
+    { from: 0, to: 1, weight: 1 },
+    { from: 0, to: 2, weight: 10 },
+    { from: 1, to: 2, weight: 1 },
+  ]
+  @checker.check_certificate(3, edges, [Some(0), Some(1), Some(10)], [None, Some(0), Some(0)], 0, true)
+}

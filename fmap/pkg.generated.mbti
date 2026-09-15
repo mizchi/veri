@@ -21,7 +21,25 @@ pub fn[K, V] mem(K, Fmap[K, V]) -> Bool
 
 pub fn[K, V] remove(K, Fmap[K, V]) -> Fmap[K, V]
 
+pub fn[K, V] removed(Fmap[K, V], Fmap[K, V], K) -> Bool
+
+pub fn[K, V] removed_frame(Fmap[K, V], Fmap[K, V], K, K) -> Unit
+
+pub fn[K, V] removed_lookup(Fmap[K, V], Fmap[K, V], K) -> Unit
+
+pub fn[K, V] removed_size(Fmap[K, V], Fmap[K, V], K) -> Unit
+
+pub fn[K, V] same_entry(Fmap[K, V], Fmap[K, V], K) -> Bool
+
 pub fn[K, V] size(Fmap[K, V]) -> @integer.Integer
+
+pub fn[K, V] updated(Fmap[K, V], Fmap[K, V], K, V) -> Bool
+
+pub fn[K, V] updated_frame(Fmap[K, V], Fmap[K, V], K, V, K) -> Unit
+
+pub fn[K, V] updated_lookup(Fmap[K, V], Fmap[K, V], K, V) -> Unit
+
+pub fn[K, V] updated_size(Fmap[K, V], Fmap[K, V], K, V) -> Unit
 
 // Errors
 

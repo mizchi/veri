@@ -1,0 +1,31 @@
+///|
+predicate edge_between(edges : FixedArray[@checker.Edge], source : Int, target : Int, index : Int) {
+  0 <= index && index < edges.length() && edges[index].from == source && edges[index].to == target
+}
+
+///|
+predicate edge_exists(edges : FixedArray[@checker.Edge], source : Int, target : Int) {
+  ∃ index : Int, edge_between(edges, source, target, index)
+}
+
+///|
+predicate prefix_contains(cycle : FixedArray[Int], stop : Int, vertex : Int) {
+  ∃ i : Int, 0 <= i && i < stop && cycle[i] == vertex
+}
+
+///|
+predicate seen_prefix(seen : FixedArray[Bool], cycle : FixedArray[Int], stop : Int) {
+  ∀ vertex : Int, vertex_index(seen.length(), vertex) → seen[vertex] == prefix_contains(cycle, stop, vertex)
+}
+
+///|
+predicate links_prefix(n : Int, edges : FixedArray[@checker.Edge], cycle : FixedArray[Int], stop : Int) {
+  ∀ i : Int, 0 <= i && i < stop → vertex_index(n, cycle[i]) && vertex_index(n, cycle[i + 1]) && edge_exists(edges, cycle[i], cycle[i + 1])
+}
+
+///|
+/// A nonempty, closed, simple directed cycle; [v,v] represents a self-loop.
+pub predicate simple_cycle(n : Int, edges : FixedArray[@checker.Edge], cycle : FixedArray[Int]) {
+  cycle.length() >= 2 && cycle[0] == cycle[cycle.length() - 1] &&
+  unique_prefix(cycle, cycle.length() - 1) && links_prefix(n, edges, cycle, cycle.length() - 1)
+}

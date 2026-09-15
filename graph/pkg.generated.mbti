@@ -8,6 +8,8 @@ import {
 }
 
 // Values
+pub fn[V] acyclic((V, V) -> Bool) -> Bool
+
 pub fn[V] bfs_certificate((V, V) -> Bool, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
 
 pub fn[V] closed((V, V) -> Bool, @fset.Fset[V]) -> Bool
@@ -24,6 +26,8 @@ pub fn[V] feasible((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.I
 
 pub fn[V] fewest_edges((V, V) -> Bool, V, @list.List[V], V) -> Bool
 
+pub fn[V] nonempty_path_rank((V, V) -> Bool, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
 pub fn[V] nonnegative((V, V) -> Bool, (V, V) -> @integer.Integer) -> Bool
 
 pub fn[V] nonnegative_path((V, V) -> Bool, (V, V) -> @integer.Integer, V, @list.List[V], V) -> Unit
@@ -34,11 +38,17 @@ pub fn[V] path((V, V) -> Bool, V, @list.List[V], V) -> Bool
 
 pub fn[V] path_lower_bound((V, V) -> Bool, (V, V) -> @integer.Integer, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
 
+pub fn[V] path_rank((V, V) -> Bool, (V) -> @integer.Integer, V, @list.List[V], V) -> Unit
+
 pub fn[V] path_reaches((V, V) -> Bool, V, @list.List[V], V) -> Unit
 
 pub fn[V] path_stays_in_set((V, V) -> Bool, V, @list.List[V], V, @fset.Fset[V]) -> Unit
 
 pub fn[V] path_weight((V, V) -> @integer.Integer, V, @list.List[V]) -> @integer.Integer
+
+pub fn[V] rank_excludes_cycles((V, V) -> Bool, (V) -> @integer.Integer) -> Unit
+
+pub fn[V] ranked((V, V) -> Bool, (V) -> @integer.Integer) -> Bool
 
 pub fn[V] reachable((V, V) -> Bool, V, V) -> Bool
 

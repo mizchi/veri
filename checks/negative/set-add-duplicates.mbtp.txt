@@ -1,0 +1,4 @@
+///|
+lemma negative_control() where {
+  proof_ensure: @integer.eq(size(add(1, add(1, empty()))), @integer.from_int(2)),
+} {}

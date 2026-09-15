@@ -5,17 +5,32 @@ import {
   "mizchi/veri/fset",
   "mizchi/veri/integer",
   "mizchi/veri/runtime/graph",
+  "mizchi/veri/runtime/graph/checker",
   "mizchi/veri/runtime/list",
 }
 
 // Values
 pub fn allocation_size(Int, Int, Int) -> Int?
 
+pub fn certify_acyclic(@graph.Graph, FixedArray[Int]) -> Bool
+
+pub fn certify_bfs_at(@graph.Graph, @graph.SearchResult, Int) -> Bool
+
+pub fn certify_cyclic(@graph.Graph, FixedArray[Int]) -> Bool
+
+pub fn certify_dijkstra_at(@graph.Graph, @graph.SearchResult, Int) -> Bool
+
+pub fn certify_topology(@graph.Graph, @graph.Topology) -> Bool
+
+pub fn insertion_index(FixedArray[Int], Int) -> Int?
+
 pub fn length_as_int(UInt) -> Int?
+
+pub fn minimum_spanning_forest(ArrayView[@checker.Edge], vertex_count~ : Int) -> Array[@checker.Edge] raise
 
 pub fn read_header(BytesView, Int) -> (UInt16, UInt, Int)?
 
-pub fn route(ArrayView[@graph.Edge], Int, Int, Int) -> Array[Int]? raise @graph.GraphError
+pub fn route(ArrayView[@checker.Edge], Int, Int, Int) -> Array[Int]? raise @graph.GraphError
 
 pub fn sum_partitions(@list.List[@integer.Integer], @list.List[@integer.Integer]) -> Unit
 

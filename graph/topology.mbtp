@@ -1,0 +1,36 @@
+///|
+/// Every edge strictly increases a mathematical rank.
+pub predicate[V] ranked(edge : (V, V) -> Bool, rank : (V) -> @integer.Integer) {
+  ∀ x : V, ∀ y : V, edge(x, y) → @integer.lt(rank(x), rank(y))
+}
+///|
+pub predicate[V] acyclic(edge : (V, V) -> Bool) {
+  ∀ source : V, ∀ steps : List[V], path(edge, source, steps, source) → empty_steps(steps)
+}
+///|
+pub lemma[V] path_rank(edge : (V, V) -> Bool, rank : (V) -> @integer.Integer, source : V, steps : List[V], target : V) where {
+  proof_decrease: steps,
+  proof_require: ranked(edge, rank),
+  proof_require: path(edge, source, steps, target),
+  proof_ensure: @integer.le(rank(source), rank(target)),
+} {
+  match steps { Nil => (); Cons(next, rest) => path_rank(edge, rank, next, rest, target) }
+}
+///|
+pub lemma[V] nonempty_path_rank(edge : (V, V) -> Bool, rank : (V) -> @integer.Integer, source : V, steps : List[V], target : V) where {
+  proof_require: ranked(edge, rank),
+  proof_require: path(edge, source, steps, target),
+  proof_require: empty_steps(steps) == false,
+  proof_ensure: @integer.lt(rank(source), rank(target)),
+} {
+  match steps { Nil => (); Cons(next, rest) => path_rank(edge, rank, next, rest, target) }
+}
+///|
+/// A rank certificate excludes every nonempty directed cycle.
+pub lemma[V] rank_excludes_cycles(edge : (V, V) -> Bool, rank : (V) -> @integer.Integer) where {
+  proof_require: ranked(edge, rank),
+  proof_ensure: acyclic(edge),
+} {}
+
+///|
+fn[V] empty_steps(steps : List[V]) -> Bool { match steps { Nil => true; Cons(_next, _rest) => false } }

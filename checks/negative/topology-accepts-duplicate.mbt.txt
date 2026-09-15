@@ -1,0 +1,4 @@
+///|
+fn negative_control() -> Bool where { proof_ensure: accepted => accepted } {
+  check_topological_order(2, [], [0, 0])
+}

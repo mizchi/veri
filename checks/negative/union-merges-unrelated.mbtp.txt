@@ -1,0 +1,4 @@
+///|
+lemma negative_control() where {
+  proof_ensure: merge_label(2, 0, 1) == merge_label(0, 0, 1),
+} {}

@@ -1,0 +1,14 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/set"
+
+// Values
+pub fn[K : Hash + Eq] matches_elements(@moonbitlang/core/set.Set[K], ArrayView[K]) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+pub using @moonbitlang/core/set {type Set}
+
+// Traits

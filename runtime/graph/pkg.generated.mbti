@@ -2,10 +2,34 @@
 package "mizchi/veri/runtime/graph"
 
 import {
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/graph/checker",
+  "mizchi/veri/runtime/list",
   "moonbitlang/core/debug",
 }
 
 // Values
+pub fn acyclic(Graph) -> Bool
+
+pub fn certified(Graph, SearchResult, Bool) -> Bool
+
+pub fn certified_shortest(Graph, SearchResult, Int, Bool) -> Unit
+
+pub fn cyclic(Graph) -> Bool
+
+pub fn path(Graph, Int, Int, @list.List[Int]) -> Bool
+
+pub fn path_cost(Graph, @list.List[Int], Bool) -> @integer.Integer
+
+pub fn result_distance(SearchResult, Int) -> Int?
+
+pub fn shortest_at(Graph, SearchResult, Int, Bool) -> Bool
+
+pub fn simple_cycle(Graph, FixedArray[Int]) -> Bool
+
+pub fn topological_order(Graph, FixedArray[Int]) -> Bool
+
+pub fn valid_topology(Graph, Topology) -> Bool
 
 // Errors
 pub(all) suberror GraphError {
@@ -16,26 +40,26 @@ pub(all) suberror GraphError {
 } derive(Eq, @debug.Debug)
 
 // Types and methods
-pub(all) struct Edge {
-  from : Int
-  to : Int
-  weight : Int
-} derive(Eq, @debug.Debug)
-
 pub struct Graph {
   // private fields
 }
 pub fn Graph::bfs(Self, Int) -> SearchResult raise GraphError
 pub fn Graph::check_bfs(Self, SearchResult) -> Bool
+pub fn Graph::check_cycle(Self, FixedArray[Int]) -> Bool
+pub fn Graph::check_cycle_view(Self, ArrayView[Int]) -> Bool
 pub fn Graph::check_dijkstra(Self, SearchResult) -> Bool
+pub fn Graph::check_topological_order(Self, FixedArray[Int]) -> Bool
+pub fn Graph::check_topological_order_view(Self, ArrayView[Int]) -> Bool
+pub fn Graph::check_topology(Self, Topology) -> Bool
 pub fn Graph::dijkstra(Self, Int) -> SearchResult raise GraphError
 pub fn Graph::edge_weight(Self, Int, Int) -> Int?
-pub fn Graph::edges(Self) -> Array[Edge]
-pub fn Graph::from_array(ArrayView[Edge], vertex_count~ : Int) -> Self raise GraphError
-pub fn Graph::from_iter(Iter[Edge], vertex_count~ : Int) -> Self raise GraphError
-pub fn Graph::iter(Self) -> Iter[Edge]
+pub fn Graph::edges(Self) -> Array[@checker.Edge]
+pub fn Graph::from_array(ArrayView[@checker.Edge], vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::from_iter(Iter[@checker.Edge], vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::iter(Self) -> Iter[@checker.Edge]
 pub fn Graph::new(vertex_count~ : Int) -> Self raise GraphError
-pub fn Graph::to_array(Self) -> Array[Edge]
+pub fn Graph::to_array(Self) -> Array[@checker.Edge]
+pub fn Graph::topological_sort(Self) -> Topology
 pub fn Graph::vertex_count(Self) -> Int
 
 pub struct SearchResult {
@@ -45,6 +69,12 @@ pub fn SearchResult::distance(Self, Int) -> Int?
 pub fn SearchResult::path_to(Self, Int) -> Array[Int]?
 pub fn SearchResult::source(Self) -> Int
 
+pub(all) enum Topology {
+  Ordered(FixedArray[Int])
+  Cyclic(FixedArray[Int])
+} derive(Eq, @debug.Debug)
+
 // Type aliases
+pub using @checker {type Edge}
 
 // Traits

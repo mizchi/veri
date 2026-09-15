@@ -1,0 +1,66 @@
+///|
+#proof_import("set.Fset")
+pub fn[T] remove(value : T, set : Fset[T]) -> Fset[T] = "remove"
+///|
+#proof_import("set.Fset")
+pub fn[T] intersection(left : Fset[T], right : Fset[T]) -> Fset[T] = "inter"
+///|
+#proof_import("set.Fset")
+pub fn[T] difference(left : Fset[T], right : Fset[T]) -> Fset[T] = "diff"
+///|
+#proof_import("set.Fset")
+pub fn[T] size(set : Fset[T]) -> @integer.Integer = "cardinal"
+///|
+#proof_import("set.Fset")
+pub fn[T] eq(left : Fset[T], right : Fset[T]) -> Bool = "(==)"
+
+///|
+/// Logical transition for core Set.add; no link to the core body is assumed.
+pub predicate[T] added(before : Fset[T], after : Fset[T], value : T) {
+  eq(after, add(value, before))
+}
+///|
+pub predicate[T] removed(before : Fset[T], after : Fset[T], value : T) {
+  eq(after, remove(value, before))
+}
+///|
+pub lemma[T] added_members(before : Fset[T], after : Fset[T], value : T, other : T) where {
+  proof_require: added(before, after, value),
+  proof_ensure: mem(other, after) == added_member(before, value, other),
+} {}
+///|
+pub lemma[T] removed_members(before : Fset[T], after : Fset[T], value : T, other : T) where {
+  proof_require: removed(before, after, value),
+  proof_ensure: mem(other, after) == removed_member(before, value, other),
+} {}
+///|
+pub lemma[T] added_size(before : Fset[T], after : Fset[T], value : T) where {
+  proof_require: added(before, after, value),
+  proof_ensure: @integer.eq(size(after), add_size(before, value)),
+} {}
+///|
+pub lemma[T] removed_size(before : Fset[T], after : Fset[T], value : T) where {
+  proof_require: removed(before, after, value),
+  proof_ensure: @integer.eq(size(after), remove_size(before, value)),
+} {}
+
+///|
+fn[T] added_member(before : Fset[T], value : T, other : T) -> Bool {
+  if same(other, value) { true } else { mem(other, before) }
+}
+///|
+fn[T] removed_member(before : Fset[T], value : T, other : T) -> Bool {
+  if same(other, value) { false } else { mem(other, before) }
+}
+///|
+fn[T] add_size(before : Fset[T], value : T) -> @integer.Integer {
+  if mem(value, before) { size(before) } else { @integer.add(size(before), @integer.from_int(1)) }
+}
+///|
+fn[T] remove_size(before : Fset[T], value : T) -> @integer.Integer {
+  if mem(value, before) { @integer.sub(size(before), @integer.from_int(1)) } else { size(before) }
+}
+
+///|
+#proof_import("map.Map")
+fn[T] same(left : T, right : T) -> Bool = "(=)"

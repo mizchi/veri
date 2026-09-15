@@ -45,7 +45,7 @@ prove-collections-machine: prover-config
 
 # Order, arithmetic and real/IEEE error models under checked machine integers.
 prove-foundations-machine: prover-config
-    for foundation_package in relations seq/order integer/laws integer/aggregate/laws number/laws number/parity real/laws ieee754/error ieee754/error/operations runtime/number runtime/int32 runtime/int64 runtime/conversion runtime/bytes algebra encoding encoding/bitvector graph; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$foundation_package" --target-dir _build/foundations-machine --why3-config _build/why3/why3.conf || exit; done
+    for foundation_package in relations seq/order integer/laws integer/aggregate/laws number/laws number/parity real/laws ieee754/error ieee754/error/operations runtime/number runtime/int32 runtime/int64 runtime/conversion runtime/bytes algebra encoding encoding/bitvector graph fset fmap runtime/search union_find runtime/graph/checker runtime/graph/topology runtime/graph; do MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$foundation_package" --target-dir _build/foundations-machine --why3-config _build/why3/why3.conf || exit; done
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove foundations --target-dir _build/foundations-machine --why3-config ../_build/why3/why3.conf
     MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove toolkit --target-dir _build/foundations-machine --why3-config ../_build/why3/why3.conf
 
@@ -55,6 +55,43 @@ test target="js":
 # Run only the reproducible QuickCheck properties (also included in normal tests).
 quickcheck target="js":
     moon test --target {{target}} --filter 'quickcheck:*'
+
+# Graph properties include shrinking, an Int64 oracle and corrupted certificates.
+quickcheck-graph target="js":
+    moon test runtime/graph --target {{target}} --filter 'quickcheck:*' --deny-warn
+
+# Complete shortest-path/topology checkers, graph laws and clients under both integer models.
+prove-graph: prover-config
+    moon prove runtime/graph/checker --why3-config _build/why3/why3.conf
+    moon prove runtime/graph/topology --why3-config _build/why3/why3.conf
+    moon prove runtime/graph --why3-config _build/why3/why3.conf
+    moon prove graph --why3-config _build/why3/why3.conf
+    moon -C examples prove toolkit --why3-config ../_build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/graph/checker --target-dir _build/graph-machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/graph/topology --target-dir _build/graph-machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove runtime/graph --target-dir _build/graph-machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove graph --target-dir _build/graph-machine --why3-config _build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove toolkit --target-dir _build/graph-machine --why3-config ../_build/why3/why3.conf
+
+# Includes all graph QuickCheck and regression tests in debug and release.
+verify-graph: check prove-graph
+    just negative graph runtime/graph/checker runtime/graph runtime/graph/topology
+    for graph_target in js wasm wasm-gc native; do moon test runtime/graph runtime/graph/checker runtime/graph/topology --target "$graph_target" --deny-warn || exit; moon test runtime/graph runtime/graph/checker runtime/graph/topology --release --target "$graph_target" --deny-warn || exit; done
+
+# New core bridges, search contracts, topology, partitions and cursor composition.
+prove-extensions: prover-config
+    for extension_package in fset fmap runtime/search union_find encoding graph runtime/graph/checker runtime/graph/topology runtime/graph; do moon prove "$extension_package" --why3-config _build/why3/why3.conf || exit; MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon prove "$extension_package" --target-dir _build/extensions-machine --why3-config _build/why3/why3.conf || exit; done
+    moon -C examples prove toolkit --why3-config ../_build/why3/why3.conf
+    MOON_PROVE_PRELUDE_OVERRIDE="$HOME/.moon/lib/prelude_proof_machine_int" moon -C examples prove toolkit --target-dir _build/extensions-machine --why3-config ../_build/why3/why3.conf
+
+# Consume all public graph soundness contracts and probe ArrayView adapter lowering.
+graph-capabilities:
+    node tools/check-graph-capabilities.mjs
+
+# Shrinking properties, regressions, proof laws and false controls.
+verify-extensions: check core-capabilities graph-capabilities prove-extensions
+    just negative fset fmap runtime/search union_find graph runtime/graph/checker runtime/graph runtime/graph/topology
+    for extension_target in js wasm wasm-gc native; do moon test runtime/map runtime/set runtime/search runtime/union_find runtime/bytes/cursor runtime/graph runtime/graph/checker runtime/graph/topology --target "$extension_target" --deny-warn || exit; moon test runtime/map runtime/set runtime/search runtime/union_find runtime/bytes/cursor runtime/graph runtime/graph/checker runtime/graph/topology --release --target "$extension_target" --deny-warn || exit; done
 
 # Compare collection workloads with core and save unrounded results and ratios.
 bench target="native":
@@ -123,4 +160,4 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities prove prove-machine prove-collections-machine prove-foundations-machine negative smt vectors-check test-backends test-release package-check
+verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine negative smt vectors-check test-backends test-release package-check

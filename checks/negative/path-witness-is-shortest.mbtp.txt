@@ -1,0 +1,22 @@
+///|
+fn triangle_edge(source : Int, target : Int) -> Bool {
+  if source == 0 {
+    if target == 1 { true } else { target == 2 }
+  } else {
+    if source == 1 { target == 2 } else { false }
+  }
+}
+
+///|
+fn triangle_weight(source : Int, target : Int) -> @integer.Integer {
+  if source == 0 {
+    if target == 2 { @integer.from_int(3) } else { @integer.one() }
+  } else { @integer.one() }
+}
+
+///|
+// A valid path alone is not a shortest-path certificate: 0 -> 1 -> 2 costs 2,
+// while the claimed shortest path 0 -> 2 costs 3.
+lemma negative_control() where {
+  proof_ensure: shortest(triangle_edge, triangle_weight, 0, Cons(2, Nil), 2),
+} {}

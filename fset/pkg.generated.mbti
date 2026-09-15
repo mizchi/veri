@@ -1,16 +1,42 @@
 // Generated using `moon info`, DON'T EDIT IT
 package "mizchi/veri/fset"
 
+import {
+  "mizchi/veri/integer",
+}
+
 // Values
 pub fn[T] add(T, Fset[T]) -> Fset[T]
 
 pub fn add_contains(Int, Fset[Int]) -> Unit
 
+pub fn[T] added(Fset[T], Fset[T], T) -> Bool
+
+pub fn[T] added_members(Fset[T], Fset[T], T, T) -> Unit
+
+pub fn[T] added_size(Fset[T], Fset[T], T) -> Unit
+
+pub fn[T] difference(Fset[T], Fset[T]) -> Fset[T]
+
 pub fn[T] empty() -> Fset[T]
 
 pub fn empty_has_no_member(Int) -> Unit
 
+pub fn[T] eq(Fset[T], Fset[T]) -> Bool
+
+pub fn[T] intersection(Fset[T], Fset[T]) -> Fset[T]
+
 pub fn[T] mem(T, Fset[T]) -> Bool
+
+pub fn[T] remove(T, Fset[T]) -> Fset[T]
+
+pub fn[T] removed(Fset[T], Fset[T], T) -> Bool
+
+pub fn[T] removed_members(Fset[T], Fset[T], T, T) -> Unit
+
+pub fn[T] removed_size(Fset[T], Fset[T], T) -> Unit
+
+pub fn[T] size(Fset[T]) -> @integer.Integer
 
 pub fn[T] subset(Fset[T], Fset[T]) -> Bool
 

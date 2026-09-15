@@ -1,0 +1,40 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/graph/checker"
+
+import {
+  "mizchi/veri/integer",
+  "mizchi/veri/runtime/list",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub fn certificate(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+
+pub fn certificate_realizes(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Int, Bool) -> Unit
+
+pub fn certificate_sound(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Unit
+
+pub fn check_certificate(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+
+pub fn correct(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+
+pub fn path(FixedArray[Edge], Int, Int, @list.List[Int]) -> Bool
+
+pub fn path_bound(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Int, Bool, @list.List[Int]) -> Unit
+
+pub fn path_cost(FixedArray[Edge], @list.List[Int], Bool) -> @integer.Integer
+
+pub fn relaxation(Int, Int, Int) -> Bool
+
+// Errors
+
+// Types and methods
+pub(all) struct Edge {
+  from : Int
+  to : Int
+  weight : Int
+} derive(Eq, @debug.Debug)
+
+// Type aliases
+
+// Traits

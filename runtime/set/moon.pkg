@@ -1,0 +1,8 @@
+import {
+  "moonbitlang/core/set" @core,
+}
+
+import {
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+} for "test"

@@ -1,0 +1,32 @@
+///|
+/// Partition labels are arbitrary. Equal labels mean the same component.
+pub fn merge_label(representative : Int, left : Int, right : Int) -> Int {
+  if representative == right { left } else { representative }
+}
+///|
+pub predicate joined(x : Int, y : Int, left : Int, right : Int) {
+  x == y || (x == left && y == right) || (x == right && y == left)
+}
+///|
+/// Replacing one class representative merges exactly the two selected classes.
+pub lemma merge_exactly(x : Int, y : Int, left : Int, right : Int) where {
+  proof_ensure: joined(x, y, left, right) == (merge_label(x, left, right) == merge_label(y, left, right)),
+} {}
+///|
+pub lemma merge_idempotent(representative : Int, left : Int, right : Int) where {
+  proof_ensure: merge_label(merge_label(representative, left, right), left, right) == merge_label(representative, left, right),
+} {}
+///|
+pub lemma merge_reflexive(representative : Int, left : Int, right : Int) where {
+  proof_ensure: joined(representative, representative, left, right),
+} {}
+///|
+pub lemma merge_symmetric(x : Int, y : Int, left : Int, right : Int) where {
+  proof_ensure: joined(x, y, left, right) == joined(y, x, left, right),
+} {}
+///|
+pub lemma merge_transitive(x : Int, y : Int, z : Int, left : Int, right : Int) where {
+  proof_require: joined(x, y, left, right),
+  proof_require: joined(y, z, left, right),
+  proof_ensure: joined(x, z, left, right),
+} {}

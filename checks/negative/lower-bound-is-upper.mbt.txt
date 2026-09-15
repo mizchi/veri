@@ -1,0 +1,5 @@
+///|
+fn negative_control() -> Int where { proof_ensure: result => result == 2 } {
+  let values : FixedArray[Int] = [1, 1]
+  lower_bound(values, 1)
+}

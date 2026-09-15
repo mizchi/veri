@@ -1,0 +1,133 @@
+///|
+predicate empty_steps(steps : @list.List[Int]) {
+  match steps { Nil => true; Cons(_index, _rest) => false }
+}
+
+///|
+/// No nonempty finite edge-index path returns to its source.
+pub predicate acyclic(edges : FixedArray[@checker.Edge]) {
+  ∀ source : Int, ∀ steps : @list.List[Int], @checker.path(edges, source, source, steps) → empty_steps(steps)
+}
+
+///|
+/// An actual nonempty path returns to its source, including self-loops.
+pub predicate has_cycle(edges : FixedArray[@checker.Edge]) {
+  ∃ source : Int, ∃ steps : @list.List[Int], @checker.path(edges, source, source, steps) && !empty_steps(steps)
+}
+
+///|
+lemma before_transitive(order : FixedArray[Int], source : Int, middle : Int, target : Int) where {
+  proof_require: unique_prefix(order, order.length()),
+  proof_require: before(order, source, middle),
+  proof_require: before(order, middle, target),
+  proof_ensure: before(order, source, target),
+} {}
+
+///|
+lemma before_irreflexive(order : FixedArray[Int], vertex : Int) where {
+  proof_require: unique_prefix(order, order.length()),
+  proof_ensure: before(order, vertex, vertex) == false,
+} {}
+
+///|
+lemma nonempty_path_before(n : Int, edges : FixedArray[@checker.Edge], order : FixedArray[Int], source : Int, target : Int, steps : @list.List[Int]) where {
+  proof_decrease: steps,
+  proof_require: topological(n, edges, order),
+  proof_require: @checker.path(edges, source, target, steps),
+  proof_require: empty_steps(steps) == false,
+  proof_ensure: before(order, source, target),
+} {
+  match steps {
+    Nil => ()
+    Cons(index, rest) => {
+      proof_assert forward_edge(n, order, edges[index])
+      match rest {
+        Nil => ()
+        Cons(_index, _tail) => {
+          nonempty_path_before(n, edges, order, source, edges[index].from, rest)
+          before_transitive(order, source, edges[index].from, target)
+        }
+      }
+    }
+  }
+}
+
+///|
+/// A checked permutation excludes every directed cycle in the actual edge array.
+pub lemma topological_acyclic(n : Int, edges : FixedArray[@checker.Edge], order : FixedArray[Int]) where {
+  proof_require: topological(n, edges, order),
+  proof_ensure: acyclic(edges),
+} {}
+
+///|
+predicate reaches(edges : FixedArray[@checker.Edge], source : Int, target : Int) {
+  ∃ steps : @list.List[Int], @checker.path(edges, source, target, steps)
+}
+
+///|
+predicate nonempty_reaches(edges : FixedArray[@checker.Edge], source : Int, target : Int) {
+  ∃ steps : @list.List[Int], @checker.path(edges, source, target, steps) && !empty_steps(steps)
+}
+
+///|
+lemma reaches_self(edges : FixedArray[@checker.Edge], source : Int) where {
+  proof_ensure: reaches(edges, source, source),
+} {
+  proof_assert @checker.path(edges, source, source, Nil)
+}
+
+///|
+lemma reaches_cons(edges : FixedArray[@checker.Edge], source : Int, middle : Int, target : Int, index : Int, rest : @list.List[Int]) where {
+  proof_require: edge_between(edges, middle, target, index),
+  proof_require: @checker.path(edges, source, middle, rest),
+  proof_ensure: reaches(edges, source, target),
+  proof_ensure: nonempty_reaches(edges, source, target),
+} {
+  proof_assert @checker.path(edges, source, target, Cons(index, rest))
+  proof_assert empty_steps(Cons(index, rest)) == false
+}
+
+///|
+lemma reaches_extend(edges : FixedArray[@checker.Edge], source : Int, middle : Int, target : Int) where {
+  proof_require: edge_exists(edges, middle, target),
+  proof_require: reaches(edges, source, middle),
+  proof_ensure: reaches(edges, source, target),
+  proof_ensure: nonempty_reaches(edges, source, target),
+} {}
+
+///|
+predicate prefix_end(cycle : FixedArray[Int], stop : Int) { 0 <= stop && stop < cycle.length() }
+
+///|
+predicate nonempty_prefix_path(edges : FixedArray[@checker.Edge], cycle : FixedArray[Int], stop : Int) {
+  stop > 0 → nonempty_reaches(edges, cycle[0], cycle[stop])
+}
+
+///|
+fn prefix_size(stop : Int) -> @integer.Integer { @integer.from_int(stop) }
+
+///|
+lemma links_reach(n : Int, edges : FixedArray[@checker.Edge], cycle : FixedArray[Int], stop : Int) where {
+  proof_decrease: prefix_size(stop),
+  proof_require: prefix_end(cycle, stop),
+  proof_require: links_prefix(n, edges, cycle, stop),
+  proof_ensure: reaches(edges, cycle[0], cycle[stop]),
+  proof_ensure: nonempty_prefix_path(edges, cycle, stop),
+} {
+  if stop > 0 {
+    links_reach(n, edges, cycle, stop - 1)
+    reaches_extend(edges, cycle[0], cycle[stop - 1], cycle[stop])
+  } else {
+    reaches_self(edges, cycle[0])
+  }
+}
+
+///|
+/// The checked consecutive edges construct a real, nonempty closed path.
+pub lemma cycle_realized(n : Int, edges : FixedArray[@checker.Edge], cycle : FixedArray[Int]) where {
+  proof_require: simple_cycle(n, edges, cycle),
+  proof_ensure: has_cycle(edges),
+  proof_ensure: acyclic(edges) == false,
+} {
+  links_reach(n, edges, cycle, cycle.length() - 1)
+}

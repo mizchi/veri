@@ -51,8 +51,9 @@
 - [x] Floyd–Warshall による全点対の比較、グラフ・操作列の shrinking。
   意図的に誤った「最短辺数＝最短重み」は重み0の1辺へ縮小する。
 
-実装: `graph`、`runtime/graph`。論理的な証明書の定理を証明し、可変状態を使う
-BFS / Dijkstra 本体と実行可能な結果検査器は差分テストで検査する段階。
+実装: `graph`、`runtime/graph`、`runtime/graph/checker`。BFS / Dijkstra の結果検査器は、
+実際の内部配列に対する全体の健全性を両整数モデルで証明。可変状態を使う探索本体、
+CSR 構築と `path_to` の配列変換は差分テストで検査する。
 自己辺・多重辺・ゼロ重み閉路・非連結・不正入力・Int 距離のオーバーフローを含む。
 構築は `new(vertex_count~)` / `from_array(edges, vertex_count~)` / `from_iter`、
 走査は `iter` / `to_array`、構築・探索の失敗は `raise GraphError` に統一。
@@ -70,5 +71,35 @@ BFS / Dijkstra 本体と実行可能な結果検査器は差分テストで検�
 - ネイティブ整数変換・UInt16・codec の実行時の値保存を直接証明する。
   現行コンパイラの unsupported primitive operator / type を
   `just conversion-capabilities` で再現する。対応が追加されたら生成された意味を確認する。
-- 純粋な callback と実行時 map/fold、および可変状態を使う探索・結果検査器の
-  全体の対応を証明する。現在のモデル上の定理やテスト成功とは区別する。
+- 純粋な callback と実行時 map/fold、可変状態を使う探索、CSR 構築・`path_to`・
+  トポロジー返却配列・ArrayView 補助APIの変換を証明する。
+  最短経路とトポロジーの検査器全体の健全性は証明済み。
+
+## 追加の実用 API（実装済み）
+
+- [x] `runtime/map` / `runtime/set`: core 型の再公開、任意順・重複拒否の内容検査。
+  論理的な更新・削除・frame・要素数の法則を `fmap` / `fset` に追加。
+  core 本体との対応は、衝突キーを含む shrinking 付き操作列テスト。
+- [x] `runtime/search`: Int の lower/upper bound と整列判定の実装を両整数モデルで証明。
+  core ソートの結果検査（昇順・重複数の保存）は差分テスト。
+- [x] トポロジカルソートと単純閉路を FixedArray の証明書で返却。
+  検査器本体から並べ替え・全辺の向き・非循環性、単純閉路・実在する閉路を両整数モデルで証明。
+  `check_topology` で両判定を検査。DFS 本体は全到達性モデルで差分テスト。
+- [x] Union-Find: サイズによる併合・経路圧縮、代表元・成分数・サイズ・コピー。
+  論理モデルは2成分だけの併合・同値関係を証明。親配列の実装は操作列で差分テスト。
+- [x] 不変の BytesView カーソルとパーサの zip/map/and_then/or_else。
+  長さ付き入力、失敗時の位置保存、消費長、切れた入力を shrinking 付きで検査。
+  読取境界の実装・消費長の合成則は証明済み。
+- [x] graph 検査器の距離不等式を `runtime/graph/checker.relaxation` に分離し、
+  実装を両整数モデルで証明。`just graph-capabilities` に現行呼出し制約の再現例を追加。
+- [ ] core Map/Set と論理モデルを直接接続した実装証明。
+- [ ] Union-Find の親配列・経路圧縮、DFS・パーサ合成の実装本体の証明。
+- [x] `check_bfs` / `check_dijkstra` が受理した結果の最短性・正確な到達性・親チェーンを、
+  検査器本体から両整数モデルで証明。距離 getter と利用側の `shortest_at` 契約まで接続。
+  任意の生配列に対して前提なしで検査し、実際の辺配列の全有限経路が対象となる。
+- [x] `runtime/graph/topology` に順序・閉路検査器全体の実装証明を分離。
+  公開 Graph API と利用側の非循環/循環の契約まで接続し、O(V+E) を維持。
+  任意の証明書とビューのオフセットを1,000件、2万頂点の鎖・閉路も検査。
+- [ ] CSR 構築、`path_to`・トポロジー返却配列・ArrayView 補助APIの変換の実装証明。
+
+`just verify-extensions` で追加 API をまとめて検証する。

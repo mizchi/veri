@@ -1,0 +1,23 @@
+///|
+/// A read consumes count bytes starting at offset within the same view.
+pub predicate readable(length : @integer.Integer, offset : @integer.Integer, count : @integer.Integer) {
+  @integer.le(@integer.zero(), offset) && @integer.le(@integer.zero(), count) &&
+  @integer.le(@integer.add(offset, count), length)
+}
+///|
+/// The bounds of sequential reads compose; this theorem does not assume that a
+/// native parser implements a codec or that callbacks have no side effects.
+pub lemma read_composition(length : @integer.Integer, offset : @integer.Integer, first : @integer.Integer, second : @integer.Integer) where {
+  proof_require: readable(length, offset, first),
+  proof_require: readable(length, @integer.add(offset, first), second),
+  proof_ensure: readable(length, offset, @integer.add(first, second)),
+  proof_ensure: @integer.eq(@integer.add(@integer.add(offset, first), second), @integer.add(offset, @integer.add(first, second))),
+} {}
+///|
+pub lemma read_split(length : @integer.Integer, offset : @integer.Integer, first : @integer.Integer, second : @integer.Integer) where {
+  proof_require: @integer.le(@integer.zero(), first),
+  proof_require: @integer.le(@integer.zero(), second),
+  proof_require: readable(length, offset, @integer.add(first, second)),
+  proof_ensure: readable(length, offset, first),
+  proof_ensure: readable(length, @integer.add(offset, first), second),
+} {}

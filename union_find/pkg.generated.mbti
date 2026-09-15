@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/union_find"
+
+// Values
+pub fn joined(Int, Int, Int, Int) -> Bool
+
+pub fn merge_exactly(Int, Int, Int, Int) -> Unit
+
+pub fn merge_idempotent(Int, Int, Int) -> Unit
+
+pub fn merge_label(Int, Int, Int) -> Int
+
+pub fn merge_reflexive(Int, Int, Int) -> Unit
+
+pub fn merge_symmetric(Int, Int, Int, Int) -> Unit
+
+pub fn merge_transitive(Int, Int, Int, Int, Int) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

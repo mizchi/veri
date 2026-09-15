@@ -1,0 +1,117 @@
+///|
+predicate edge_index(edges : FixedArray[Edge], index : Int) {
+  0 <= index && index < edges.length()
+}
+
+///|
+/// A path is a list of indices into the actual edge array, in reverse order.
+/// This distinguishes parallel edges. Nil is the zero-edge source-to-source path.
+pub predicate path(edges : FixedArray[Edge], source : Int, target : Int, steps : List[Int]) {
+  match steps {
+    Nil => source == target
+    Cons(index, rest) => 0 <= index && index < edges.length() && edges[index].to == target &&
+      path(edges, source, edges[index].from, rest)
+  }
+}
+
+///|
+/// Unbounded sum of edge weights, or edge count when weighted is false.
+pub fn path_cost(edges : FixedArray[Edge], steps : List[Int], weighted : Bool) -> @integer.Integer {
+  match steps {
+    Nil => @integer.zero()
+    Cons(index, rest) => @integer.add(path_cost(edges, rest, weighted), edge_cost(edges[index], weighted))
+  }
+}
+
+///|
+predicate realized(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], source : Int, target : Int, weighted : Bool) {
+  ∃ steps : List[Int], path(edges, source, target, steps) && @integer.eq(distance(ds, target), path_cost(edges, steps, weighted))
+}
+
+///|
+/// Closure excludes unlabelled reachable vertices; relaxation bounds every path.
+pub lemma path_bound(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, target : Int, weighted : Bool, steps : List[Int]) where {
+  proof_decrease: steps,
+  proof_require: certificate(n, edges, ds, ps, source, weighted),
+  proof_require: path(edges, source, target, steps),
+  proof_ensure: labeled(ds, target),
+  proof_ensure: @integer.le(distance(ds, target), path_cost(edges, steps, weighted)),
+} {
+  match steps {
+    Nil => ()
+    Cons(index, rest) => path_bound(n, edges, ds, ps, source, edges[index].from, weighted, rest)
+  }
+}
+
+///|
+lemma realized_root(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], source : Int, weighted : Bool) where {
+  proof_require: has_value(ds[source], 0),
+  proof_ensure: realized(edges, ds, source, source, weighted),
+} {
+  proof_assert path(edges, source, source, Nil)
+  proof_assert @integer.eq(distance(ds, source), path_cost(edges, Nil, weighted))
+}
+
+///|
+lemma realized_cons(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], source : Int, parent : Int, vertex : Int, weighted : Bool, index : Int, rest : List[Int]) where {
+  proof_require: edge_index(edges, index),
+  proof_require: tight(edges[index], ds, parent, vertex, weighted),
+  proof_require: path(edges, source, parent, rest),
+  proof_require: @integer.eq(distance(ds, parent), path_cost(edges, rest, weighted)),
+  proof_ensure: realized(edges, ds, source, vertex, weighted),
+} {
+  proof_assert path(edges, source, vertex, Cons(index, rest))
+  proof_assert @integer.eq(distance(ds, vertex), path_cost(edges, Cons(index, rest), weighted))
+}
+
+///|
+lemma extend_realized(edges : FixedArray[Edge], ds : FixedArray[Option[Int]], source : Int, parent : Int, vertex : Int, weighted : Bool) where {
+  proof_require: tight_prefix(edges, ds, parent, vertex, weighted, edges.length()),
+  proof_require: realized(edges, ds, source, parent, weighted),
+  proof_ensure: realized(edges, ds, source, vertex, weighted),
+} {}
+
+///|
+/// Every checked predecessor chain supplies a real path with exactly its label.
+lemma parents_realize(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool, steps : List[Int]) where {
+  proof_decrease: steps,
+  proof_require: certificate(n, edges, ds, ps, source, weighted),
+  proof_require: labeled(ds, vertex),
+  proof_require: parent_path(ps, source, vertex, steps),
+  proof_ensure: realized(edges, ds, source, vertex, weighted),
+} {
+  match steps {
+    Nil => ()
+    Cons(parent, rest) => if vertex != source {
+      parents_realize(n, edges, ds, ps, source, parent, weighted, rest)
+    }
+  }
+}
+
+///|
+pub lemma certificate_realizes(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, vertex : Int, weighted : Bool) where {
+  proof_require: certificate(n, edges, ds, ps, source, weighted),
+  proof_require: labeled(ds, vertex),
+  proof_ensure: realized(edges, ds, source, vertex, weighted),
+} {
+  proof_assert vertex_valid(edges, ds, ps, source, vertex, weighted)
+  vertex_anchored(edges, ds, ps, source, vertex, weighted)
+}
+
+///|
+/// Exact reachability and shortest distances for every vertex, over every finite
+/// path in the actual edge array. Also certifies the supplied predecessor chains.
+pub predicate correct(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, weighted : Bool) {
+  certificate(n, edges, ds, ps, source, weighted) &&
+  (∀ vertex : Int, labeled(ds, vertex) → realized(edges, ds, source, vertex, weighted)) &&
+  (∀ vertex : Int, ∀ steps : List[Int], path(edges, source, vertex, steps) →
+    labeled(ds, vertex) && @integer.le(distance(ds, vertex), path_cost(edges, steps, weighted)))
+}
+
+///|
+/// The executable checker establishes certificate; these proved inductions give
+/// the semantic conclusion, with no assumption about how the producer searched.
+pub lemma certificate_sound(n : Int, edges : FixedArray[Edge], ds : FixedArray[Option[Int]], ps : FixedArray[Option[Int]], source : Int, weighted : Bool) where {
+  proof_require: certificate(n, edges, ds, ps, source, weighted),
+  proof_ensure: correct(n, edges, ds, ps, source, weighted),
+} {}

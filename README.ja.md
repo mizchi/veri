@@ -138,7 +138,7 @@ just package-check # 公開用 ZIP から日英 README の最小例を実行・�
 | `runtime/bytes` | BytesView 上の Byte / UInt16 / UInt / UInt64 codec | 読み取り境界と消費長を証明し、ネイティブ codec を差分検査 |
 | `algebra` | 演算の明示的な法則と map/fold モデル | 恒等・合成、順序を保つ分割、monoid の分割集計、可換演算の並べ替え |
 | `graph` | 経路・到達性・重み・有限集合の証明 | 連結と分解、閉じた集合、距離ラベルによる最短経路・BFS の証明書 |
-| `runtime/graph` | 不変の有向グラフ、BFS、Dijkstra | 独立距離モデル、実行可能な結果検査、グラフと操作列の shrinking |
+| `runtime/graph` | 不変の有向グラフ、BFS・Dijkstra・トポロジー | 検査器全体の証明、独立モデル、グラフと操作列の shrinking |
 | `examples/toolkit` | 安全な確保サイズ、ヘッダ読取、集計、経路 | 別モジュールでの契約の合成と実行例 |
 | `checks/` | FP・bitvector・array・string の SMT-LIB 2 検査 | 全入力に対する性質と、固定入力の反例 |
 | `checks/negative` | 意図的に誤った補題 | 誤った主張を検証経路が成功扱いしないこと |
@@ -201,6 +201,83 @@ lemma adding_nan_is_nan(x : @ieee754.Float64, y : @ieee754.Float64) where {
 実行時は `@float64.matches(actual, Bits(expected_bits))` でビット一致、
 `@float64.matches(actual, AnyNaN)` で NaN 分類を検査する。
 符号付きゼロを取り違えたり、有限値に 1 ULP の差があればビット一致は失敗する。
+
+## Map / Set・探索・依存関係・パーサ
+
+`runtime/map.Map` と `runtime/set.Set` は **core の型そのものを再公開**する。
+標準の `Map` / `Set` と相互に渡せ、挿入・削除・走査は同じ実装を使う。
+`matches_entries` / `matches_elements` は必要時だけ呼ぶ内容検査で、入力順を問わず、
+重複キー・重複要素を拒否する。通常の操作に検査コストやモデルのコピーは加わらない。
+`fmap.updated` / `removed` と `fset.added` / `removed` は対応する論理的な遷移を定義し、
+参照・所属・他の要素の保存・要素数の法則を証明する。core 本体との対応は、
+ハッシュがすべて衝突するキーを使う操作列と独立した配列モデルで差分検査する。
+論理的な等値と対応させるキーは、`Eq` が同値関係を満たし、等しいキーのハッシュが一致する必要がある。
+
+`runtime/search` は `FixedArray[Int]` 上の `lower_bound`（最初の `>=`）と
+`upper_bound`（最初の `>`）を提供する。整列済みという事前条件の下で、実装本体の
+境界条件を通常・機械整数モデルの両方で証明する。O(log n)、配列コピーなし。
+`is_sorted` は事前条件と一致する O(n) の検査で、こちらも実装を証明する。
+入力の整列は呼び出し側が保証するか、先に `is_sorted` で調べる。
+`check_sort(before, after)` は昇順と重複数の保存を実行時に検査する。
+core のインプレースソートを検査するときは、ソート前のコピーを `before` に渡す。
+この Map ベースの結果検査器は差分テストが保証の境界である。
+
+`Graph::topological_sort()` は `Ordered(order)` または `Cyclic(cycle)` を返す。
+両方の証明書は `FixedArray[Int]` で、順序は全頂点の並べ替え、閉路は先頭頂点を末尾に
+繰り返した単純閉路（自己辺なら `[v, v]`）。`graph.check_topology(witness)` で判定ごと検査できる。
+`check_topological_order(order)` / `check_cycle(cycle)` は各配列を直接受け取る。
+**検査器全体の実装と健全性を、通常・機械整数の両モデルで証明している。**
+順序の受理は全頂点の一意な出現・全辺の向き・非循環性を、閉路の受理は単純性・実在する
+連続辺・非空の閉路の存在を保証する。`topological_order` / `simple_cycle` / `acyclic` /
+`cyclic` / `valid_topology` を利用側の契約で使える。
+
+実装は `runtime/graph/topology` に分離し、実際の辺配列と証明書を検査する。
+順序は新しい順位表、閉路は新しい訪問表と CSR の隣接範囲を使い、どちらも O(V+E) 時間・
+O(V) 空間。閉路の検査は範囲と辺の両端を再確認するため、不正な CSR オフセットから
+架空の辺を受理したり範囲外アクセスしたりしない。重みは使わない。
+DFS 本体・返却配列の構築は差分テストの対象で、検査器の証明はその正しさを前提にしない。
+全到達性モデル、任意の証明書、2万頂点の鎖・閉路、shrinking 付き QuickCheck でも確認する。
+
+未公開の旧 API からは `check_topological_order(order[:])` を `check_topological_order(order)` に
+変更する。`ArrayView[Int]` 用には `check_topological_order_view` / `check_cycle_view` もあり、
+ビューをコピーして検査する。このコピーはオフセット付きビューの差分テストで確認する。
+現行の証明器では ArrayView の読み取りに未対応のため、証明コードでは FixedArray の API を使う。
+
+`runtime/union_find.UnionFind::new(n)` は `0..<n` の要素を管理する。
+`find` / `same` / `union` / `component_size` / `component_count` / `copy` / `to_array`
+を提供し、不正なサイズ・要素は `raise UnionFindError`。
+`union` は併合できた場合だけ `true` を返す。代表元の番号は仕様に含めない。
+サイズによる併合と経路圧縮を使い、平坦な成分ラベルとの操作列テストで検査する。
+`union_find` の論理モデルでは「指定した2成分だけを併合する」性質と同値関係の法則を証明する。
+可変な親配列・経路圧縮の実装本体は未証明。
+
+
+`examples/toolkit/kruskal.mbt` に、core のソートと Union-Find を組み合わせて
+無向グラフの最小全域森を求める実行例も置く。この例の最適性は形式証明していない。
+
+`runtime/bytes/cursor` は不変の `Cursor` と `Parser[T]` を提供する。
+`Cursor::read(parser)` は `Some((value, next_cursor))` または `None`。
+`byte`・各幅の LE/BE 読取・`take` を `zip` / `map` / `and_then` / `or_else` で合成できる。
+`length_prefixed_uint_be()` は32 bit BE の長さと後続の `BytesView` を読み、
+切れた入力・Int に収まらない長さを拒否する。読み取りでバイト列はコピーしない。
+元カーソルは成功・失敗のどちらでも変わらず、fallback は元の位置から試す。
+callback 自身の副作用は巻き戻さない。`read_end` の実装と `encoding.read_composition` の
+消費長の法則は証明済みで、native codec・パーサ合成は shrinking 付きの差分テストで検査する。
+
+```sh
+just verify-extensions # 上記の証明・負例・4バックエンドの debug/release テスト
+just graph-capabilities # 最短性・トポロジーの公開契約と、ArrayView 補助APIの変換制約を確認
+```
+
+BFS/Dijkstra の **検査器全体の健全性**を、通常・機械整数の両モデルで証明する。
+`runtime/graph/checker.check_certificate` は任意の入力を検査し、受理した距離が実在する経路で
+達成され、すべての経路の費用以下であり、`None` の頂点には到達できないことを保証する。
+親チェーンの始点への到達、全辺の距離不等式、配列長・添字・非負重みも検査する。
+`relaxation` は和を作らず `next <= cost + weight` を判定し、オーバーフローする迂回路も扱う。
+公開 `Graph::check_bfs` / `check_dijkstra` は実際の内部配列を直接渡し、同じ証明を利用する。
+`certified` / `shortest_at` と契約付きの `SearchResult::distance` を利用側の証明で使える。
+現行 core Map / Set と `ArrayView` 補助APIのコピー処理は、この実装証明の対象外である。
+証明対象は受理した結果の健全性で、すべての妥当な証明書を受理する完全性は未証明。
 
 ## Bitvector API
 
@@ -268,14 +345,27 @@ MoonBit の `try ... catch` でエラーを扱える。
 無効な始点はエラーになり、到達可能な頂点の最小距離が Int を超える場合もエラーにする。
 オーバーフローする迂回路があっても、表現可能な最短経路は拒否しない。
 `check_bfs` / `check_dijkstra` は経路・辺の不等式・到達集合の閉包を独立して検査する。
-この診断用検査は経路の再構成と隣接辺の走査により最悪 O(V(V+E)) 時間で、探索時には自動実行しない。
+この診断用検査は親チェーンと辺の走査により最悪 O(V(V+E)) 時間で、探索時には自動実行しない。
+グラフは不変の CSR 配列を保持する。検査器は辺・距離・親の `FixedArray` を読み取るだけで、
+証明のない配列変換を挟まない。探索処理から与えられた証明書の正しさを前提にしない。
 
 `graph` は経路の連結・分解、重みの加法性、`fset` 内の閉包、距離ラベルからの
 最短性の証明書を用意する。論理経路は後続頂点列（始点を省き、終点を含む）で、
-実行時の `path_to` は始点も含む。探索と実行可能な結果検査は、独立した
-Floyd–Warshall モデルと比較し、ゼロ重み閉路・非連結・オーバーフローもテストする。
-可変状態を使うアルゴリズム本体全体は未証明。`examples/toolkit` に実行例と、
-整数演算・集計・有限集合の契約を合成する証明例がある。
+実行時の `path_to` は始点も含む。検査器の `path` は多重辺を区別するため、実際に保存された
+辺の番号を終点側から並べた `List[Int]` を使う。`path_cost` は数学的整数の和で、
+BFS では辺数、Dijkstra では重みの合計になる。親チェーンの帰納法で距離を達成する経路を、
+経路の帰納法で全経路に対する下界と到達集合の閉包を証明する。
+探索と検査器は独立した Floyd–Warshall モデルとも比較し、ゼロ重み閉路・非連結・
+オーバーフロー・改ざんされた証明書をテストする。BFS / Dijkstra の探索本体、CSR の構築、
+`path_to` の可変配列への変換は差分テストの対象で、形式証明はしていない。
+`examples/toolkit/checked_graph.mbt` では公開検査 API の呼び出しから任意頂点の最短性を導く。
+
+`just quickcheck-graph js`（または `wasm`・`wasm-gc`・`native`）で graph の性質テストを実行する。
+`just verify-graph` は4バックエンドの debug/release テスト、通常・機械整数モデルでの
+検査器本体・論理法則・利用側契約の証明、偽の主張を拒否する負例検査をまとめて実行する。
+三角形の例では、BFS は1辺の直行経路を、最小重みは重み3の直行経路より軽い
+重み2の2辺経路を証明する。経路が存在するだけでは最短性を示せず、負例では
+重み3の経路を最短とする主張が証明されないことを確認する。
 
 ## 順序・整数論・実数と誤差評価
 
@@ -405,9 +495,20 @@ Why3 の ghost コードとして扱う問題も回避している。新たな�
 ## QuickCheck による性質テスト
 
 `bounds/` と `runtime/` の性質を `moonbitlang/core/quickcheck` で、
-固定 seed `20260914` / `20260915` により検査する。通常は1,000件、
-グラフは500個と編集操作列200件について、全始点・終点を Floyd–Warshall と比較する。
-生成サイズは最大64、コレクション操作列と赤黒木は最大128、グラフは最大7頂点・入力辺48本。`just quickcheck js`（または `wasm`、
+固定 seed `20260914`〜`20260927` により検査する。通常は1,000件、
+グラフは小さい重み500個・境界重み500個・編集操作列200件について、全始点・終点を
+Floyd–Warshall と比較する。生成サイズは最大64、コレクション操作列と赤黒木は最大128、
+グラフは最大7頂点・生成する入力辺48本。頂点番号と辺順の変更を500件、
+到達可能な辺を1本追加してから距離・到達性・親頂点を改ざんする検査を500件行う。
+独立モデルは `Int64?` で到達不能と Int 上限を超える有限距離を区別し、返された経路も
+実装の辺検索や証明書検査を使わず元の辺配列で確認する。
+標準 tuple / array shrinking で元の入力を縮小してから再実行する。
+追加 API は、Map / Set の衝突操作列、二分探索、Union-Find、トポロジカル順序、
+パーサ合成2種類を各500件、距離不等式を1,000件検査する。
+検査器の生配列への任意の距離・親の改ざんも1,000件検査し、各入力で正常な証明書の受理も確認する（seed `20260926`）。
+トポロジーは任意の証明書と独立した参照実装を1,000件比較し、各入力で既知の DAG または
+閉路の正常な証明書も確認する（seed `20260927`）。標準 tuple / array shrinker を使用する。
+`just quickcheck js`（または `wasm`、
 `wasm-gc`、`native`）で実行でき、`just test`・`just test-backends`・
 `just test-release`・`just verify` にも含まれる。
 

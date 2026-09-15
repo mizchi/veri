@@ -1,0 +1,12 @@
+import {
+  "mizchi/veri/integer",
+}
+
+import {
+  "moonbitlang/core/quickcheck",
+  "moonbitlang/core/quickcheck/shrink",
+} for "test"
+
+options(
+  "proof-enabled": true,
+)

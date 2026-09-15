@@ -6,6 +6,8 @@ import { spawnSync } from "node:child_process";
 // Probe direct calls, without assuming contracts for core. A trivial
 // postcondition tests compiler support only, never behavioral correctness.
 const probes = [
+  ["map", "builtin", "Map[Int, Int]", "Int?", "xs.get(1)"],
+  ["set", "set", "Set[Int]", "Bool", "xs.contains(1)"],
   ["list", "list", "List[Int]", "Int", "xs.length()"],
   ["queue", "queue", "Queue[Int]", "Int?", "xs.peek()"],
   ["immutable-pqueue", "immut/priority_queue", "PriorityQueue[Int]", "@core.PriorityQueue[Int]", "xs.push(1)"],

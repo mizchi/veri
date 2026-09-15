@@ -49,6 +49,12 @@ pub fn octets(@list.List[@integer.Integer]) -> Bool
 
 pub fn radix() -> @integer.Integer
 
+pub fn read_composition(@integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn read_split(@integer.Integer, @integer.Integer, @integer.Integer, @integer.Integer) -> Unit
+
+pub fn readable(@integer.Integer, @integer.Integer, @integer.Integer) -> Bool
+
 pub fn reverse_into(@list.List[@integer.Integer], @list.List[@integer.Integer]) -> @list.List[@integer.Integer]
 
 // Errors

@@ -1,0 +1,24 @@
+///|
+pub predicate topological_order(graph : Graph, order : FixedArray[Int]) {
+  @topology_checker.topological(graph.starts.length(), graph.edge_data, order)
+}
+
+///|
+pub predicate acyclic(graph : Graph) { @topology_checker.acyclic(graph.edge_data) }
+
+///|
+pub predicate simple_cycle(graph : Graph, cycle : FixedArray[Int]) {
+  @topology_checker.simple_cycle(graph.starts.length(), graph.edge_data, cycle)
+}
+
+///|
+pub predicate cyclic(graph : Graph) { @topology_checker.has_cycle(graph.edge_data) }
+
+///|
+/// The supplied witness is valid and its Ordered/Cyclic verdict is correct.
+pub predicate valid_topology(graph : Graph, topology : Topology) {
+  match topology {
+    Ordered(order) => topological_order(graph, order) && acyclic(graph)
+    Cyclic(cycle) => simple_cycle(graph, cycle) && cyclic(graph) && !acyclic(graph)
+  }
+}

@@ -1,4 +1,9 @@
 import {
+  "mizchi/veri/runtime/map",
+  "mizchi/veri/runtime/set",
+  "mizchi/veri/runtime/search",
+  "mizchi/veri/runtime/union_find",
+  "mizchi/veri/runtime/bytes/cursor",
   "mizchi/veri/integer",
   "mizchi/veri/relations",
   "mizchi/veri/algebra",

@@ -1,0 +1,8 @@
+///|
+// A valid singleton must not become logically impossible after adding the
+// quantified soundness lemmas. This false rejection is also a vacuity control.
+fn negative_control() -> Bool where {
+  proof_ensure: accepted => !accepted,
+} {
+  @checker.check_certificate(1, [], [Some(0)], [None], 0, true)
+}

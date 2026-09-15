@@ -1,0 +1,4 @@
+///|
+fn negative_control() -> Bool where { proof_ensure: result => result } {
+  relaxation(0, 2, 1)
+}

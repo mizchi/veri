@@ -224,9 +224,149 @@
     "claim": "an empty path changes its source vertex"
   },
   {
+    "package": "graph",
+    "fixture": "path-witness-is-shortest.mbtp.txt",
+    "claim": "a path witness without feasible labels proves shortestness"
+  },
+  {
     "package": "runtime/bytes",
     "fixture": "truncated-read-succeeds.mbt.txt",
     "claim": "a four-byte read fits inside three bytes",
     "machine": true
+  },
+  {
+    "package": "fset",
+    "fixture": "set-add-duplicates.mbtp.txt",
+    "claim": "adding an existing set member increases cardinality"
+  },
+  {
+    "package": "runtime/search",
+    "fixture": "lower-bound-is-upper.mbt.txt",
+    "claim": "lower_bound skips equal elements",
+    "machine": true
+  },
+  {
+    "package": "union_find",
+    "fixture": "union-merges-unrelated.mbtp.txt",
+    "claim": "joining two classes also merges an unrelated third class"
+  },
+  {
+    "package": "runtime/graph/checker",
+    "fixture": "relaxation-ignores-weight.mbt.txt",
+    "claim": "a too-small relaxation bound is accepted",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-accepts-nonminimum.mbt.txt",
+    "claim": "complete checker accepts a real but nonminimum path",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-accepts-nonminimum.mbt.txt",
+    "claim": "complete checker accepts a real but nonminimum path",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-hides-reachable.mbt.txt",
+    "claim": "complete checker accepts an unlabelled reachable vertex",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-hides-reachable.mbt.txt",
+    "claim": "complete checker accepts an unlabelled reachable vertex",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-rejects-singleton.mbt.txt",
+    "claim": "complete checker rejects a valid singleton (nonvacuity)",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph",
+    "fixture": "checker-rejects-singleton.mbt.txt",
+    "claim": "complete checker rejects a valid singleton (nonvacuity)",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-accepts-cycle.mbt.txt",
+    "claim": "topological checker accepts a cyclic graph",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-accepts-cycle.mbt.txt",
+    "claim": "topological checker accepts a cyclic graph",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-accepts-duplicate.mbt.txt",
+    "claim": "topological checker accepts a duplicated vertex",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-accepts-duplicate.mbt.txt",
+    "claim": "topological checker accepts a duplicated vertex",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-fabricates-edge.mbt.txt",
+    "claim": "cycle checker accepts a nonexistent closing edge",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-fabricates-edge.mbt.txt",
+    "claim": "cycle checker accepts a nonexistent closing edge",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-rejects-empty.mbt.txt",
+    "claim": "topological checker rejects an empty graph (nonvacuity)",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-rejects-empty.mbt.txt",
+    "claim": "topological checker rejects an empty graph (nonvacuity)",
+    "machine": true,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-rejects-selfloop.mbt.txt",
+    "claim": "cycle checker rejects a self-loop (nonvacuity)",
+    "machine": false,
+    "timeoutMs": 300000
+  },
+  {
+    "package": "runtime/graph/topology",
+    "fixture": "topology-rejects-selfloop.mbt.txt",
+    "claim": "cycle checker rejects a self-loop (nonvacuity)",
+    "machine": true,
+    "timeoutMs": 300000
   }
 ]

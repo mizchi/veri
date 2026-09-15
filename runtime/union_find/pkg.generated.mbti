@@ -1,0 +1,32 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/union_find"
+
+import {
+  "moonbitlang/core/debug",
+}
+
+// Values
+
+// Errors
+pub(all) suberror UnionFindError {
+  NegativeSize(Int)
+  InvalidElement(Int)
+} derive(Eq, @debug.Debug)
+
+// Types and methods
+pub struct UnionFind {
+  // private fields
+}
+pub fn UnionFind::component_count(Self) -> Int
+pub fn UnionFind::component_size(Self, Int) -> Int raise UnionFindError
+pub fn UnionFind::copy(Self) -> Self
+pub fn UnionFind::find(Self, Int) -> Int raise UnionFindError
+pub fn UnionFind::length(Self) -> Int
+pub fn UnionFind::new(Int) -> Self raise UnionFindError
+pub fn UnionFind::same(Self, Int, Int) -> Bool raise UnionFindError
+pub fn UnionFind::to_array(Self) -> Array[Int]
+pub fn UnionFind::union(Self, Int, Int) -> Bool raise UnionFindError
+
+// Type aliases
+
+// Traits

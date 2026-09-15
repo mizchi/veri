@@ -1,0 +1,35 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/graph/topology"
+
+import {
+  "mizchi/veri/runtime/graph/checker",
+}
+
+// Values
+pub fn acyclic(FixedArray[@checker.Edge]) -> Bool
+
+pub fn before(FixedArray[Int], Int, Int) -> Bool
+
+pub fn check_cycle(FixedArray[@checker.Edge], FixedArray[Int], FixedArray[Int]) -> Bool
+
+pub fn check_topological_order(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+
+pub fn cycle_realized(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Unit
+
+pub fn has_cycle(FixedArray[@checker.Edge]) -> Bool
+
+pub fn permutation(Int, FixedArray[Int]) -> Bool
+
+pub fn simple_cycle(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+
+pub fn topological(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+
+pub fn topological_acyclic(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Unit
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

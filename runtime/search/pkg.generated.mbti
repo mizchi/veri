@@ -1,0 +1,25 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/runtime/search"
+
+// Values
+pub fn check_sort(ArrayView[Int], ArrayView[Int]) -> Bool
+
+pub fn is_sorted(FixedArray[Int]) -> Bool
+
+pub fn lower_bound(FixedArray[Int], Int) -> Int
+
+pub fn lower_partition(FixedArray[Int], Int, Int) -> Bool
+
+pub fn ordered(FixedArray[Int]) -> Bool
+
+pub fn upper_bound(FixedArray[Int], Int) -> Int
+
+pub fn upper_partition(FixedArray[Int], Int, Int) -> Bool
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

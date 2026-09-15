@@ -1,0 +1,41 @@
+///|
+/// Acceptance contract on the graph and search result's actual storage.
+pub predicate certified(graph : Graph, search : SearchResult, weighted : Bool) {
+  @checker.correct(graph.starts.length(), graph.edge_data, search.distances, search.parents, search.origin, weighted)
+}
+
+///|
+/// Reverse edge-index paths over the canonical graph storage (see checker.path).
+pub predicate path(graph : Graph, source : Int, target : Int, steps : @list.List[Int]) {
+  @checker.path(graph.edge_data, source, target, steps)
+}
+
+///|
+pub fn path_cost(graph : Graph, steps : @list.List[Int], weighted : Bool) -> @integer.Integer {
+  @checker.path_cost(graph.edge_data, steps, weighted)
+}
+
+///|
+/// Logical view of the public distance accessor, including invalid vertices.
+pub fn result_distance(search : SearchResult, vertex : Int) -> Option[Int] {
+  if vertex < 0 { None } else {
+    if vertex >= search.distances.length() { None } else { search.distances[vertex] }
+  }
+}
+
+///|
+/// None means no path; Some cost is both attained and a lower bound on every path.
+pub predicate shortest_at(graph : Graph, search : SearchResult, vertex : Int, weighted : Bool) {
+  match result_distance(search, vertex) {
+    None => ∀ steps : @list.List[Int], !path(graph, search.origin, vertex, steps)
+    Some(cost) =>
+      (∃ steps : @list.List[Int], path(graph, search.origin, vertex, steps) && @integer.eq(@integer.from_int(cost), path_cost(graph, steps, weighted))) &&
+      (∀ steps : @list.List[Int], path(graph, search.origin, vertex, steps) → @integer.le(@integer.from_int(cost), path_cost(graph, steps, weighted)))
+  }
+}
+
+///|
+pub lemma certified_shortest(graph : Graph, search : SearchResult, vertex : Int, weighted : Bool) where {
+  proof_require: certified(graph, search, weighted),
+  proof_ensure: shortest_at(graph, search, vertex, weighted),
+} {}

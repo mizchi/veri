@@ -1,11 +1,5 @@
 ///|
-/// A directed edge. Parallel edges and self-loops are retained.
-#valtype
-pub(all) struct Edge {
-  from : Int
-  to : Int
-  weight : Int
-} derive(Debug, Eq)
+pub using @checker {type Edge}
 
 ///|
 pub(all) suberror GraphError {
@@ -16,10 +10,11 @@ pub(all) suberror GraphError {
 } derive(Debug, Eq)
 
 ///|
-/// Immutable adjacency lists with vertices numbered 0..<vertex_count.
-/// Algorithms are differential-tested; graph contains the separate proof model.
+/// Immutable CSR storage with vertices numbered 0..<vertex_count.
+/// Producers are differential-tested; certificate checking uses these exact edges.
 pub struct Graph {
-  priv adjacency : Array[Array[Edge]]
+  priv edge_data : FixedArray[Edge]
+  priv starts : FixedArray[Int]
 }
 
 ///|
@@ -49,11 +44,27 @@ pub fn Graph::from_array(
       raise NegativeWeight(e.weight)
     }
   }
-  let adjacency = Array::makei(vertex_count, _ => [])
-  for e in edges {
-    adjacency[e.from].push(e)
+  let counts = FixedArray::make(vertex_count, 0)
+  for edge in edges {
+    counts[edge.from] += 1
   }
-  { adjacency, }
+  let starts = FixedArray::make(vertex_count, 0)
+  let mut offset = 0
+  for vertex = 0; vertex < vertex_count; vertex = vertex + 1 {
+    starts[vertex] = offset
+    offset += counts[vertex]
+  }
+  let next = starts.copy()
+  let edge_data = FixedArray::make(edges.length(), Edge::{
+    from: 0,
+    to: 0,
+    weight: 0,
+  })
+  for edge in edges {
+    edge_data[next[edge.from]] = edge
+    next[edge.from] += 1
+  }
+  { edge_data, starts, }
 }
 
 ///|
@@ -70,8 +81,12 @@ pub fn Graph::from_iter(
 }
 
 ///|
-pub fn Graph::vertex_count(self : Graph) -> Int {
-  self.adjacency.length()
+pub fn Graph::vertex_count(
+  self : Graph,
+) -> Int where {
+  proof_ensure: result => result == self.starts.length(),
+} {
+  self.starts.length()
 }
 
 ///|
@@ -84,7 +99,7 @@ pub fn Graph::edges(self : Graph) -> Array[Edge] {
 /// Traverse edges in source-vertex order, retaining input order within each source.
 /// Each call creates an independent iterator without an intermediate array.
 pub fn Graph::iter(self : Graph) -> Iter[Edge] {
-  self.adjacency.iter().flat_map(outgoing => outgoing.iter())
+  self.edge_data.iter()
 }
 
 ///|
@@ -103,7 +118,7 @@ pub fn Graph::edge_weight(self : Graph, from : Int, to : Int) -> Int? {
     return None
   }
   let mut best : Int? = None
-  for e in self.adjacency[from] {
+  for e in self.outgoing(from) {
     if e.to == to {
       match best {
         None => best = Some(e.weight)
@@ -118,19 +133,28 @@ pub fn Graph::edge_weight(self : Graph, from : Int, to : Int) -> Int? {
 /// Distances and predecessor witnesses owned by one search, with no mutable views.
 pub struct SearchResult {
   priv origin : Int
-  priv distances : Array[Int?]
-  priv parents : Array[Int?]
+  priv distances : FixedArray[Int?]
+  priv parents : FixedArray[Int?]
 }
 
 ///|
-pub fn SearchResult::source(self : SearchResult) -> Int {
+pub fn SearchResult::source(
+  self : SearchResult,
+) -> Int where {
+  proof_ensure: result => result == self.origin,
+} {
   self.origin
 }
 
 ///|
 /// Invalid or unreachable vertices return None. A Dijkstra result never contains
 /// an unrepresentable reachable distance: the whole search returns DistanceOverflow.
-pub fn SearchResult::distance(self : SearchResult, vertex : Int) -> Int? {
+pub fn SearchResult::distance(
+  self : SearchResult,
+  vertex : Int,
+) -> Int? where {
+  proof_ensure: result => @relations.same(result, result_distance(self, vertex)),
+} {
   if vertex < 0 || vertex >= self.distances.length() {
     None
   } else {
@@ -172,14 +196,14 @@ pub fn Graph::bfs(self : Graph, source : Int) -> SearchResult raise GraphError {
   if source < 0 || source >= n {
     raise InvalidVertex(source)
   }
-  let distances : Array[Int?] = Array::make(n, None)
-  let parents : Array[Int?] = Array::make(n, None)
+  let distances : FixedArray[Int?] = FixedArray::make(n, None)
+  let parents : FixedArray[Int?] = FixedArray::make(n, None)
   distances[source] = Some(0)
   let mut frontier = @queue.Queue::new().push(source)
   while frontier.pop() is Some((vertex, rest)) {
     frontier = rest
     let cost = distances[vertex].unwrap()
-    for e in self.adjacency[vertex] {
+    for e in self.outgoing(vertex) {
       if distances[e.to] is None {
         // Every discovered vertex has a simple path of at most n-1 edges.
         distances[e.to] = Some(cost + 1)
@@ -204,8 +228,8 @@ pub fn Graph::dijkstra(
   if source < 0 || source >= n {
     raise InvalidVertex(source)
   }
-  let distances : Array[Int?] = Array::make(n, None)
-  let parents : Array[Int?] = Array::make(n, None)
+  let distances : FixedArray[Int?] = FixedArray::make(n, None)
+  let parents : FixedArray[Int?] = FixedArray::make(n, None)
   let buckets : Map[Int, @queue.Queue[Int]] = Map([])
   let mut priorities = @pqueue.IntMinQueue::new().push(0)
   buckets[0] = @queue.Queue::new().push(source)
@@ -221,7 +245,7 @@ pub fn Graph::dijkstra(
     if distances[vertex] != Some(cost) {
       continue
     }
-    for e in self.adjacency[vertex] {
+    for e in self.outgoing(vertex) {
       match @int32.checked_add(cost, e.weight) {
         None => ()
         Some(candidate) => {
@@ -249,4 +273,14 @@ pub fn Graph::dijkstra(
     }
   }
   { origin: source, distances, parents, }
+}
+
+///|
+fn Graph::outgoing(self : Graph, vertex : Int) -> ArrayView[Edge] {
+  let end = if vertex + 1 < self.starts.length() {
+    self.starts[vertex + 1]
+  } else {
+    self.edge_data.length()
+  }
+  self.edge_data[self.starts[vertex]:end]
 }

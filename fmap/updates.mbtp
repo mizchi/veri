@@ -1,0 +1,60 @@
+///|
+/// Logical transition for core Map.set; native core calls are tested separately.
+pub predicate[K, V] updated(before : Fmap[K, V], after : Fmap[K, V], key : K, value : V) {
+  eq(after, add(key, value, before))
+}
+///|
+pub predicate[K, V] removed(before : Fmap[K, V], after : Fmap[K, V], key : K) {
+  eq(after, remove(key, before))
+}
+///|
+pub lemma[K, V] updated_lookup(before : Fmap[K, V], after : Fmap[K, V], key : K, value : V) where {
+  proof_require: updated(before, after, key, value),
+  proof_ensure: mem(key, after),
+  proof_ensure: same(find(key, after), value),
+} {}
+///|
+pub lemma[K, V] updated_frame(before : Fmap[K, V], after : Fmap[K, V], key : K, value : V, other : K) where {
+  proof_require: updated(before, after, key, value),
+  proof_require: same(key, other) == false,
+  proof_ensure: same_entry(before, after, other),
+} {}
+///|
+pub lemma[K, V] updated_size(before : Fmap[K, V], after : Fmap[K, V], key : K, value : V) where {
+  proof_require: updated(before, after, key, value),
+  proof_ensure: @integer.eq(size(after), add_size(before, key)),
+} {}
+///|
+pub lemma[K, V] removed_lookup(before : Fmap[K, V], after : Fmap[K, V], key : K) where {
+  proof_require: removed(before, after, key),
+  proof_ensure: mem(key, after) == false,
+} {}
+///|
+pub lemma[K, V] removed_size(before : Fmap[K, V], after : Fmap[K, V], key : K) where {
+  proof_require: removed(before, after, key),
+  proof_ensure: @integer.eq(size(after), remove_size(before, key)),
+} {}
+
+///|
+fn[K, V] add_size(before : Fmap[K, V], key : K) -> @integer.Integer {
+  if mem(key, before) { size(before) } else { @integer.add(size(before), @integer.from_int(1)) }
+}
+///|
+fn[K, V] remove_size(before : Fmap[K, V], key : K) -> @integer.Integer {
+  if mem(key, before) { @integer.sub(size(before), @integer.from_int(1)) } else { size(before) }
+}
+
+///|
+#proof_import("map.Map")
+fn[T] same(left : T, right : T) -> Bool = "(=)"
+///|
+pub predicate[K, V] same_entry(before : Fmap[K, V], after : Fmap[K, V], key : K) {
+  mem(key, after) == mem(key, before) &&
+  (mem(key, before) → same(find(key, after), find(key, before)))
+}
+///|
+pub lemma[K, V] removed_frame(before : Fmap[K, V], after : Fmap[K, V], key : K, other : K) where {
+  proof_require: removed(before, after, key),
+  proof_require: same(key, other) == false,
+  proof_ensure: same_entry(before, after, other),
+} {}

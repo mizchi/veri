@@ -1,0 +1,101 @@
+///|
+predicate vertex_index(n : Int, vertex : Int) { 0 <= vertex && vertex < n }
+
+///|
+predicate occurrence(order : FixedArray[Int], vertex : Int, index : Int) {
+  0 <= index && index < order.length() && order[index] == vertex
+}
+
+///|
+predicate occurs(order : FixedArray[Int], vertex : Int) {
+  ∃ index : Int, occurrence(order, vertex, index)
+}
+
+///|
+predicate unique_prefix(order : FixedArray[Int], stop : Int) {
+  ∀ i : Int, ∀ j : Int, 0 <= i && i < stop && 0 <= j && j < stop && order[i] == order[j] → i == j
+}
+
+///|
+pub predicate permutation(n : Int, order : FixedArray[Int]) {
+  n == order.length() &&
+  (∀ i : Int, 0 <= i && i < n → vertex_index(n, order[i])) &&
+  unique_prefix(order, n) &&
+  (∀ vertex : Int, vertex_index(n, vertex) → occurs(order, vertex))
+}
+
+///|
+pub predicate before(order : FixedArray[Int], source : Int, target : Int) {
+  ∃ i : Int, ∃ j : Int, occurrence(order, source, i) && occurrence(order, target, j) && i < j
+}
+
+///|
+predicate forward_edge(n : Int, order : FixedArray[Int], edge : @checker.Edge) {
+  vertex_index(n, edge.from) && vertex_index(n, edge.to) && before(order, edge.from, edge.to)
+}
+
+///|
+predicate forward_edges(n : Int, order : FixedArray[Int], edges : FixedArray[@checker.Edge]) {
+  ∀ i : Int, 0 <= i && i < edges.length() → forward_edge(n, order, edges[i])
+}
+
+///|
+/// A permutation of all vertices, with every actual edge pointing forward.
+pub predicate topological(n : Int, edges : FixedArray[@checker.Edge], order : FixedArray[Int]) {
+  permutation(n, order) && forward_edges(n, order, edges)
+}
+
+///|
+predicate inverse_prefix(order : FixedArray[Int], ranks : FixedArray[Int], stop : Int) {
+  ∀ i : Int, 0 <= i && i < stop → vertex_index(ranks.length(), order[i]) && ranks[order[i]] == i
+}
+
+///|
+predicate rank_entry(order : FixedArray[Int], ranks : FixedArray[Int], vertex : Int) {
+  occurrence(order, vertex, ranks[vertex])
+}
+
+///|
+predicate rank_entries(order : FixedArray[Int], ranks : FixedArray[Int], stop : Int) {
+  ∀ vertex : Int, 0 <= vertex && vertex < stop → rank_entry(order, ranks, vertex)
+}
+
+///|
+predicate ranked_edge(ranks : FixedArray[Int], edge : @checker.Edge) {
+  vertex_index(ranks.length(), edge.from) && vertex_index(ranks.length(), edge.to) && ranks[edge.from] < ranks[edge.to]
+}
+
+///|
+predicate ranked_edges(ranks : FixedArray[Int], edges : FixedArray[@checker.Edge], stop : Int) {
+  ∀ i : Int, 0 <= i && i < stop → ranked_edge(ranks, edges[i])
+}
+
+///|
+lemma rank_covers(order : FixedArray[Int], ranks : FixedArray[Int], vertex : Int) where {
+  proof_require: rank_entry(order, ranks, vertex),
+  proof_ensure: occurs(order, vertex),
+} {
+  proof_assert occurrence(order, vertex, ranks[vertex])
+}
+
+///|
+lemma rank_forward(order : FixedArray[Int], ranks : FixedArray[Int], edge : @checker.Edge) where {
+  proof_require: ranked_edge(ranks, edge),
+  proof_require: rank_entries(order, ranks, ranks.length()),
+  proof_ensure: forward_edge(ranks.length(), order, edge),
+} {
+  proof_assert occurrence(order, edge.from, ranks[edge.from])
+  proof_assert occurrence(order, edge.to, ranks[edge.to])
+}
+
+///|
+predicate same_size(order : FixedArray[Int], ranks : FixedArray[Int]) { order.length() == ranks.length() }
+
+///|
+lemma rank_certificate(order : FixedArray[Int], ranks : FixedArray[Int], edges : FixedArray[@checker.Edge]) where {
+  proof_require: same_size(order, ranks),
+  proof_require: inverse_prefix(order, ranks, order.length()),
+  proof_require: rank_entries(order, ranks, ranks.length()),
+  proof_require: ranked_edges(ranks, edges, edges.length()),
+  proof_ensure: topological(order.length(), edges, order),
+} {}
