@@ -13,7 +13,8 @@ every job to succeed.
 | Formatting, types, public API, reference vectors, compiler capabilities | `just ci-check` |
 | Library and examples in debug/release on four backends | `just ci-test js` (also `wasm`, `wasm-gc`, `native`) |
 | Tool tests, SMT/temporal models, expected-result suites | `just ci-models` |
-| Mathematical-integer proofs and false-statement controls | `just ci-prove-mathematical` |
+| Mathematical-integer proofs | `just ci-prove-mathematical` |
+| False-statement controls (four CI shards) | `just negative` |
 | Machine-integer proofs | `just ci-prove-machine` |
 | Separate consumer of the package archive | `just package-check` |
 | Pinned Nix Apalache cross-checks against Z3 | `just apalache apalache-lease-clock` |
@@ -24,6 +25,10 @@ just is `1.58.0`, and Apalache is `0.62.2` through `flake.lock`. Actions use com
 SHA pins with Dependabot update proposals. Only tools and dependencies are cached;
 verification runs every time. Logs and generated reports remain available as
 artifacts for seven days.
+CI sets `VERI_PROVER_JOBS=2` and `VERI_PROVER_FINAL_TIMEOUT=6` to bound Why3's
+solver concurrency and increase the final-stage time budget in seconds. Local
+defaults remain 16 and 2. `VERI_NEGATIVE_SHARD=0` through `3` with
+`VERI_NEGATIVE_SHARDS=4` partition the 68 negative controls without duplication.
 
 [.github/toolchain.env](../.github/toolchain.env) contains the MoonBit pin.
 Upstream versioned archives expire after 60 days, so refresh this pin before

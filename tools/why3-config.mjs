@@ -5,6 +5,21 @@ import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 import { installedCvc5 } from "./cvc5.mjs";
 
+export function proverResources(env = process.env) {
+  function limit(name, fallback, maximum) {
+    if (env[name] === undefined) return fallback;
+    const value = Number(env[name]);
+    if (!Number.isInteger(value) || value <= 0 || value > maximum) {
+      throw new Error("Invalid " + name);
+    }
+    return value;
+  }
+  return {
+    parallelism: limit('VERI_PROVER_JOBS', 16, 64),
+    finalTimeout: limit('VERI_PROVER_FINAL_TIMEOUT', 2, 60),
+  };
+}
+
 // Preserve Why3's standard transformations and arithmetic model. Only omit the
 // two native-BV encoding fragments, retaining the upstream BV theory axioms.
 // Never change the user's installed Why3 files or introduce new axioms.
@@ -52,6 +67,7 @@ export function cvc5RealDriver(source, directory) {
 }
 
 export function configureWhy3() {
+  const resources = proverResources();
   const moonDirectory = join(homedir(), ".moon");
   const dataDirectory = join(moonDirectory, "share/why3");
   const drivers = join(dataDirectory, "drivers");
@@ -87,16 +103,16 @@ export function configureWhy3() {
     // Normalize concrete datatype constructors after splitting. Doing this
     // earlier can obscure the recursive hypotheses needed by list proofs.
     "t compute_in_goal start",
-    "c Z3," + version + " 2 4000",
-    "c Z3-Arithmetic," + version + " 2 4000",
-    "c CVC5," + cvc5.version + " 2 4000",
-    "c Z3-RealFloat," + version + " 2 4000",
-    "c Z3-Quantified," + version + " 2 4000",
+    "c Z3," + version + " " + resources.finalTimeout + " 4000",
+    "c Z3-Arithmetic," + version + " " + resources.finalTimeout + " 4000",
+    "c CVC5," + cvc5.version + " " + resources.finalTimeout + " 4000",
+    "c Z3-RealFloat," + version + " " + resources.finalTimeout + " 4000",
+    "c Z3-Quantified," + version + " " + resources.finalTimeout + " 4000",
     "",
   ].join("\n");
   writeFileSync(config, '[main]\nmagic = 14\ndatadir = ' + JSON.stringify(dataDirectory) +
     '\nlibdir = ' + JSON.stringify(join(moonDirectory, "lib/why3")) +
-    '\nmemlimit = 1000\nrunning_provers_max = 16\ntimelimit = 5.0\n\n' +
+    '\nmemlimit = 1000\nrunning_provers_max = ' + resources.parallelism + '\ntimelimit = 5.0\n\n' +
     '[prover]\nname = "Z3"\nversion = "' + version + '"\ncommand = "z3 -smt2 -T:%t %f"\ndriver = "z3_487"\n\n' +
     '[prover]\nname = "Z3-Arithmetic"\nversion = "' + version + '"\ncommand = "z3 -smt2 -T:%t %f"\ndriver = ' + JSON.stringify(driver) + '\n\n' +
     '[prover]\nname = "Z3-RealFloat"\nversion = "' + version + '"\ncommand = "z3 -smt2 -T:%t %f"\ndriver = ' + JSON.stringify(floatDriver) + '\n\n' +

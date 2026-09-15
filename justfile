@@ -261,6 +261,6 @@ ci-models:
     node --test --test-concurrency=1 tools/*.test.mjs
     just smt temporal temporal-bridge task-group lease-clock model-suite
 
-ci-prove-mathematical: prove negative
+ci-prove-mathematical: prove
 
 ci-prove-machine: prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine

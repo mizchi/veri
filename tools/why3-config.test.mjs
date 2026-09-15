@@ -1,6 +1,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { arithmeticDriver, realFloatDriver, quantifiedDriver, cvc5RealDriver } from "./why3-config.mjs";
+import { arithmeticDriver, realFloatDriver, quantifiedDriver, cvc5RealDriver, proverResources } from "./why3-config.mjs";
+
+test("prover resource overrides remain finite and positive", () => {
+  assert.deepEqual(proverResources({}), {parallelism:16, finalTimeout:2});
+  assert.deepEqual(proverResources({VERI_PROVER_JOBS:'2',VERI_PROVER_FINAL_TIMEOUT:'6'}),
+    {parallelism:2,finalTimeout:6});
+  for (const key of ['VERI_PROVER_JOBS','VERI_PROVER_FINAL_TIMEOUT']) {
+    for (const value of ['', '0', '-1', 'NaN', 'Infinity', '1.5', '9999']) {
+      assert.throws(() => proverResources({[key]:value}), /Invalid/);
+    }
+  }
+});
 
 test("arithmetic driver changes only the native BV encoding imports", () => {
   const original = 'import "smt-libv2.gen"\nimport "smt-libv2-bv.gen"\nimport "z3_bv.gen"\ntransformation "remove_unused_keep_constants"\ntheory int.Int\n  remove prop CompatOrderMult\nend\n';

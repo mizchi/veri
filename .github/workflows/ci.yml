@@ -15,6 +15,8 @@ concurrency:
 
 env:
   CI: 'true'
+  VERI_PROVER_JOBS: '2'
+  VERI_PROVER_FINAL_TIMEOUT: '6'
 
 defaults:
   run:
@@ -89,6 +91,28 @@ jobs:
         with:
           name: prove-${{ matrix.mode }}
 
+  negative:
+    name: Negative proof controls (${{ matrix.shard }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    env:
+      VERI_NEGATIVE_SHARD: ${{ matrix.shard }}
+      VERI_NEGATIVE_SHARDS: '4'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: just negative 2>&1 | tee ci.log
+      - uses: ./.github/actions/report
+        if: ${{ !cancelled() }}
+        with:
+          name: negative-${{ matrix.shard }}
+
   package:
     name: Package consumer checks
     runs-on: ubuntu-24.04
@@ -125,7 +149,7 @@ jobs:
   result:
     name: CI result
     if: ${{ always() }}
-    needs: [check, test, models, prove, package, apalache]
+    needs: [check, test, models, prove, negative, package, apalache]
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:

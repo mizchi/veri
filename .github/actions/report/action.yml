@@ -15,5 +15,7 @@ runs:
           _build/*-report.json
           _build/*-capabilities.json
           _build/why3/
+          _build/**/*.proof.json
+          _build/**/*.mlw
         if-no-files-found: ignore
         retention-days: 7

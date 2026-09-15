@@ -5,13 +5,21 @@ import { fileURLToPath } from "node:url";
 import { homedir } from "node:os";
 import { spawnSync } from "node:child_process";
 import { configureWhy3 } from "./why3-config.mjs";
-import { selectNegativeChecks } from "./negative-selection.mjs";
+import { selectNegativeChecks, shardNegativeChecks } from "./negative-selection.mjs";
 
 const fixtures = new URL("../checks/negative/", import.meta.url);
-const checks = selectNegativeChecks(
+let checks = selectNegativeChecks(
   JSON.parse(readFileSync(new URL("manifest.json", fixtures), "utf8")),
   process.argv.slice(2),
 );
+if (process.env.VERI_NEGATIVE_SHARD !== undefined || process.env.VERI_NEGATIVE_SHARDS !== undefined) {
+  const shard = process.env.VERI_NEGATIVE_SHARD;
+  const total = process.env.VERI_NEGATIVE_SHARDS;
+  if (!/^\d+$/.test(shard ?? '') || !/^\d+$/.test(total ?? '')) {
+    throw new Error('Invalid negative-control shard');
+  }
+  checks = shardNegativeChecks(checks, Number(shard), Number(total));
+}
 if (checks.length === 0) throw new Error("No negative proof controls configured");
 const config = configureWhy3();
 

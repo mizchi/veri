@@ -12,7 +12,8 @@ Ubuntu 24.04 上で以下を独立したジョブに分け、最後の `CI resul
 | フォーマット・型・公開 API・参照値・コンパイラ対応範囲 | `just ci-check` |
 | 本体と examples の debug / release、4バックエンド | `just ci-test js`（`wasm` / `wasm-gc` / `native` も実行） |
 | ツールのテスト、SMT・時相モデル・期待結果付きスイート | `just ci-models` |
-| 通常整数の証明と、偽の命題を拒否する負例 | `just ci-prove-mathematical` |
+| 通常整数の証明 | `just ci-prove-mathematical` |
+| 偽の命題を拒否する負例（CI は4分割） | `just negative` |
 | 機械整数の証明 | `just ci-prove-machine` |
 | 配布物を別プロジェクトから利用・証明 | `just package-check` |
 | Nix の Apalache と Z3 の照合 | `just apalache apalache-lease-clock` |
@@ -22,6 +23,9 @@ MoonBit `0.10.12+1634b282e`、Z3 `4.16.0`、CVC5 `1.3.4` を固定し、
 Apalache は `flake.lock` に基づく `0.62.2`。Actions もコミット SHA に固定し、
 Dependabot で更新を提案する。ツールと依存のみをキャッシュし、検査は毎回実行する。
 ログと生成した検証レポートは7日間の artifact として残す。
+CI では `VERI_PROVER_JOBS=2` と `VERI_PROVER_FINAL_TIMEOUT=6` により、
+Why3 の同時ソルバー数と最終段階の制限秒数を調整する。ローカルの既定値は16と2。
+負例は `VERI_NEGATIVE_SHARD=0`〜`3`、`VERI_NEGATIVE_SHARDS=4` で68件を重複なく分配する。
 
 MoonBit の固定値は [.github/toolchain.env](../.github/toolchain.env) で管理する。
 上流の版別アーカイブは60日で削除されるため、この pin は2026年11月8日より前に更新する。
