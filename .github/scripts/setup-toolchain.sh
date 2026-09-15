@@ -27,6 +27,8 @@ fetch_verified \
 mkdir -p "$veri_moon_dir"
 tar -xzf "$veri_download_dir/moon.tar.gz" -C "$veri_moon_dir"
 tar -xzf "$veri_download_dir/core.tar.gz" -C "$veri_moon_dir/lib"
+# The official installer sets these modes after extracting the distribution.
+chmod +x "$veri_moon_dir"/bin/* "$veri_moon_dir/bin/internal/tcc"
 ln -sf moon "$veri_moon_dir/bin/moonx"
 export PATH="$veri_moon_dir/bin:$PATH"
 moon -C "$veri_moon_dir/lib/core" bundle --all --warn-list -a
