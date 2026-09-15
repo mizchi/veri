@@ -56,11 +56,11 @@ just setup-apalache # installation only; creates _build/apalache-bin
 _build/apalache-bin/bin/apalache-mc version
 
 # Run one property directly, with outputs kept under _build.
-nix run path:./nix -- check --out-dir=_build/apalache/manual \
+nix run . -- check --out-dir=_build/apalache/manual \
   --length=8 --temporal=FairResponse checks/temporal/Job.tla
 ```
 
-The [Nix flake](../../nix/flake.nix) pins nixpkgs, the official release archive,
+The [Nix flake](../../flake.nix) pins nixpkgs, the official release archive,
 and its SHA-256 from the [v0.62.2 release](https://github.com/apalache-mc/apalache/releases/tag/v0.62.2).
 It does not need a system JVM or Docker. The package has been exercised on
 Apple Silicon macOS; the other declared Nix systems have not been tested here.

@@ -163,7 +163,7 @@ temporal-bridge:
 # Install pinned Apalache and Java through Nix, local to _build.
 setup-apalache:
     mkdir -p _build
-    nix build path:./nix --out-link _build/apalache-bin
+    nix build . --out-link _build/apalache-bin
 
 # Cross-check Job and TaskGroup with Apalache/Z3 and replay all witnesses in MoonBit.
 apalache: setup-apalache

@@ -13,5 +13,7 @@ target/
 /tools/
 /runtime/float_conversions/
 /justfile
+/flake.nix
+/flake.lock
 /veri.mbtx
 /TODO.md

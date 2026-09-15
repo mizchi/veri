@@ -48,11 +48,11 @@ just setup-apalache # 導入だけ行い、_build/apalache-bin を作成
 _build/apalache-bin/bin/apalache-mc version
 
 # 個別の性質を直接検査する。出力先は _build 以下。
-nix run path:./nix -- check --out-dir=_build/apalache/manual \
+nix run . -- check --out-dir=_build/apalache/manual \
   --length=8 --temporal=FairResponse checks/temporal/Job.tla
 ```
 
-[Nix flake](../../nix/flake.nix) で nixpkgs・公式配布物・
+[Nix flake](../../flake.nix) で nixpkgs・公式配布物・
 [v0.62.2 のリリース](https://github.com/apalache-mc/apalache/releases/tag/v0.62.2)にある SHA-256 を固定した。
 システムへの JVM の導入や Docker は不要。Apple Silicon の macOS で動作を確認した。
 flake に列挙した他のシステムでは未検証。
