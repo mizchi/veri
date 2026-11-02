@@ -1,6 +1,6 @@
 ///|
 test "FIFO and persistent snapshots" {
-  let empty : @queue.Queue[Int] = @queue.empty()
+  let empty : @queue.Queue[Int32] = @queue.empty()
   let first = @queue.push(empty, 10)
   let second = @queue.push(first, 20)
   assert_eq(@queue.to_array(first), [10])
@@ -16,8 +16,8 @@ test "FIFO and persistent snapshots" {
 test "quickcheck: queue operation traces agree with an array model" {
   @quickcheck.check(
     (operations : Array[@commands.Command]) => {
-      let mut state : @queue.Queue[Int] = @queue.empty()
-      let reference : Array[Int] = []
+      let mut state : @queue.Queue[Int32] = @queue.empty()
+      let reference : Array[Int32] = []
       for operation in operations {
         let before = state
         let snapshot = @queue.to_array(before)

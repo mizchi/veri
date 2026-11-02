@@ -6,11 +6,11 @@ import {
 }
 
 // Values
-pub fn checked_add(Int, Int) -> Int?
+pub fn checked_add(Int32, Int32) -> Int32?
 
-pub fn checked_mul(Int, Int) -> Int?
+pub fn checked_mul(Int32, Int32) -> Int32?
 
-pub fn checked_sub(Int, Int) -> Int?
+pub fn checked_sub(Int32, Int32) -> Int32?
 
 pub fn in_range(@integer.Integer) -> Bool
 

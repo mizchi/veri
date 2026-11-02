@@ -1,6 +1,6 @@
 ///|
 priv struct Key {
-  value : Int
+  value : Int32
 } derive(Eq)
 
 ///|
@@ -12,9 +12,9 @@ impl Hash for Key with fn hash_combine(self, hasher) {
 ///|
 test "quickcheck: map traces match an association list even with constant hashes" {
   @quickcheck.check(
-    (commands : Array[(Int, Int, Int)]) => {
-      let actual : @map.Map[Key, Int] = Map([])
-      let mut expected : Array[(Key, Int)] = []
+    (commands : Array[(Int32, Int32, Int32)]) => {
+      let actual : @map.Map[Key, Int32] = Map([])
+      let mut expected : Array[(Key, Int32)] = []
       for (tag, raw_key, value) in commands {
         let key = Key::{ value: raw_key % 8, }
         match (tag % 4).abs() {
@@ -45,7 +45,7 @@ test "quickcheck: map traces match an association list even with constant hashes
         }
         for k = -7; k <= 7; k = k + 1 {
           let key = Key::{ value: k, }
-          let mut found : Int? = None
+          let mut found : Int32? = None
           for (candidate, value) in expected {
             if candidate == key {
               found = Some(value)

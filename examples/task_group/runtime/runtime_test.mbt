@@ -48,7 +48,7 @@ async fn exercise(scenario : Scenario, reverse : Bool) -> Unit {
     @aqueue.Queue(kind=Blocking(1)),
     @aqueue.Queue(kind=Blocking(1)),
   ]
-  let ready : @aqueue.Queue[Int] = @aqueue.Queue(kind=Blocking(1))
+  let ready : @aqueue.Queue[Int32] = @aqueue.Queue(kind=Blocking(1))
   let external_ready : @aqueue.Queue[Unit] = @aqueue.Queue(kind=Blocking(1))
   let block : @aqueue.Queue[Unit] = @aqueue.Queue(kind=Blocking(1))
   let order = if reverse { [1, 0] } else { [0, 1] }

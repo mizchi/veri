@@ -1,6 +1,6 @@
 ///|
 /// Two passes reverse the implementation order; each has five timed batches.
-fn measure(b : @bench.Bench, size : Int) -> Unit raise {
+fn measure(b : @bench.Bench, size : Int32) -> Unit raise {
   for scenario in scenarios(size) {
     // Validate the exact measured input and optimized backend outside timing.
     for variant in scenario.variants {

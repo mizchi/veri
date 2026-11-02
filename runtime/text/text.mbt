@@ -40,14 +40,14 @@ pub fn Text::to_string(self : Text) -> String {
 
 ///|
 /// Number of Unicode scalar values, not UTF-16 code units or graphemes.
-pub fn Text::length(self : Text) -> Int {
+pub fn Text::length(self : Text) -> Int32 {
   self.value.char_length()
 }
 
 ///|
 /// SMT str.substr semantics: invalid start or nonpositive count yields empty;
 /// a count past the end is truncated. Indices count Unicode scalar values.
-pub fn Text::substring(self : Text, start : Int, count : Int) -> Text {
+pub fn Text::substring(self : Text, start : Int32, count : Int32) -> Text {
   let length = self.length()
   if start < 0 || start >= length || count <= 0 {
     return { value: "", }
@@ -59,11 +59,11 @@ pub fn Text::substring(self : Text, start : Int, count : Int) -> Text {
   } else {
     self.value.offset_of_nth_char(start + count).unwrap()
   }
-  { value: self.value.sub(start=first, end=last).to_owned(), }
+  { value: self.value.exact_view(start=first, end=last).to_owned(), }
 }
 
 ///|
 /// SMT str.at semantics: one scalar value, or empty for an invalid index.
-pub fn Text::char_at(self : Text, index : Int) -> Text {
+pub fn Text::char_at(self : Text, index : Int32) -> Text {
   self.substring(index, 1)
 }

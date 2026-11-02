@@ -7,11 +7,11 @@ import {
 }
 
 // Values
-pub fn append_preserved(@list.List[Int], @list.List[Int]) -> Unit
+pub fn append_preserved(@list.List[Int32], @list.List[Int32]) -> Unit
 
 pub fn[T] from_seq(@seq.Seq[T]) -> @list.List[T]
 
-pub fn length_preserved(@list.List[Int]) -> Unit
+pub fn length_preserved(@list.List[Int32]) -> Unit
 
 pub fn[T] to_seq(@list.List[T]) -> @seq.Seq[T]
 

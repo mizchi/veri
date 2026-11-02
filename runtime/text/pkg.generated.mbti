@@ -10,9 +10,9 @@ pub fn from_string(String) -> Text?
 pub struct Text {
   // private fields
 }
-pub fn Text::char_at(Self, Int) -> Self
-pub fn Text::length(Self) -> Int
-pub fn Text::substring(Self, Int, Int) -> Self
+pub fn Text::char_at(Self, Int32) -> Self
+pub fn Text::length(Self) -> Int32
+pub fn Text::substring(Self, Int32, Int32) -> Self
 pub fn Text::to_string(Self) -> String
 
 // Type aliases

@@ -1,6 +1,6 @@
 ///|
 test "queue methods preserve old versions and iterate in FIFO order" {
-  let empty : @queue.Queue[Int] = @queue.Queue::new()
+  let empty : @queue.Queue[Int32] = @queue.Queue::new()
   let queue = empty.push(1).push(2).push(3)
   assert_true(empty.is_empty())
   assert_eq(queue.peek(), Some(1))

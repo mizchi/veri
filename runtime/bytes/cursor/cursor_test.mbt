@@ -38,7 +38,7 @@ test "length prefix rejects truncation and unrepresentable length" {
 ///|
 test "quickcheck: parser composition consumes exact lengths with shrinking" {
   @quickcheck.check(
-    (input : (Byte, UInt, Bytes)) => {
+    (input : (Byte, UInt32, Bytes)) => {
       let (tag, value, tail) = input
       let encoded = @codec.byte_to_bytes(tag) +
         @codec.uint_to_be_bytes(value) +
@@ -98,7 +98,7 @@ test "fallback restarts at the original position and mapping preserves offsets" 
 ///|
 test "quickcheck: arbitrary take lengths compose or fail without consuming input" {
   @quickcheck.check(
-    (input : (Bytes, Int, Int)) => {
+    (input : (Bytes, Int32, Int32)) => {
       let (data, raw_first, raw_second) = input
       let first = raw_first % (data.length() + 2)
       let second = raw_second % (data.length() + 2)

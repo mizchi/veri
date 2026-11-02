@@ -6,13 +6,13 @@ import {
 }
 
 // Values
-pub fn add_count(Int, @bag.Bag[Int]) -> Unit
+pub fn add_count(Int32, @bag.Bag[Int32]) -> Unit
 
-pub fn add_size(Int, @bag.Bag[Int]) -> Unit
+pub fn add_size(Int32, @bag.Bag[Int32]) -> Unit
 
-pub fn remove_added(Int, @bag.Bag[Int]) -> Unit
+pub fn remove_added(Int32, @bag.Bag[Int32]) -> Unit
 
-pub fn union_commutes(@bag.Bag[Int], @bag.Bag[Int]) -> Unit
+pub fn union_commutes(@bag.Bag[Int32], @bag.Bag[Int32]) -> Unit
 
 // Errors
 

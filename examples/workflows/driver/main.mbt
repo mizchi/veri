@@ -1,12 +1,12 @@
 ///|
 struct Config {
-  mode : Int
+  mode : Int32
 } derive(@json.FromJson)
 
 ///|
 fn main {
   @model_driver.serve((config : Config) => {
-    let spec : @model_check.Spec[Int, Int, Int] = {
+    let spec : @model_check.Spec[Int32, Int32, Int32] = {
       initial: 0,
       actions: [("finish", 1)],
       step: (state, _) => {

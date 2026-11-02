@@ -5,14 +5,20 @@ using @list {type List}
 /// A directed edge. Parallel edges and self-loops are retained.
 #valtype
 pub(all) struct Edge {
-  from : Int
-  to : Int
-  weight : Int
+  from : Int32
+  to : Int32
+  weight : Int32
 } derive(Debug, Eq)
 
 ///|
+pub extend Edge with @debug.Debug::{to_repr}
+
+///|
+pub extend Edge with Eq::{not_equal, equal}
+
+///|
 fn check_edges(
-  n : Int,
+  n : Int32,
   edges : FixedArray[Edge],
 ) -> Bool where {
   proof_ensure: result => result == edges_valid(n, edges, edges.length()),
@@ -36,10 +42,10 @@ fn check_edges(
 
 ///|
 fn check_ancestors(
-  ps : FixedArray[Int?],
-  source : Int,
-  vertex : Int,
-  fuel : Int,
+  ps : FixedArray[Int32?],
+  source : Int32,
+  vertex : Int32,
+  fuel : Int32,
 ) -> Bool where {
   proof_require: 0 <= fuel,
   proof_ensure: result => result → anchored(ps, source, vertex),
@@ -60,9 +66,9 @@ fn check_ancestors(
 ///|
 fn check_tight(
   edges : FixedArray[Edge],
-  ds : FixedArray[Int?],
-  parent : Int,
-  vertex : Int,
+  ds : FixedArray[Int32?],
+  parent : Int32,
+  vertex : Int32,
   weighted : Bool,
 ) -> Bool where {
   proof_require: labeled(ds, parent) && labeled(ds, vertex),
@@ -99,10 +105,10 @@ fn check_tight(
 ///|
 fn check_vertex(
   edges : FixedArray[Edge],
-  ds : FixedArray[Int?],
-  ps : FixedArray[Int?],
-  source : Int,
-  vertex : Int,
+  ds : FixedArray[Int32?],
+  ps : FixedArray[Int32?],
+  source : Int32,
+  vertex : Int32,
   weighted : Bool,
 ) -> Bool where {
   proof_require: 0 <= vertex &&
@@ -147,7 +153,7 @@ fn check_vertex(
 ///|
 fn check_feasible(
   edges : FixedArray[Edge],
-  ds : FixedArray[Int?],
+  ds : FixedArray[Int32?],
   weighted : Bool,
 ) -> Bool where {
   proof_require: edges_valid(ds.length(), edges, edges.length()),
@@ -182,11 +188,11 @@ fn check_feasible(
 /// Validate an untrusted shortest-path certificate without mutating its arrays.
 /// All endpoints, weights, lengths and labels are checked; no input preconditions.
 pub fn check_certificate(
-  n : Int,
+  n : Int32,
   edges : FixedArray[Edge],
-  ds : FixedArray[Int?],
-  ps : FixedArray[Int?],
-  source : Int,
+  ds : FixedArray[Int32?],
+  ps : FixedArray[Int32?],
+  source : Int32,
   weighted : Bool,
 ) -> Bool where {
   proof_ensure: result => result → correct(n, edges, ds, ps, source, weighted),
@@ -212,8 +218,8 @@ pub fn check_certificate(
 
 ///|
 fn check_root(
-  cost : Int?,
-  parent : Int?,
+  cost : Int32?,
+  parent : Int32?,
 ) -> Bool where {
   proof_ensure: result => result == (has_value(cost, 0) && absent(parent)),
 } {

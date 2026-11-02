@@ -1,6 +1,6 @@
 ///|
 /// Independent range oracle: compute the endpoint in Int64, without subtraction.
-fn reference_range(length : Int, start : Int, count : Int) -> Bool {
+fn reference_range(length : Int32, start : Int32, count : Int32) -> Bool {
   0 <= start &&
   0 <= count &&
   start.to_int64() + count.to_int64() <= length.to_int64()
@@ -8,7 +8,7 @@ fn reference_range(length : Int, start : Int, count : Int) -> Bool {
 
 ///|
 /// Exercise nearby valid/invalid indices as well as full-width random integers.
-fn nearby(value : Int, length : Int) -> Int {
+fn nearby(value : Int32, length : Int32) -> Int32 {
   (value.reinterpret_as_uint() % (length + 2).reinterpret_as_uint()).reinterpret_as_int() -
   1
 }
@@ -17,12 +17,12 @@ fn nearby(value : Int, length : Int) -> Int {
 /// Compare one transition against a snapshot, so overlapping copies cannot read
 /// values that the reference itself has already overwritten.
 fn update_step(
-  actual : FixedArray[Int],
-  expected : Array[Int],
-  tag : Int,
-  x : Int,
-  y : Int,
-  z : Int,
+  actual : FixedArray[Int32],
+  expected : Array[Int32],
+  tag : Int32,
+  x : Int32,
+  y : Int32,
+  z : Int32,
 ) -> Bool {
   let before = expected.copy()
   let n = before.length()
@@ -77,11 +77,11 @@ fn update_step(
 
 ///|
 fn update_case(
-  original : FixedArray[Int],
-  tag : Int,
-  x : Int,
-  y : Int,
-  z : Int,
+  original : FixedArray[Int32],
+  tag : Int32,
+  x : Int32,
+  y : Int32,
+  z : Int32,
 ) -> Bool {
   let actual = FixedArray::makei(original.length(), i => original[i])
   update_step(actual, original.iter().to_array(), tag, x, y, z)
@@ -90,7 +90,7 @@ fn update_case(
 ///|
 test "quickcheck: range validation agrees with widened endpoint arithmetic" {
   @quickcheck.check(
-    (input : (Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32)) => {
       let (length, start, count) = input
       @array.valid_range(length, { start, count, }) ==
       reference_range(length, start, count)
@@ -104,7 +104,7 @@ test "quickcheck: range validation agrees with widened endpoint arithmetic" {
 ///|
 test "quickcheck: set preserves every other cell and rejects invalid indices" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int, Int)) => {
+    (input : (FixedArray[Int32], Int32, Int32)) => {
       let (original, index, value) = input
       update_case(original, 0, index, value, 0) &&
       update_case(original, 0, nearby(index, original.length()), value, 0)
@@ -119,7 +119,7 @@ test "quickcheck: set preserves every other cell and rejects invalid indices" {
 ///|
 test "quickcheck: swap matches a snapshot including equal indices" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int, Int)) => {
+    (input : (FixedArray[Int32], Int32, Int32)) => {
       let (original, left, right) = input
       let i = nearby(left, original.length())
       let j = nearby(right, original.length())
@@ -137,7 +137,7 @@ test "quickcheck: swap matches a snapshot including equal indices" {
 ///|
 test "quickcheck: fill changes exactly its range and invalid fills are atomic" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int, Int, Int)) => {
+    (input : (FixedArray[Int32], Int32, Int32, Int32)) => {
       let (original, start, count, value) = input
       update_case(original, 2, start, count, value) &&
       update_case(
@@ -158,7 +158,7 @@ test "quickcheck: fill changes exactly its range and invalid fills are atomic" {
 ///|
 test "quickcheck: copy_within matches immutable source values for overlapping ranges" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int, Int, Int)) => {
+    (input : (FixedArray[Int32], Int32, Int32, Int32)) => {
       let (original, source, target, count) = input
       let n = original.length()
       update_case(original, 3, source, target, count) &&
@@ -181,11 +181,11 @@ test "quickcheck: copy_within matches immutable source values for overlapping ra
 
 ///|
 fn blit_case(
-  source : FixedArray[Int],
-  original : FixedArray[Int],
-  src : Int,
-  dst : Int,
-  count : Int,
+  source : FixedArray[Int32],
+  original : FixedArray[Int32],
+  src : Int32,
+  dst : Int32,
+  count : Int32,
 ) -> Bool {
   let source_before = source.iter().to_array()
   // Clone both inputs so even a broken implementation cannot mutate the
@@ -210,7 +210,7 @@ fn blit_case(
 ///|
 test "quickcheck: blit preserves its source and destination frame" {
   @quickcheck.check(
-    (input : (FixedArray[Int], FixedArray[Int], Int, Int, Int)) => {
+    (input : (FixedArray[Int32], FixedArray[Int32], Int32, Int32, Int32)) => {
       let (source, target, src, dst, count) = input
       blit_case(source, target, src, dst, count) &&
       blit_case(
@@ -231,7 +231,7 @@ test "quickcheck: blit preserves its source and destination frame" {
 ///|
 test "quickcheck: update traces agree with a snapshot model after every operation" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Array[(Int, Int, Int, Int)])) => {
+    (input : (FixedArray[Int32], Array[(Int32, Int32, Int32, Int32)])) => {
       let (original, trace) = input
       let actual = FixedArray::makei(original.length(), i => original[i])
       let expected = original.iter().to_array()
@@ -268,7 +268,7 @@ test "quickcheck: update traces agree with a snapshot model after every operatio
 
 ///|
 test "array update inputs use core tuple and array shrinking" {
-  let input : (FixedArray[Int], Int, Int) = ([10, 20], 1, 2)
+  let input : (FixedArray[Int32], Int32, Int32) = ([10, 20], 1, 2)
   assert_true(
     @shrink.Shrink::shrink(input).any(candidate => candidate.0.length() == 0),
   )
@@ -279,7 +279,7 @@ test "array update inputs use core tuple and array shrinking" {
 ///|
 test "quickcheck: a wrong forward copy shrinks to a three-cell overlap" {
   let report = @quickcheck.report(
-    (original : FixedArray[Int]) => {
+    (original : FixedArray[Int32]) => {
       if original.length() < 3 {
         return true
       }
@@ -309,7 +309,7 @@ test "quickcheck: a wrong forward copy shrinks to a three-cell overlap" {
 ///|
 test "quickcheck: alias-aware blit matches snapshots for valid and invalid overlaps" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int, Int, Int)) => {
+    (input : (FixedArray[Int32], Int32, Int32, Int32)) => {
       let (original, source, target, count) = input
       let n = original.length()
       update_case(original, 4, source, target, count) &&

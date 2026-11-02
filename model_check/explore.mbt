@@ -1,19 +1,25 @@
 ///|
 pub(all) suberror ExplorationError {
-  InvalidDepth(Int)
-  InvalidStateLimit(Int)
-  InvalidEventCount(Int)
-  StateLimitExceeded(Int)
-  TransitionLimitExceeded(Int)
+  InvalidDepth(Int32)
+  InvalidStateLimit(Int32)
+  InvalidEventCount(Int32)
+  StateLimitExceeded(Int32)
+  TransitionLimitExceeded(Int32)
 } derive(Debug, Eq)
+
+///|
+pub extend ExplorationError with @debug.Debug::{to_repr}
+
+///|
+pub extend ExplorationError with Eq::{not_equal, equal}
 
 ///|
 pub(all) struct Exploration[S] {
   states : Array[S]
-  transitions : Array[Array[Int]]
-  depths : Array[Int]
-  frontier : Array[Int]
-  max_depth : Int
+  transitions : Array[Array[Int32]]
+  depths : Array[Int32]
+  frontier : Array[Int32]
+  max_depth : Int32
   complete : Bool
 }
 
@@ -28,10 +34,10 @@ pub fn[S : Eq, E] explore(
   initial : S,
   events : Array[E],
   step : (S, E) -> S?,
-  max_depth~ : Int,
-  max_states? : Int = 4096,
-  max_transitions? : Int = 4000000,
-  state_hash? : (S) -> Int,
+  max_depth~ : Int32,
+  max_states~ : Int32 = 4096,
+  max_transitions~ : Int32 = 4000000,
+  state_hash? : (S) -> Int32,
 ) -> Exploration[S] raise ExplorationError {
   guard max_depth >= 0 && max_depth <= 1000000 else {
     raise InvalidDepth(max_depth)
@@ -41,7 +47,7 @@ pub fn[S : Eq, E] explore(
   guard max_transitions > 0 else {
     raise TransitionLimitExceeded(max_transitions)
   }
-  let buckets : Map[Int, Array[Int]] = Map([])
+  let buckets : Map[Int32, Array[Int32]] = Map([])
   if state_hash is Some(hash) {
     buckets.set(hash(initial), [0])
   }

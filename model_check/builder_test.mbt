@@ -1,5 +1,5 @@
 ///|
-fn spec() -> @model_check.Spec[Int, Int, Int] {
+fn spec() -> @model_check.Spec[Int32, Int32, Int32] {
   {
     initial: 0,
     actions: [("advance", 1), ("wait", 0)],

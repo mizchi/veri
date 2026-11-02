@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/debug",
   "mizchi/veri/bintree" @logic_tree,
   "mizchi/veri/list" @logic_list,
   "mizchi/veri/runtime/list" @linked,
@@ -9,6 +10,4 @@ import {
   "moonbitlang/core/quickcheck/shrink",
 } for "test"
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

@@ -1,9 +1,9 @@
 ///|
 test "quickcheck: search-tree insertion preserves sorted unique contents" {
   @quickcheck.check(
-    (input : (Array[Int], Int)) => {
+    (input : (Array[Int32], Int32)) => {
       let mut tree = @search.empty()
-      let expected : Array[Int] = []
+      let expected : Array[Int32] = []
       for value in input.0 {
         let before = tree
         let snapshot = @search.to_array(before)

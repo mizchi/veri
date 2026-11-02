@@ -1,5 +1,5 @@
 ///|
-fn make_client(config : Int) -> @model_check.Client[Int, Int, Int] {
+fn make_client(config : Int32) -> @model_check.Client[Int32, Int32, Int32] {
   {
     initial: config,
     states: [config],

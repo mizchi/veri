@@ -3,6 +3,4 @@ import {
   "mizchi/veri/list",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

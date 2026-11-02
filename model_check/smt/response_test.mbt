@@ -1,12 +1,12 @@
 ///|
 fn response_model(
-  transitions : Array[Array[Int]],
+  transitions : Array[Array[Int32]],
   pending : Array[Bool],
   done : Array[Bool],
 ) -> @model_check.Model[Json] {
   {
     initial: 0,
-    states: Array::makei(transitions.length(), i => i.to_json()),
+    states: Array::makei(transitions.length(), i => Json(i)),
     actions: Array::makei(transitions[0].length(), i => "action-\{i}"),
     transitions,
     predicates: { "pending": pending, "done": done },
@@ -51,7 +51,7 @@ test "complete response finds fair closed walks, including several simple cycles
 // loop entry, current state, and a bit mask of justice evidence. No SCC algorithm.
 fn response_oracle(
   graph : @model_check.Model[Json],
-  justice : Array[Int],
+  justice : Array[Int32],
 ) -> Bool {
   let n = graph.states.length()
   let done = graph.predicates.get("done").unwrap()
@@ -126,7 +126,7 @@ fn response_oracle(
 ///|
 test "complete response agrees with an independent product oracle with shrinking" {
   @quickcheck.check(
-    (input : (Array[(UInt, UInt, UInt, Bool, Bool)], UInt)) => {
+    (input : (Array[(UInt32, UInt32, UInt32, Bool, Bool)], UInt32)) => {
       let (rows, mask) = input
       let n = 1 + rows.length() % 5
       let transitions = Array::makei(n, state => {

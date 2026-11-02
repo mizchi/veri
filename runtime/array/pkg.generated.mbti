@@ -8,33 +8,36 @@ import {
 }
 
 // Values
-pub fn[T] blit(FixedArray[T], FixedArray[T], Range, Int) -> Bool
+pub fn[T] blit(FixedArray[T], FixedArray[T], Range, Int32) -> Bool
 
-pub fn[T] blit_disjoint(FixedArray[T], FixedArray[T], Range, Int) -> Bool
+pub fn[T] blit_disjoint(FixedArray[T], FixedArray[T], Range, Int32) -> Bool
 
-pub fn[T] copy_within(FixedArray[T], Range, Int) -> Bool
+pub fn[T] copy_within(FixedArray[T], Range, Int32) -> Bool
 
 pub fn[T] fill(FixedArray[T], T, Range) -> Bool
 
-pub fn[T] get(FixedArray[T], Int) -> T?
+pub fn[T] get(FixedArray[T], Int32) -> T?
 
 pub fn[T] model(FixedArray[T]) -> @arrays.SmtArray[@integer.Integer, T]
 
-pub fn range_in_bounds(Int, Int, Int) -> Bool
+pub fn range_in_bounds(Int32, Int32, Int32) -> Bool
 
-pub fn[T] set(FixedArray[T], Int, T) -> Bool
+pub fn[T] set(FixedArray[T], Int32, T) -> Bool
 
-pub fn[T] swap(FixedArray[T], Int, Int) -> Bool
+pub fn[T] swap(FixedArray[T], Int32, Int32) -> Bool
 
-pub fn valid_range(Int, Range) -> Bool
+pub fn valid_range(Int32, Range) -> Bool
 
 // Errors
 
 // Types and methods
 pub(all) struct Range {
-  start : Int
-  count : Int
+  start : Int32
+  count : Int32
 } derive(Eq, @debug.Debug)
+pub fn Range::equal(Self, Self) -> Bool
+pub fn Range::not_equal(Self, Self) -> Bool
+pub fn Range::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

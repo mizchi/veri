@@ -15,8 +15,8 @@ test "quickcheck: minimum queue traces agree with sorting and core PriorityQueue
   @quickcheck.check(
     (operations : Array[@commands.Command]) => {
       let mut queue = @pqueue.empty()
-      let reference : Array[Int] = []
-      let core : @core_pqueue.PriorityQueue[@cmp.Reverse[Int]] = @core_pqueue.PriorityQueue([],
+      let reference : Array[Int32] = []
+      let core : @core_pqueue.PriorityQueue[@cmp.Reverse[Int32]] = @core_pqueue.PriorityQueue([],
       )
       for operation in operations {
         let before = queue

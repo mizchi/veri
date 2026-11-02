@@ -1,5 +1,5 @@
 ///|
-fn client() -> @model_check.Client[Int, Int, Int] {
+fn client() -> @model_check.Client[Int32, Int32, Int32] {
   {
     initial: 0,
     states: [0, 1, 2],

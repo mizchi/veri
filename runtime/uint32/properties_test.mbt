@@ -1,7 +1,7 @@
 ///|
 test "quickcheck: wrapping arithmetic agrees with native UInt" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let (x, y) = input
       @uint32.add(x, y) == x + y && @uint32.sub(x, y) == x - y
     },
@@ -13,7 +13,7 @@ test "quickcheck: wrapping arithmetic agrees with native UInt" {
 ///|
 test "quickcheck: wrapping addition and subtraction are inverses" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let (x, y) = input
       @uint32.sub(@uint32.add(x, y), y) == x &&
       @uint32.add(@uint32.sub(x, y), y) == x
@@ -26,7 +26,7 @@ test "quickcheck: wrapping addition and subtraction are inverses" {
 ///|
 test "quickcheck: unsigned order agrees with sign-bit biased signed order" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let (x, y) = input
       let signed_x = (x ^ 0x80000000U).reinterpret_as_int()
       let signed_y = (y ^ 0x80000000U).reinterpret_as_int()

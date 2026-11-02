@@ -8,23 +8,23 @@ import {
 // Values
 pub fn acyclic(FixedArray[@checker.Edge]) -> Bool
 
-pub fn before(FixedArray[Int], Int, Int) -> Bool
+pub fn before(FixedArray[Int32], Int32, Int32) -> Bool
 
-pub fn check_cycle(FixedArray[@checker.Edge], FixedArray[Int], FixedArray[Int]) -> Bool
+pub fn check_cycle(FixedArray[@checker.Edge], FixedArray[Int32], FixedArray[Int32]) -> Bool
 
-pub fn check_topological_order(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+pub fn check_topological_order(Int32, FixedArray[@checker.Edge], FixedArray[Int32]) -> Bool
 
-pub fn cycle_realized(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Unit
+pub fn cycle_realized(Int32, FixedArray[@checker.Edge], FixedArray[Int32]) -> Unit
 
 pub fn has_cycle(FixedArray[@checker.Edge]) -> Bool
 
-pub fn permutation(Int, FixedArray[Int]) -> Bool
+pub fn permutation(Int32, FixedArray[Int32]) -> Bool
 
-pub fn simple_cycle(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+pub fn simple_cycle(Int32, FixedArray[@checker.Edge], FixedArray[Int32]) -> Bool
 
-pub fn topological(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Bool
+pub fn topological(Int32, FixedArray[@checker.Edge], FixedArray[Int32]) -> Bool
 
-pub fn topological_acyclic(Int, FixedArray[@checker.Edge], FixedArray[Int]) -> Unit
+pub fn topological_acyclic(Int32, FixedArray[@checker.Edge], FixedArray[Int32]) -> Unit
 
 // Errors
 

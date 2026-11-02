@@ -25,7 +25,7 @@ pub fn[T] List::from_iter(Iter[T]) -> Self[T]
 pub fn[T] List::is_empty(Self[T]) -> Bool
 pub fn[T] List::iter(Self[T]) -> Iter[T]
 #as_free_fn(length)
-pub fn[T] List::length(Self[T]) -> Int
+pub fn[T] List::length(Self[T]) -> Int32
 pub fn[A, B] List::map(Self[A], (A) -> B raise?) -> Self[B] raise?
 #as_free_fn(empty)
 pub fn[T] List::new() -> Self[T]

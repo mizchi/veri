@@ -1,8 +1,8 @@
 ///|
 fn oracle(
   data : BytesView,
-  offset : Int,
-  width : Int,
+  offset : Int32,
+  width : Int32,
   little : Bool,
 ) -> UInt64? {
   if offset < 0 || offset > data.length() || width > data.length() - offset {
@@ -17,7 +17,7 @@ fn oracle(
 }
 
 ///|
-fn expected_bytes(value : UInt64, width : Int, little : Bool) -> Bytes {
+fn expected_bytes(value : UInt64, width : Int32, little : Bool) -> Bytes {
   let mut rest = value
   let result = Array::make(width, b'\x00')
   for i = 0; i < width; i = i + 1 {
@@ -46,7 +46,7 @@ test "quickcheck: u8 le codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_byte(data[:], offset)
@@ -85,7 +85,7 @@ test "quickcheck: u8 be codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_byte(data[:], offset)
@@ -124,7 +124,7 @@ test "quickcheck: u16 le codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint16_le(data[:], offset)
@@ -163,7 +163,7 @@ test "quickcheck: u16 be codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint16_be(data[:], offset)
@@ -202,7 +202,7 @@ test "quickcheck: u32 le codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint_le(data[:], offset)
@@ -241,7 +241,7 @@ test "quickcheck: u32 be codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint_be(data[:], offset)
@@ -280,7 +280,7 @@ test "quickcheck: u64 le codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint64_le(data[:], offset)
@@ -318,7 +318,7 @@ test "quickcheck: u64 be codecs match positional model and reject truncation" {
     seed=20260915,
   )
   @quickcheck.check(
-    (input : (Bytes, Int)) => {
+    (input : (Bytes, Int32)) => {
       let (data, raw_offset) = input
       let offset = raw_offset % (data.length() + 1)
       let actual = @bytes.decode_uint64_be(data[:], offset)
@@ -339,7 +339,7 @@ test "quickcheck: u64 be codecs match positional model and reject truncation" {
 
 ///|
 test "byte inputs shrink in length, byte values and offsets" {
-  let input : (Bytes, Int) = (b"\xff\x80\x10", 17)
+  let input : (Bytes, Int32) = (b"\xff\x80\x10", 17)
   assert_true(@shrink.Shrink::shrink(input).any(x => x.0.length() == 0))
   assert_true(@shrink.Shrink::shrink(input).any(x => x.1 == 0))
   assert_true(

@@ -9,7 +9,7 @@ import {
 // Values
 pub fn accepts(Graph, @lease_clock.Variant, String, @model_check.Witness) -> Bool
 
-pub fn explore(@lease_clock.Variant, Int, max_states? : Int) -> Graph raise
+pub fn explore(@lease_clock.Variant, Int32, max_states? : Int32) -> Graph raise
 
 // Errors
 
@@ -21,12 +21,13 @@ pub(all) struct Graph {
 pub fn Graph::client(Self, @lease_clock.Variant) -> @model_check.Client[@lease_clock.State, @lease_clock.Event, Snapshot]
 
 pub(all) struct Snapshot {
-  now : Int
+  now : Int32
   a : @lease_clock.NodeState
   b : @lease_clock.NodeState
-  owner : Int
-  epoch : Int
+  owner : Int32
+  epoch : Int32
 } derive(ToJson)
+pub fn Snapshot::to_json(Self) -> Json
 
 // Type aliases
 pub using @model_check {type Witness}

@@ -163,7 +163,7 @@ test "quickcheck: schedules preserve resources and compose with proved replay, w
     Tick,
   ]
   @quickcheck.check(
-    (input : (Int, Array[Int])) => {
+    (input : (Int32, Array[Int32])) => {
       let (mask, schedule) = input
       let policy : @task_group.Policy = {
         first_no_wait: (mask & 1) != 0,

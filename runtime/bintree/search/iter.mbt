@@ -1,7 +1,7 @@
 ///|
 /// Traverse unique keys in ascending order with O(height) auxiliary storage.
 /// Each call creates independent traversal state. Runtime-tested.
-pub fn IntSet::iter(self : IntSet) -> Iter[Int] {
+pub fn IntSet::iter(self : IntSet) -> Iter[Int32] {
   let pending : Array[Node] = []
   let mut current = self.root
   Iter::new(fn() {

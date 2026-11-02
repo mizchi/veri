@@ -8,18 +8,24 @@ pub(all) struct CaseReport {
 } derive(ToJson)
 
 ///|
+pub extend CaseReport with ToJson::{to_json}
+
+///|
 pub(all) struct SuiteReport {
-  version : Int
+  version : Int32
   passed : Bool
   cases : Array[CaseReport]
 } derive(ToJson)
 
 ///|
+pub extend SuiteReport with ToJson::{to_json}
+
+///|
 /// Relative module paths are resolved against the suite file's directory.
 pub async fn run_suite(
   suite : @suite.Suite,
-  base_dir? : String = ".",
-  z3? : String = "z3",
+  base_dir~ : String = ".",
+  z3~ : String = "z3",
 ) -> SuiteReport {
   suite.validate()
   let reports = []

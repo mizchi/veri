@@ -52,7 +52,7 @@ test "quickcheck: proved trace execution matches a finite reference with shrinki
     [-1, -1, 3, -1],
   ]
   @quickcheck.check(
-    (input : (Int, Array[Int])) => {
+    (input : (Int32, Array[Int32])) => {
       let (tag, raw) = input
       let code = (tag % 4).abs()
       let state = @temporal.state_from_code(code).unwrap()

@@ -6,13 +6,13 @@ import {
 }
 
 // Values
-pub fn height_nonnegative(@bintree.Tree[Int]) -> Unit
+pub fn height_nonnegative(@bintree.Tree[Int32]) -> Unit
 
-pub fn node_size(@bintree.Tree[Int], Int, @bintree.Tree[Int]) -> Unit
+pub fn node_size(@bintree.Tree[Int32], Int32, @bintree.Tree[Int32]) -> Unit
 
-pub fn root_member(@bintree.Tree[Int], Int, @bintree.Tree[Int]) -> Unit
+pub fn root_member(@bintree.Tree[Int32], Int32, @bintree.Tree[Int32]) -> Unit
 
-pub fn traversal_length(@bintree.Tree[Int]) -> Unit
+pub fn traversal_length(@bintree.Tree[Int32]) -> Unit
 
 // Errors
 

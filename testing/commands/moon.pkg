@@ -1,8 +1,8 @@
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/quickcheck",
   "moonbitlang/core/quickcheck/shrink",
 }
 
 import {
-  "moonbitlang/core/debug",
 } for "test"

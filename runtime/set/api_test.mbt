@@ -1,8 +1,8 @@
 ///|
 test "core type identity and independent copies" {
-  let value : @set.Set[Int] = Set([])
+  let value : @set.Set[Int32] = Set([])
   value.add(1)
-  let copy : Set[Int] = value.copy()
+  let copy : @set.Set[Int32] = value.copy()
   copy.add(2)
   assert_false(value.contains(2))
   assert_true(@set.matches_elements(value, [1]))

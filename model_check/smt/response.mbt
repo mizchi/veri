@@ -1,15 +1,15 @@
 ///|
 priv struct Search {
-  parent : Array[Int]
-  incoming : Array[Int]
-  depths : Array[Int]
-  order : Array[Int]
+  parent : Array[Int32]
+  incoming : Array[Int32]
+  depths : Array[Int32]
+  order : Array[Int32]
 }
 
 ///|
 fn search(
   model : @model_check.Model[Json],
-  seeds : Array[Int],
+  seeds : Array[Int32],
   allowed : Array[Bool],
 ) -> Search {
   let n = model.states.length()
@@ -40,7 +40,7 @@ fn search(
 }
 
 ///|
-fn Search::path(self : Search, target : Int) -> (Array[Int], Array[Int]) {
+fn Search::path(self : Search, target : Int32) -> (Array[Int32], Array[Int32]) {
   let states = [target]
   let actions = []
   let mut state = target
@@ -59,7 +59,7 @@ fn Search::path(self : Search, target : Int) -> (Array[Int], Array[Int]) {
 fn components(
   model : @model_check.Model[Json],
   allowed : Array[Bool],
-) -> (Array[Int], Array[Array[Int]]) {
+) -> (Array[Int32], Array[Array[Int32]]) {
   let n = model.states.length()
   let m = model.actions.length()
   let reverse = Array::makei(n, _ => [])
@@ -125,12 +125,16 @@ fn components(
 
 ///|
 priv struct Walk {
-  states : Array[Int]
-  actions : Array[Int]
+  states : Array[Int32]
+  actions : Array[Int32]
 }
 
 ///|
-fn Walk::append(self : Walk, action : Int, next : Int) -> Unit raise ModelError {
+fn Walk::append(
+  self : Walk,
+  action : Int32,
+  next : Int32,
+) -> Unit raise ModelError {
   guard self.actions.length() < 1000000 else {
     raise InvalidQuery(
       "Constructed response witness exceeds 1000000 transitions",
@@ -144,7 +148,7 @@ fn Walk::append(self : Walk, action : Int, next : Int) -> Unit raise ModelError 
 fn Walk::connect(
   self : Walk,
   model : @model_check.Model[Json],
-  target : Int,
+  target : Int32,
   allowed : Array[Bool],
 ) -> Unit raise ModelError {
   let current = self.states[self.states.length() - 1]
@@ -168,7 +172,7 @@ fn exhaustive_response(
   model : @model_check.Model[Json],
   trigger : String,
   goal : String,
-  justice : Array[Int],
+  justice : Array[Int32],
 ) -> ExhaustiveResult raise ModelError {
   let n = model.states.length()
   let reachable = search(model, [model.initial], Array::make(n, true))
@@ -188,7 +192,7 @@ fn exhaustive_response(
     if !cyclic {
       continue
     }
-    let evidence : Array[(Int, Int)] = []
+    let evidence : Array[(Int32, Int32)] = []
     for action in justice {
       for state in members {
         let next = model.transitions[state][action]

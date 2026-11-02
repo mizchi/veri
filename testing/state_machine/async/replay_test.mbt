@@ -1,5 +1,5 @@
 ///|
-fn model() -> @state_machine.Model[Int, Int, Int, Int] {
+fn model() -> @state_machine.Model[Int32, Int32, Int32, Int32] {
   {
     initial: () => 0,
     step: (state, command) => Some((state + command, state + command)),
@@ -10,8 +10,8 @@ fn model() -> @state_machine.Model[Int, Int, Int, Int] {
 ///|
 fn system(
   broken : Bool,
-  closed : Array[Int],
-) -> @async.System[Int, Int, Int, Int] {
+  closed : Array[Int32],
+) -> @async.System[Int32, Int32, Int32, Int32] {
   {
     create: () => 0,
     step: (state, command) => {

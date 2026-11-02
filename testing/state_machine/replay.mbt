@@ -72,10 +72,10 @@ pub fn[
 ] check(
   model : Model[M, C, O, V],
   system : System[S, C, O, V],
-  count? : UInt = 1000,
-  max_size? : UInt = 128,
-  max_shrinks? : UInt = 1000,
-  seed? : UInt64 = 20260916,
+  count~ : UInt32 = 1000,
+  max_size~ : UInt32 = 128,
+  max_shrinks~ : UInt32 = 1000,
+  seed~ : UInt64 = 20260916,
 ) -> Unit raise {
   @quickcheck.check(
     (commands : Array[C]) => replay(model, system, commands).verdict == Matched,

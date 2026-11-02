@@ -1,10 +1,10 @@
 ///|
 fn lower_search(
-  xs : FixedArray[Int],
-  value : Int,
-  left : Int,
-  right : Int,
-) -> Int where {
+  xs : FixedArray[Int32],
+  value : Int32,
+  left : Int32,
+  right : Int32,
+) -> Int32 where {
   proof_require: ordered(xs),
   proof_require: 0 <= left && left <= right && right <= xs.length(),
   proof_require: lower_left(xs, value, left),
@@ -28,9 +28,9 @@ fn lower_search(
 /// First index whose value is >= value. Requires ascending input.
 /// O(log n), no copying or sortedness scan. Check is_sorted for untrusted input.
 pub fn lower_bound(
-  xs : FixedArray[Int],
-  value : Int,
-) -> Int where {
+  xs : FixedArray[Int32],
+  value : Int32,
+) -> Int32 where {
   proof_require: ordered(xs),
   proof_ensure: index => lower_partition(xs, value, index),
 } {
@@ -39,11 +39,11 @@ pub fn lower_bound(
 
 ///|
 fn upper_search(
-  xs : FixedArray[Int],
-  value : Int,
-  left : Int,
-  right : Int,
-) -> Int where {
+  xs : FixedArray[Int32],
+  value : Int32,
+  left : Int32,
+  right : Int32,
+) -> Int32 where {
   proof_require: ordered(xs),
   proof_require: 0 <= left && left <= right && right <= xs.length(),
   proof_require: upper_left(xs, value, left),
@@ -67,9 +67,9 @@ fn upper_search(
 /// First index whose value is > value. Requires ascending input.
 /// O(log n), no copying or sortedness scan. Check is_sorted for untrusted input.
 pub fn upper_bound(
-  xs : FixedArray[Int],
-  value : Int,
-) -> Int where {
+  xs : FixedArray[Int32],
+  value : Int32,
+) -> Int32 where {
   proof_require: ordered(xs),
   proof_ensure: index => upper_partition(xs, value, index),
 } {
@@ -79,7 +79,7 @@ pub fn upper_bound(
 ///|
 /// O(n) check of the exact precondition required by the verified bounds searches.
 pub fn is_sorted(
-  xs : FixedArray[Int],
+  xs : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: result => result == ordered(xs),
 } {
@@ -99,11 +99,11 @@ pub fn is_sorted(
 /// Check ascending order and preservation of every multiplicity. Expected O(n)
 /// time and O(distinct values) space. Keep a pre-sort copy when sorting in place.
 /// This checker is differential-tested; core Map operations are not proof-callable.
-pub fn check_sort(before : ArrayView[Int], after : ArrayView[Int]) -> Bool {
+pub fn check_sort(before : ArrayView[Int32], after : ArrayView[Int32]) -> Bool {
   if before.length() != after.length() {
     return false
   }
-  let counts : Map[Int, Int] = Map([])
+  let counts : Map[Int32, Int32] = Map([])
   for value in before {
     counts.set(value, counts.get(value).unwrap_or(0) + 1)
   }

@@ -35,7 +35,7 @@ test "verified cycle checker checks closure, simplicity and actual edges" {
     { from: 1, to: 2, weight: 0, },
     { from: 2, to: 0, weight: 7, },
   ]
-  let starts : FixedArray[Int] = [0, 1, 2, 3]
+  let starts : FixedArray[Int32] = [0, 1, 2, 3]
   assert_true(@topology.check_cycle(edges, starts, [0, 1, 2, 0]))
   assert_true(@topology.check_cycle(edges, starts, [1, 2, 0, 1]))
   assert_false(@topology.check_cycle(edges, starts, [0, 2, 1, 0]))

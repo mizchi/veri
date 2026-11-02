@@ -1,9 +1,9 @@
 ///|
 /// Greatest common divisor of unsigned 32-bit values; gcd(0, 0) = 0.
 pub fn gcd(
-  x : UInt,
-  y : UInt,
-) -> UInt where {
+  x : UInt32,
+  y : UInt32,
+) -> UInt32 where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
   proof_ensure: result => {
@@ -26,9 +26,9 @@ pub fn gcd(
 /// Signed division rounded toward zero. None denotes division by zero or
 /// the sole unrepresentable Int quotient, Int::min_value / -1.
 pub fn div_rem(
-  x : Int,
-  y : Int,
-) -> (Int, Int)? where {
+  x : Int32,
+  y : Int32,
+) -> (Int32, Int32)? where {
   proof_require: -2147483648 <= x && x <= 2147483647,
   proof_require: -2147483648 <= y && y <= 2147483647,
   proof_ensure: result => {
@@ -58,9 +58,9 @@ pub fn div_rem(
 ///|
 /// Nonnegative remainder for a positive modulus; None for a nonpositive modulus.
 pub fn euclidean_mod(
-  x : Int,
-  modulus : Int,
-) -> Int? where {
+  x : Int32,
+  modulus : Int32,
+) -> Int32? where {
   proof_require: -2147483648 <= x && x <= 2147483647,
   proof_require: -2147483648 <= modulus && modulus <= 2147483647,
   proof_ensure: result => {

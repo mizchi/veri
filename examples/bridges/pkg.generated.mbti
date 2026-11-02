@@ -2,15 +2,15 @@
 package "mizchi/veri-examples/bridges"
 
 // Values
-pub fn fill_and_read(FixedArray[Int], Int, Int, Int) -> Int?
+pub fn fill_and_read(FixedArray[Int32], Int32, Int32, Int32) -> Int32?
 
-pub fn first_or(FixedArray[Int], Int) -> Int
+pub fn first_or(FixedArray[Int32], Int32) -> Int32
 
-pub fn restore32(UInt, UInt) -> UInt
+pub fn restore32(UInt32, UInt32) -> UInt32
 
 pub fn restore64(UInt64, UInt64) -> UInt64
 
-pub fn zero_after_max() -> UInt
+pub fn zero_after_max() -> UInt32
 
 // Errors
 

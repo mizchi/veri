@@ -16,6 +16,7 @@ pub(all) struct Snapshot {
   pending : Bool
   done : Bool
 } derive(ToJson)
+pub fn Snapshot::to_json(Self) -> Json
 
 // Type aliases
 

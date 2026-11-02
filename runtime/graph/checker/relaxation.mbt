@@ -3,9 +3,9 @@
 /// This function's body is proved under both integer models and is used by the
 /// complete certificate checker; soundness.mbtp connects the local checks to paths.
 pub fn relaxation(
-  cost : Int,
-  next : Int,
-  weight : Int,
+  cost : Int32,
+  next : Int32,
+  weight : Int32,
 ) -> Bool where {
   proof_ensure: result => {
     result ==

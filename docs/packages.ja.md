@@ -70,7 +70,7 @@ veri/
 ├── runtime/                 # 数値・文字列の対応とコレクション実装
 ├── testing/commands/
 └── examples/
-    ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.1.0 に依存
+    ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.2.1 に依存
     ├── models/
     ├── bridges/
     ├── floating/
@@ -82,7 +82,7 @@ workspace 内の依存はローカルの本体へ解決され、レジストリ�
 公開パッケージは `mizchi/veri/bounds`、`mizchi/veri/bitvector`、`mizchi/veri/arrays` などのパスで import する。
 本体と examples の証明は `just prove` でまとめて実行する。このツールチェインでは
 `moon prove` 単体は現在のモジュールが対象で、examples の証明には `moon -C examples prove` を使う。
-証明結果は各モジュールの `_build/verif/` 配下に出力される。
+証明結果は `_build/verif/` 配下に出力される。ワークスペースでは完全なパッケージパスごとのディレクトリに分かれる。
 
 `.mbt` が実装・型・契約、`.mbtp` が論理モデル・補題。`pkg.generated.mbti` で公開 API を確認できる。
 `fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bitvector`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。

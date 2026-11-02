@@ -26,7 +26,7 @@ test "division conventions and rejected inputs" {
 
 ///|
 /// Independent bounded oracle: enumerate common divisors, without Euclid's step.
-fn trial_gcd(x : UInt, y : UInt) -> UInt {
+fn trial_gcd(x : UInt32, y : UInt32) -> UInt32 {
   let mut result = 0U
   let bound = if x > y { x } else { y }
   for divisor = 1U; divisor <= bound; divisor = divisor + 1U {
@@ -40,7 +40,7 @@ fn trial_gcd(x : UInt, y : UInt) -> UInt {
 ///|
 test "quickcheck: gcd agrees with enumerated common divisors" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let (x, y) = input
       let a = x % 257U
       let b = y % 257U
@@ -55,7 +55,7 @@ test "quickcheck: gcd agrees with enumerated common divisors" {
 ///|
 test "quickcheck: full-width gcd is a symmetric common divisor" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let (x, y) = input
       let d = @number.gcd(x, y)
       d == @number.gcd(y, x) &&
@@ -70,7 +70,7 @@ test "quickcheck: full-width gcd is a symmetric common divisor" {
 ///|
 test "quickcheck: signed division decomposes in Int64 without overflow" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (x, y) = input
       match @number.div_rem(x, y) {
         None => y == 0 || (x == -2147483648 && y == -1)
@@ -93,7 +93,7 @@ test "quickcheck: signed division decomposes in Int64 without overflow" {
 ///|
 test "quickcheck: Euclidean remainder is the unique nonnegative representative" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (x, m) = input
       match @number.euclidean_mod(x, m) {
         None => m <= 0

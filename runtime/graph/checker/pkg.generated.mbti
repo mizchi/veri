@@ -8,32 +8,35 @@ import {
 }
 
 // Values
-pub fn certificate(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+pub fn certificate(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Bool) -> Bool
 
-pub fn certificate_realizes(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Int, Bool) -> Unit
+pub fn certificate_realizes(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Int32, Bool) -> Unit
 
-pub fn certificate_sound(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Unit
+pub fn certificate_sound(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Bool) -> Unit
 
-pub fn check_certificate(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+pub fn check_certificate(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Bool) -> Bool
 
-pub fn correct(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Bool) -> Bool
+pub fn correct(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Bool) -> Bool
 
-pub fn path(FixedArray[Edge], Int, Int, @list.List[Int]) -> Bool
+pub fn path(FixedArray[Edge], Int32, Int32, @list.List[Int32]) -> Bool
 
-pub fn path_bound(Int, FixedArray[Edge], FixedArray[Int?], FixedArray[Int?], Int, Int, Bool, @list.List[Int]) -> Unit
+pub fn path_bound(Int32, FixedArray[Edge], FixedArray[Int32?], FixedArray[Int32?], Int32, Int32, Bool, @list.List[Int32]) -> Unit
 
-pub fn path_cost(FixedArray[Edge], @list.List[Int], Bool) -> @integer.Integer
+pub fn path_cost(FixedArray[Edge], @list.List[Int32], Bool) -> @integer.Integer
 
-pub fn relaxation(Int, Int, Int) -> Bool
+pub fn relaxation(Int32, Int32, Int32) -> Bool
 
 // Errors
 
 // Types and methods
 pub(all) struct Edge {
-  from : Int
-  to : Int
-  weight : Int
+  from : Int32
+  to : Int32
+  weight : Int32
 } derive(Eq, @debug.Debug)
+pub fn Edge::equal(Self, Self) -> Bool
+pub fn Edge::not_equal(Self, Self) -> Bool
+pub fn Edge::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

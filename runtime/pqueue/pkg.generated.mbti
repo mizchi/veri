@@ -6,9 +6,9 @@ import {
 }
 
 // Values
-pub fn minimum(Int, IntMinQueue) -> Bool
+pub fn minimum(Int32, IntMinQueue) -> Bool
 
-pub fn model(IntMinQueue) -> @bag.Bag[Int]
+pub fn model(IntMinQueue) -> @bag.Bag[Int32]
 
 pub fn valid(IntMinQueue) -> Bool
 
@@ -20,17 +20,17 @@ pub struct IntMinQueue {
 }
 #as_free_fn(is_empty)
 pub fn IntMinQueue::is_empty(Self) -> Bool
-pub fn IntMinQueue::iter(Self) -> Iter[Int]
+pub fn IntMinQueue::iter(Self) -> Iter[Int32]
 #as_free_fn(empty)
 pub fn IntMinQueue::new() -> Self
 #as_free_fn(peek)
-pub fn IntMinQueue::peek(Self) -> Int?
+pub fn IntMinQueue::peek(Self) -> Int32?
 #as_free_fn(pop)
-pub fn IntMinQueue::pop(Self) -> (Int, Self)?
+pub fn IntMinQueue::pop(Self) -> (Int32, Self)?
 #as_free_fn(push)
-pub fn IntMinQueue::push(Self, Int) -> Self
+pub fn IntMinQueue::push(Self, Int32) -> Self
 #as_free_fn(to_array)
-pub fn IntMinQueue::to_array(Self) -> Array[Int]
+pub fn IntMinQueue::to_array(Self) -> Array[Int32]
 
 // Type aliases
 

@@ -96,7 +96,7 @@ test "disabled actions and the modeled time limit remain explicit" {
 ///|
 test "quickcheck: repaired schedules preserve single writer with array shrinking" {
   @quickcheck.check(
-    (schedule : Array[Int]) => {
+    (schedule : Array[Int32]) => {
       let mut state = @lease_clock.initial()
       let selected = []
       for raw in schedule {

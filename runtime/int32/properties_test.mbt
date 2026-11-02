@@ -1,5 +1,5 @@
 ///|
-fn agrees(actual : Int?, expected : @bigint.BigInt) -> Bool {
+fn agrees(actual : Int32?, expected : @bigint.BigInt) -> Bool {
   let valid = expected >= @bigint.BigInt::from_int(-2147483648) &&
     expected <= @bigint.BigInt::from_int(2147483647)
   match actual {
@@ -11,7 +11,7 @@ fn agrees(actual : Int?, expected : @bigint.BigInt) -> Bool {
 ///|
 test "quickcheck: checked arithmetic agrees with arbitrary precision" {
   @quickcheck.check(
-    (input : (Int, Int)) => {
+    (input : (Int32, Int32)) => {
       let (x, y) = input
       let a = @bigint.BigInt::from_int(x)
       let b = @bigint.BigInt::from_int(y)
@@ -27,7 +27,7 @@ test "quickcheck: checked arithmetic agrees with arbitrary precision" {
 
 ///|
 test "checked arithmetic inputs use the core tuple shrinker" {
-  let input : (Int, Int) = (123, -456)
+  let input : (Int32, Int32) = (123, -456)
   assert_true(@shrink.Shrink::shrink(input).any(x => x.0 == 0))
   assert_true(@shrink.Shrink::shrink(input).any(x => x.1 == 0))
 }

@@ -5,6 +5,12 @@ pub(all) struct State {
 } derive(Eq, Debug)
 
 ///|
+pub extend State with Eq::{not_equal, equal}
+
+///|
+pub extend State with @debug.Debug::{to_repr}
+
+///|
 /// Drop is an explicit broken-protocol variant used to find lost requests.
 pub(all) enum Action {
   Request
@@ -12,6 +18,12 @@ pub(all) enum Action {
   Wait
   Drop
 } derive(Eq, Debug)
+
+///|
+pub extend Action with Eq::{not_equal, equal}
+
+///|
+pub extend Action with @debug.Debug::{to_repr}
 
 ///|
 #proof_pure
@@ -96,7 +108,7 @@ pub fn step(
 ///|
 pub fn state_code(
   state : State,
-) -> Int where {
+) -> Int32 where {
   proof_ensure: code => represents(state, code),
   proof_ensure: code => 0 <= code && code <= 3,
 } {
@@ -115,7 +127,7 @@ pub fn state_code(
 
 ///|
 pub fn state_from_code(
-  code : Int,
+  code : Int32,
 ) -> State? where {
   proof_ensure: outcome => decoded(code, outcome),
 } {

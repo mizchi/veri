@@ -1,5 +1,5 @@
 ///|
-fn matches_int(value : @bigint.BigInt, result : Int?) -> Bool {
+fn matches_int(value : @bigint.BigInt, result : Int32?) -> Bool {
   let valid = value >= @bigint.BigInt::from_int(-2147483648) &&
     value <= @bigint.BigInt::from_int(2147483647)
   match result {
@@ -9,7 +9,7 @@ fn matches_int(value : @bigint.BigInt, result : Int?) -> Bool {
 }
 
 ///|
-fn matches_uint(value : @bigint.BigInt, result : UInt?) -> Bool {
+fn matches_uint(value : @bigint.BigInt, result : UInt32?) -> Bool {
   let valid = value >= @bigint.BigInt::from_uint(0U) &&
     value <= @bigint.BigInt::from_uint(4294967295U)
   match result {
@@ -41,7 +41,7 @@ fn matches_uint64(value : @bigint.BigInt, result : UInt64?) -> Bool {
 ///|
 test "quickcheck: int conversions agree with arbitrary precision" {
   @quickcheck.check(
-    (x : Int) => {
+    (x : Int32) => {
       let n = @bigint.BigInt::from_int(x)
       matches_uint(n, @conversion.checked_int_to_uint(x)) &&
       matches_int64(n, Some(@conversion.int_to_int64(x))) &&
@@ -56,7 +56,7 @@ test "quickcheck: int conversions agree with arbitrary precision" {
 ///|
 test "quickcheck: uint conversions agree with arbitrary precision" {
   @quickcheck.check(
-    (x : UInt) => {
+    (x : UInt32) => {
       let n = @bigint.BigInt::from_uint(x)
       matches_int(n, @conversion.checked_uint_to_int(x)) &&
       matches_int64(n, Some(@conversion.uint_to_int64(x))) &&

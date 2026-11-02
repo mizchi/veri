@@ -9,7 +9,7 @@ test "inclusive clamp agrees with core including a singleton interval" {
 ///|
 test "quickcheck: inclusive clamp agrees with the standard Int method" {
   @quickcheck.check(
-    (input : (Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32)) => {
       let (value, min, max) = input
       @bounds.clamp(value, min, max) == value.clamp(min~, max~)
     },

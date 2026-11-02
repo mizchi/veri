@@ -1,9 +1,9 @@
 ///|
 fn model() -> @state_machine.Model[
-  Array[Int],
+  Array[Int32],
   @commands.Command,
-  Int?,
-  Array[Int],
+  Int32?,
+  Array[Int32],
 ] {
   {
     initial: () => [],
@@ -30,12 +30,12 @@ fn model() -> @state_machine.Model[
 ///|
 fn system(
   broken : Bool,
-  closed : Array[Int],
+  closed : Array[Int32],
 ) -> @state_machine.System[
-  @queue.Queue[Int],
+  @queue.Queue[Int32],
   @commands.Command,
-  Int?,
-  Array[Int],
+  Int32?,
+  Array[Int32],
 ] {
   {
     create: () => @queue.Queue([]),

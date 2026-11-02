@@ -3,7 +3,7 @@
 pub fn certify_bfs_at(
   graph : @graph.Graph,
   search : @graph.SearchResult,
-  vertex : Int,
+  vertex : Int32,
 ) -> Bool where {
   proof_ensure: accepted => {
     accepted → @graph.shortest_at(graph, search, vertex, false)
@@ -17,7 +17,7 @@ pub fn certify_bfs_at(
 pub fn certify_dijkstra_at(
   graph : @graph.Graph,
   search : @graph.SearchResult,
-  vertex : Int,
+  vertex : Int32,
 ) -> Bool where {
   proof_ensure: accepted => {
     accepted → @graph.shortest_at(graph, search, vertex, true)
@@ -30,7 +30,7 @@ pub fn certify_dijkstra_at(
 /// A topological permutation certifies the entire graph has no directed cycles.
 pub fn certify_acyclic(
   graph : @graph.Graph,
-  order : FixedArray[Int],
+  order : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => accepted → @graph.acyclic(graph),
 } {
@@ -41,7 +41,7 @@ pub fn certify_acyclic(
 /// A closed simple witness certifies the opposite verdict.
 pub fn certify_cyclic(
   graph : @graph.Graph,
-  cycle : FixedArray[Int],
+  cycle : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => accepted → @graph.cyclic(graph),
   proof_ensure: accepted => accepted → !@graph.acyclic(graph),

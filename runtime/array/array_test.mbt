@@ -1,6 +1,6 @@
 ///|
 test "safe reads include both bounds and extreme indices" {
-  let xs : FixedArray[Int] = [10, 20]
+  let xs : FixedArray[Int32] = [10, 20]
   assert_eq(@array.get(xs, -1), None)
   assert_eq(@array.get(xs, 0), Some(10))
   assert_eq(@array.get(xs, 1), Some(20))

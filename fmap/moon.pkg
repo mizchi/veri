@@ -3,6 +3,4 @@ import {
   "mizchi/veri/fset",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

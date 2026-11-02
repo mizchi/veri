@@ -2,9 +2,15 @@
 /// Either a permutation in dependency order, or a simple directed cycle with
 /// its first vertex repeated at the end. Empty graphs yield Ordered([]).
 pub(all) enum Topology {
-  Ordered(FixedArray[Int])
-  Cyclic(FixedArray[Int])
+  Ordered(FixedArray[Int32])
+  Cyclic(FixedArray[Int32])
 } derive(Debug, Eq)
+
+///|
+pub extend Topology with @debug.Debug::{to_repr}
+
+///|
+pub extend Topology with Eq::{not_equal, equal}
 
 ///|
 /// Iterative DFS: O(V+E) time and O(V) auxiliary space, including long chains.
@@ -15,8 +21,8 @@ pub fn Graph::topological_sort(self : Graph) -> Topology {
   let color = Array::make(n, 0)
   let next_edge = Array::make(n, 0)
   let active_position = Array::make(n, -1)
-  let active : Array[Int] = []
-  let finished : Array[Int] = []
+  let active : Array[Int32] = []
+  let finished : Array[Int32] = []
   for start = 0; start < n; start = start + 1 {
     if color[start] != 0 {
       continue
@@ -54,7 +60,7 @@ pub fn Graph::topological_sort(self : Graph) -> Topology {
 /// O(V+E) time and O(V) space; does not call topological_sort.
 pub fn Graph::check_topological_order(
   self : Graph,
-  order : FixedArray[Int],
+  order : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => accepted → topological_order(self, order),
   proof_ensure: accepted => accepted → acyclic(self),
@@ -71,7 +77,7 @@ pub fn Graph::check_topological_order(
 /// O(V+E) time and O(V) space with this graph's CSR storage. Self-loops are [v,v].
 pub fn Graph::check_cycle(
   self : Graph,
-  cycle : FixedArray[Int],
+  cycle : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => accepted → simple_cycle(self, cycle),
   proof_ensure: accepted => accepted → cyclic(self),
@@ -99,7 +105,7 @@ pub fn Graph::check_topology(
 /// The copy is differential-tested; use the FixedArray API in verified code.
 pub fn Graph::check_topological_order_view(
   self : Graph,
-  order : ArrayView[Int],
+  order : ArrayView[Int32],
 ) -> Bool {
   self.check_topological_order(FixedArray::from_array(order))
 }
@@ -107,6 +113,6 @@ pub fn Graph::check_topological_order_view(
 ///|
 /// Convenience adapter for an ArrayView. Copies the view before checking.
 /// The copy is differential-tested; use the FixedArray API in verified code.
-pub fn Graph::check_cycle_view(self : Graph, cycle : ArrayView[Int]) -> Bool {
+pub fn Graph::check_cycle_view(self : Graph, cycle : ArrayView[Int32]) -> Bool {
   self.check_cycle(FixedArray::from_array(cycle))
 }

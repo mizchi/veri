@@ -1,7 +1,7 @@
 ///|
 test "quickcheck: clamp preserves the interval and is idempotent" {
   @quickcheck.check(
-    (input : (Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32)) => {
       let (value, lower, upper) = input
       let result = @bounds.clamp_half_open(value, lower, upper)
       lower <= result &&
@@ -18,7 +18,7 @@ test "quickcheck: clamp preserves the interval and is idempotent" {
 ///|
 test "quickcheck: clamp is monotone" {
   @quickcheck.check(
-    (input : (Int, Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32, Int32)) => {
       let (x, y, lower, upper) = input
       @bounds.clamp_half_open(x, lower, upper) <=
       @bounds.clamp_half_open(y, lower, upper)

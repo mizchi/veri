@@ -1,9 +1,9 @@
 ///|
 pub(all) struct ExhaustiveResult {
   witness : @model_check.Witness?
-  visited : Int
+  visited : Int32
   // Largest BFS depth among visited states; a response lasso can be longer.
-  max_depth : Int
+  max_depth : Int32
 }
 
 ///|
@@ -14,7 +14,7 @@ pub(all) struct ExhaustiveResult {
 pub fn exhaustive(
   model : @model_check.Model[Json],
   property : @model_check.Property,
-  justice? : Array[Int] = [],
+  justice~ : Array[Int32] = [],
 ) -> ExhaustiveResult raise {
   validate_query(
     model,

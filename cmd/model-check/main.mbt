@@ -70,7 +70,7 @@ async fn execute(args : Array[String]) -> Json {
   let mut config_set = false
   let mut property : @model_check.Property? = None
   let mut bound = 8
-  let mut justice : Array[Int] = []
+  let mut justice : Array[Int32] = []
   let mut justice_set = false
   let mut fair = false
   let mut require_trigger = false
@@ -256,7 +256,7 @@ async fn execute(args : Array[String]) -> Json {
   let witnesses : Array[@model_check.Witness] = @json.from_json(
     @json.parse(@fs.read_file(path).text()[:]),
   )
-  driver.replay(config, property, witnesses, justice~).to_json()
+  Json(driver.replay(config, property, witnesses, justice~))
 }
 
 ///|

@@ -3,9 +3,9 @@
 /// so malformed offsets cannot fabricate an edge or cause an invalid read.
 fn check_edge(
   edges : FixedArray[@checker.Edge],
-  starts : FixedArray[Int],
-  source : Int,
-  target : Int,
+  starts : FixedArray[Int32],
+  source : Int32,
+  target : Int32,
 ) -> Bool where {
   proof_require: vertex_index(starts.length(), source),
   proof_ensure: found => found → edge_exists(edges, source, target),
@@ -39,8 +39,8 @@ fn check_edge(
 /// space: no source vertex is visited twice. Edge weights are irrelevant.
 pub fn check_cycle(
   edges : FixedArray[@checker.Edge],
-  starts : FixedArray[Int],
-  cycle : FixedArray[Int],
+  starts : FixedArray[Int32],
+  cycle : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => {
     accepted → simple_cycle(starts.length(), edges, cycle)

@@ -1,8 +1,14 @@
 ///|
 enum Output {
-  Values(Array[Int])
-  Count(Int)
+  Values(Array[Int32])
+  Count(Int32)
 } derive(Eq, Debug)
+
+///|
+pub extend Output with Eq::{not_equal, equal}
+
+///|
+pub extend Output with @debug.Debug::{to_repr}
 
 ///|
 struct Variant {
@@ -19,7 +25,7 @@ struct Scenario {
 
 ///|
 /// Fisher-Yates with a fixed xorshift seed. Generation is outside timing.
-fn shuffled(size : Int) -> Array[Int] {
+fn shuffled(size : Int32) -> Array[Int32] {
   let values = Array::makei(size, i => i)
   let mut state = 20260914U
   for i = size - 1; i > 0; i = i - 1 {
@@ -35,8 +41,8 @@ fn shuffled(size : Int) -> Array[Int] {
 }
 
 ///|
-fn veri_stack(values : Array[Int]) -> Output {
-  let mut state : @stack.Stack[Int] = @stack.empty()
+fn veri_stack(values : Array[Int32]) -> Output {
+  let mut state : @stack.Stack[Int32] = @stack.empty()
   for value in values {
     state = @stack.push(state, value)
   }
@@ -49,8 +55,8 @@ fn veri_stack(values : Array[Int]) -> Output {
 }
 
 ///|
-fn core_list_stack(values : Array[Int]) -> Output {
-  let mut state : @core_list.List[Int] = @core_list.empty()
+fn core_list_stack(values : Array[Int32]) -> Output {
+  let mut state : @core_list.List[Int32] = @core_list.List([])
   for value in values {
     state = @core_list.cons(value, state)
   }
@@ -63,8 +69,8 @@ fn core_list_stack(values : Array[Int]) -> Output {
 }
 
 ///|
-fn array_stack(values : Array[Int]) -> Output {
-  let state : Array[Int] = []
+fn array_stack(values : Array[Int32]) -> Output {
+  let state : Array[Int32] = []
   for value in values {
     state.push(value)
   }
@@ -76,7 +82,7 @@ fn array_stack(values : Array[Int]) -> Output {
 }
 
 ///|
-fn make_queue(values : Array[Int]) -> @queue.Queue[Int] {
+fn make_queue(values : Array[Int32]) -> @queue.Queue[Int32] {
   let mut state = @queue.empty()
   for value in values {
     state = @queue.push(state, value)
@@ -85,7 +91,7 @@ fn make_queue(values : Array[Int]) -> @queue.Queue[Int] {
 }
 
 ///|
-fn veri_queue(values : Array[Int]) -> Output {
+fn veri_queue(values : Array[Int32]) -> Output {
   let mut state = make_queue(values)
   let result = []
   while @queue.pop(state) is Some((value, rest)) {
@@ -96,8 +102,8 @@ fn veri_queue(values : Array[Int]) -> Output {
 }
 
 ///|
-fn core_queue(values : Array[Int]) -> Output {
-  let state : @core_queue.Queue[Int] = @core_queue.Queue([])
+fn core_queue(values : Array[Int32]) -> Output {
+  let state : @core_queue.Queue[Int32] = @core_queue.Queue([])
   for value in values {
     state.push(value)
   }
@@ -109,7 +115,7 @@ fn core_queue(values : Array[Int]) -> Output {
 }
 
 ///|
-fn veri_pqueue(values : Array[Int]) -> Output {
+fn veri_pqueue(values : Array[Int32]) -> Output {
   let mut state = @pqueue.empty()
   for value in values {
     state = @pqueue.push(state, value)
@@ -123,8 +129,8 @@ fn veri_pqueue(values : Array[Int]) -> Output {
 }
 
 ///|
-fn core_pqueue(values : Array[Int]) -> Output {
-  let state : @core_pqueue.PriorityQueue[@cmp.Reverse[Int]] = @core_pqueue.PriorityQueue([],
+fn core_pqueue(values : Array[Int32]) -> Output {
+  let state : @core_pqueue.PriorityQueue[@cmp.Reverse[Int32]] = @core_pqueue.PriorityQueue([],
   )
   for value in values {
     state.push(@cmp.Reverse(value))
@@ -137,8 +143,8 @@ fn core_pqueue(values : Array[Int]) -> Output {
 }
 
 ///|
-fn core_immut_pqueue(values : Array[Int]) -> Output {
-  let mut state : @core_immut_pqueue.PriorityQueue[@cmp.Reverse[Int]] = @core_immut_pqueue.PriorityQueue([],
+fn core_immut_pqueue(values : Array[Int32]) -> Output {
+  let mut state : @core_immut_pqueue.PriorityQueue[@cmp.Reverse[Int32]] = @core_immut_pqueue.PriorityQueue([],
   )
   for value in values {
     state = state.push(@cmp.Reverse(value))
@@ -152,7 +158,7 @@ fn core_immut_pqueue(values : Array[Int]) -> Output {
 }
 
 ///|
-fn veri_search(values : Array[Int], queries : Array[Int]) -> Output {
+fn veri_search(values : Array[Int32], queries : Array[Int32]) -> Output {
   let mut state = @search.empty()
   for value in values {
     state = @search.insert(state, value)
@@ -167,8 +173,8 @@ fn veri_search(values : Array[Int], queries : Array[Int]) -> Output {
 }
 
 ///|
-fn core_search(values : Array[Int], queries : Array[Int]) -> Output {
-  let mut state : @core_set.SortedSet[Int] = @core_set.new()
+fn core_search(values : Array[Int32], queries : Array[Int32]) -> Output {
+  let mut state : @core_set.SortedSet[Int32] = @core_set.new()
   for value in values {
     state = state.add(value)
   }
@@ -182,7 +188,7 @@ fn core_search(values : Array[Int], queries : Array[Int]) -> Output {
 }
 
 ///|
-fn balanced(start : Int, stop : Int) -> @tree.Tree[Int] {
+fn balanced(start : Int32, stop : Int32) -> @tree.Tree[Int32] {
   if start >= stop {
     @tree.empty()
   } else {
@@ -192,7 +198,7 @@ fn balanced(start : Int, stop : Int) -> @tree.Tree[Int] {
 }
 
 ///|
-fn scenarios(size : Int) -> Array[Scenario] {
+fn scenarios(size : Int32) -> Array[Scenario] {
   let values = shuffled(size)
   let ordered = Array::makei(size, i => i)
   let left = @linked.from_array(values)

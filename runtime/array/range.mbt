@@ -3,14 +3,20 @@
 /// operations check it without overflowing and reject invalid ranges atomically.
 #valtype
 pub(all) struct Range {
-  start : Int
-  count : Int
+  start : Int32
+  count : Int32
 } derive(Debug, Eq)
+
+///|
+pub extend Range with @debug.Debug::{to_repr}
+
+///|
+pub extend Range with Eq::{not_equal, equal}
 
 ///|
 /// Validate a range without overflowing, including extreme invalid endpoints.
 pub fn valid_range(
-  length : Int,
+  length : Int32,
   range : Range,
 ) -> Bool where {
   proof_ensure: result => {
@@ -22,9 +28,9 @@ pub fn valid_range(
 
 ///|
 fn valid_range_impl(
-  length : Int,
-  start : Int,
-  count : Int,
+  length : Int32,
+  start : Int32,
+  count : Int32,
 ) -> Bool where {
   proof_ensure: result => result == range_in_bounds(length, start, count),
 } {

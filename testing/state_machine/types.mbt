@@ -25,14 +25,29 @@ pub(all) enum Verdict {
 } derive(Eq, Debug, ToJson)
 
 ///|
+pub extend Verdict with Eq::{not_equal, equal}
+
+///|
+pub extend Verdict with @debug.Debug::{to_repr}
+
+///|
+pub extend Verdict with ToJson::{to_json}
+
+///|
 pub(all) struct Replay[O, V] {
   verdict : Verdict
-  index : Int
+  index : Int32
   expected_output : O?
   actual_output : O?
   expected_state : V?
   actual_state : V?
 } derive(Debug, ToJson)
+
+///|
+pub extend Replay with @debug.Debug::{to_repr}
+
+///|
+pub extend Replay with ToJson::{to_json}
 
 ///|
 pub fn[M, C, O, V] valid_trace(

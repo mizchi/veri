@@ -1,7 +1,7 @@
 ///|
 /// Independent invariant checker: equal black height and no red-red edge.
 /// Returns (black height, total height), rejecting every invalid subtree.
-fn inspect_balance(node : Node) -> (Int, Int)? {
+fn inspect_balance(node : Node) -> (Int32, Int32)? {
   match node {
     Empty => Some((0, 0))
     Branch(color, left, _, right) => {
@@ -37,7 +37,7 @@ fn balanced(tree : IntSet) -> Bool {
 ///|
 test "quickcheck: insertion preserves red-black balance at every prefix" {
   @quickcheck.check(
-    (values : Array[Int]) => {
+    (values : Array[Int32]) => {
       let mut tree = empty()
       for value in values {
         tree = insert(tree, value)

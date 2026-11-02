@@ -6,7 +6,7 @@ pub fn byte() -> Parser[Byte]
 
 pub fn length_prefixed_uint_be() -> Parser[BytesView]
 
-pub fn take(Int) -> Parser[BytesView]
+pub fn take(Int32) -> Parser[BytesView]
 
 pub fn uint16_be() -> Parser[UInt16]
 
@@ -16,9 +16,9 @@ pub fn uint64_be() -> Parser[UInt64]
 
 pub fn uint64_le() -> Parser[UInt64]
 
-pub fn uint_be() -> Parser[UInt]
+pub fn uint_be() -> Parser[UInt32]
 
-pub fn uint_le() -> Parser[UInt]
+pub fn uint_le() -> Parser[UInt32]
 
 // Errors
 
@@ -27,9 +27,9 @@ pub struct Cursor {
   // private fields
 }
 pub fn Cursor::new(BytesView) -> Self
-pub fn Cursor::position(Self) -> Int
+pub fn Cursor::position(Self) -> Int32
 pub fn[T] Cursor::read(Self, Parser[T]) -> (T, Self)?
-pub fn Cursor::remaining(Self) -> Int
+pub fn Cursor::remaining(Self) -> Int32
 
 pub struct Parser[T] {
   // private fields

@@ -1,6 +1,6 @@
 ///|
 priv struct Key {
-  value : Int
+  value : Int32
 } derive(Eq)
 
 ///|
@@ -12,7 +12,7 @@ impl Hash for Key with fn hash_combine(self, hasher) {
 ///|
 test "quickcheck: set traces and algebra match distinct arrays with constant hashes" {
   @quickcheck.check(
-    (commands : Array[(Int, Int)]) => {
+    (commands : Array[(Int32, Int32)]) => {
       let actual : @set.Set[Key] = Set([])
       let mut expected : Array[Key] = []
       for (tag, raw_key) in commands {
@@ -49,7 +49,7 @@ test "quickcheck: set traces and algebra match distinct arrays with constant has
           !@set.matches_elements(actual, expected[:]) {
           return false
         }
-        let other = Set([Key::{ value: 0, }, Key::{ value: 1, }])
+        let other = @set.Set([Key::{ value: 0, }, Key::{ value: 1, }])
         let union = actual.union(other)
         let intersection = actual.intersection(other)
         let difference = actual.difference(other)

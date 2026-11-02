@@ -13,66 +13,72 @@ pub fn acyclic(Graph) -> Bool
 
 pub fn certified(Graph, SearchResult, Bool) -> Bool
 
-pub fn certified_shortest(Graph, SearchResult, Int, Bool) -> Unit
+pub fn certified_shortest(Graph, SearchResult, Int32, Bool) -> Unit
 
 pub fn cyclic(Graph) -> Bool
 
-pub fn path(Graph, Int, Int, @list.List[Int]) -> Bool
+pub fn path(Graph, Int32, Int32, @list.List[Int32]) -> Bool
 
-pub fn path_cost(Graph, @list.List[Int], Bool) -> @integer.Integer
+pub fn path_cost(Graph, @list.List[Int32], Bool) -> @integer.Integer
 
-pub fn result_distance(SearchResult, Int) -> Int?
+pub fn result_distance(SearchResult, Int32) -> Int32?
 
-pub fn shortest_at(Graph, SearchResult, Int, Bool) -> Bool
+pub fn shortest_at(Graph, SearchResult, Int32, Bool) -> Bool
 
-pub fn simple_cycle(Graph, FixedArray[Int]) -> Bool
+pub fn simple_cycle(Graph, FixedArray[Int32]) -> Bool
 
-pub fn topological_order(Graph, FixedArray[Int]) -> Bool
+pub fn topological_order(Graph, FixedArray[Int32]) -> Bool
 
 pub fn valid_topology(Graph, Topology) -> Bool
 
 // Errors
 pub(all) suberror GraphError {
-  NegativeVertexCount(Int)
-  InvalidVertex(Int)
-  NegativeWeight(Int)
-  DistanceOverflow(Int)
+  NegativeVertexCount(Int32)
+  InvalidVertex(Int32)
+  NegativeWeight(Int32)
+  DistanceOverflow(Int32)
 } derive(Eq, @debug.Debug)
+pub fn GraphError::equal(Self, Self) -> Bool
+pub fn GraphError::not_equal(Self, Self) -> Bool
+pub fn GraphError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct Graph {
   // private fields
 }
-pub fn Graph::bfs(Self, Int) -> SearchResult raise GraphError
+pub fn Graph::bfs(Self, Int32) -> SearchResult raise GraphError
 pub fn Graph::check_bfs(Self, SearchResult) -> Bool
-pub fn Graph::check_cycle(Self, FixedArray[Int]) -> Bool
-pub fn Graph::check_cycle_view(Self, ArrayView[Int]) -> Bool
+pub fn Graph::check_cycle(Self, FixedArray[Int32]) -> Bool
+pub fn Graph::check_cycle_view(Self, ArrayView[Int32]) -> Bool
 pub fn Graph::check_dijkstra(Self, SearchResult) -> Bool
-pub fn Graph::check_topological_order(Self, FixedArray[Int]) -> Bool
-pub fn Graph::check_topological_order_view(Self, ArrayView[Int]) -> Bool
+pub fn Graph::check_topological_order(Self, FixedArray[Int32]) -> Bool
+pub fn Graph::check_topological_order_view(Self, ArrayView[Int32]) -> Bool
 pub fn Graph::check_topology(Self, Topology) -> Bool
-pub fn Graph::dijkstra(Self, Int) -> SearchResult raise GraphError
-pub fn Graph::edge_weight(Self, Int, Int) -> Int?
+pub fn Graph::dijkstra(Self, Int32) -> SearchResult raise GraphError
+pub fn Graph::edge_weight(Self, Int32, Int32) -> Int32?
 pub fn Graph::edges(Self) -> Array[@checker.Edge]
-pub fn Graph::from_array(ArrayView[@checker.Edge], vertex_count~ : Int) -> Self raise GraphError
-pub fn Graph::from_iter(Iter[@checker.Edge], vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::from_array(ArrayView[@checker.Edge], vertex_count~ : Int32) -> Self raise GraphError
+pub fn Graph::from_iter(Iter[@checker.Edge], vertex_count~ : Int32) -> Self raise GraphError
 pub fn Graph::iter(Self) -> Iter[@checker.Edge]
-pub fn Graph::new(vertex_count~ : Int) -> Self raise GraphError
+pub fn Graph::new(vertex_count~ : Int32) -> Self raise GraphError
 pub fn Graph::to_array(Self) -> Array[@checker.Edge]
 pub fn Graph::topological_sort(Self) -> Topology
-pub fn Graph::vertex_count(Self) -> Int
+pub fn Graph::vertex_count(Self) -> Int32
 
 pub struct SearchResult {
   // private fields
 }
-pub fn SearchResult::distance(Self, Int) -> Int?
-pub fn SearchResult::path_to(Self, Int) -> Array[Int]?
-pub fn SearchResult::source(Self) -> Int
+pub fn SearchResult::distance(Self, Int32) -> Int32?
+pub fn SearchResult::path_to(Self, Int32) -> Array[Int32]?
+pub fn SearchResult::source(Self) -> Int32
 
 pub(all) enum Topology {
-  Ordered(FixedArray[Int])
-  Cyclic(FixedArray[Int])
+  Ordered(FixedArray[Int32])
+  Cyclic(FixedArray[Int32])
 } derive(Eq, @debug.Debug)
+pub fn Topology::equal(Self, Self) -> Bool
+pub fn Topology::not_equal(Self, Self) -> Bool
+pub fn Topology::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 pub using @checker {type Edge}

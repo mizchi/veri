@@ -2,7 +2,7 @@
 /// Read a cell when the index is in bounds, otherwise return None.
 pub fn[T] get(
   array : FixedArray[T],
-  index : Int,
+  index : Int32,
 ) -> T? where {
   proof_ensure: result => {
     match result {

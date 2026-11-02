@@ -6,7 +6,7 @@ import {
 }
 
 // Values
-pub fn model(IntSet) -> @bintree.Tree[Int]
+pub fn model(IntSet) -> @bintree.Tree[Int32]
 
 pub fn valid(IntSet) -> Bool
 
@@ -17,14 +17,14 @@ pub struct IntSet {
   // private fields
 }
 #as_free_fn(contains)
-pub fn IntSet::contains(Self, Int) -> Bool
+pub fn IntSet::contains(Self, Int32) -> Bool
 #as_free_fn(insert)
-pub fn IntSet::insert(Self, Int) -> Self
-pub fn IntSet::iter(Self) -> Iter[Int]
+pub fn IntSet::insert(Self, Int32) -> Self
+pub fn IntSet::iter(Self) -> Iter[Int32]
 #as_free_fn(empty)
 pub fn IntSet::new() -> Self
 #as_free_fn(to_array)
-pub fn IntSet::to_array(Self) -> Array[Int]
+pub fn IntSet::to_array(Self) -> Array[Int32]
 
 // Type aliases
 

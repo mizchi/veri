@@ -1,9 +1,9 @@
 ///|
 /// A caller can validate untrusted order once, then call the proved binary search.
 pub fn insertion_index(
-  values : FixedArray[Int],
-  key : Int,
-) -> Int? where {
+  values : FixedArray[Int32],
+  key : Int32,
+) -> Int32? where {
   proof_ensure: result => {
     match result {
       None => @search.ordered(values) == false
@@ -20,12 +20,12 @@ pub fn insertion_index(
 
 ///|
 test "core containers, dependency ordering, components and parsing compose" {
-  let names : @map.Map[Int, String] = Map([
+  let names : @map.Map[Int32, String] = Map([
     (0, "parse"),
     (1, "compile"),
     (2, "link"),
   ])
-  let ready : @set.Set[Int] = Set([0])
+  let ready : @set.Set[Int32] = Set([0])
   assert_eq(names.get(0), Some("parse"))
   assert_true(ready.contains(0))
   let graph = @graph.Graph::from_array(

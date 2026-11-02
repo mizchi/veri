@@ -14,12 +14,12 @@ pub fn uint16_be() -> Parser[UInt16] {
 }
 
 ///|
-pub fn uint_le() -> Parser[UInt] {
+pub fn uint_le() -> Parser[UInt32] {
   { parse: @codec.decode_uint_le, }
 }
 
 ///|
-pub fn uint_be() -> Parser[UInt] {
+pub fn uint_be() -> Parser[UInt32] {
   { parse: @codec.decode_uint_be, }
 }
 

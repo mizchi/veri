@@ -1,21 +1,27 @@
 ///|
 pub(all) suberror UnionFindError {
-  NegativeSize(Int)
-  InvalidElement(Int)
+  NegativeSize(Int32)
+  InvalidElement(Int32)
 } derive(Debug, Eq)
+
+///|
+pub extend UnionFindError with @debug.Debug::{to_repr}
+
+///|
+pub extend UnionFindError with Eq::{not_equal, equal}
 
 ///|
 /// Mutable disjoint sets on 0..<length. Union by size with path compression.
 /// The runtime representation is differential-tested against flat partitions;
 /// union_find contains the separate logical partition laws.
 pub struct UnionFind {
-  priv parents : Array[Int]
-  priv sizes : Array[Int]
-  priv mut components : Int
+  priv parents : Array[Int32]
+  priv sizes : Array[Int32]
+  priv mut components : Int32
 }
 
 ///|
-pub fn UnionFind::new(length : Int) -> UnionFind raise UnionFindError {
+pub fn UnionFind::new(length : Int32) -> UnionFind raise UnionFindError {
   if length < 0 {
     raise NegativeSize(length)
   }
@@ -27,12 +33,12 @@ pub fn UnionFind::new(length : Int) -> UnionFind raise UnionFindError {
 }
 
 ///|
-pub fn UnionFind::length(self : UnionFind) -> Int {
+pub fn UnionFind::length(self : UnionFind) -> Int32 {
   self.parents.length()
 }
 
 ///|
-pub fn UnionFind::component_count(self : UnionFind) -> Int {
+pub fn UnionFind::component_count(self : UnionFind) -> Int32 {
   self.components
 }
 
@@ -48,7 +54,7 @@ pub fn UnionFind::copy(self : UnionFind) -> UnionFind {
 ///|
 fn UnionFind::validate(
   self : UnionFind,
-  element : Int,
+  element : Int32,
 ) -> Unit raise UnionFindError {
   if element < 0 || element >= self.length() {
     raise InvalidElement(element)
@@ -56,7 +62,7 @@ fn UnionFind::validate(
 }
 
 ///|
-fn UnionFind::root(self : UnionFind, element : Int) -> Int {
+fn UnionFind::root(self : UnionFind, element : Int32) -> Int32 {
   let mut root = element
   while self.parents[root] != root {
     root = self.parents[root]
@@ -75,8 +81,8 @@ fn UnionFind::root(self : UnionFind, element : Int) -> Int {
 /// denotes connectivity. Finding compresses paths without changing components.
 pub fn UnionFind::find(
   self : UnionFind,
-  element : Int,
-) -> Int raise UnionFindError {
+  element : Int32,
+) -> Int32 raise UnionFindError {
   self.validate(element)
   self.root(element)
 }
@@ -84,8 +90,8 @@ pub fn UnionFind::find(
 ///|
 pub fn UnionFind::same(
   self : UnionFind,
-  left : Int,
-  right : Int,
+  left : Int32,
+  right : Int32,
 ) -> Bool raise UnionFindError {
   self.validate(left)
   self.validate(right)
@@ -97,8 +103,8 @@ pub fn UnionFind::same(
 /// inputs before any mutation. Repeated unions leave the partition unchanged.
 pub fn UnionFind::union(
   self : UnionFind,
-  left : Int,
-  right : Int,
+  left : Int32,
+  right : Int32,
 ) -> Bool raise UnionFindError {
   self.validate(left)
   self.validate(right)
@@ -121,14 +127,14 @@ pub fn UnionFind::union(
 ///|
 pub fn UnionFind::component_size(
   self : UnionFind,
-  element : Int,
-) -> Int raise UnionFindError {
+  element : Int32,
+) -> Int32 raise UnionFindError {
   self.validate(element)
   self.sizes[self.root(element)]
 }
 
 ///|
 /// A fresh array of representatives; this also compresses all paths.
-pub fn UnionFind::to_array(self : UnionFind) -> Array[Int] {
+pub fn UnionFind::to_array(self : UnionFind) -> Array[Int32] {
   Array::makei(self.length(), i => self.root(i))
 }

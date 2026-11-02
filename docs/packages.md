@@ -70,7 +70,7 @@ veri/
 ├── runtime/                 # numeric/text bridges and collection implementations
 ├── testing/commands/
 └── examples/
-    ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.1.0
+    ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.2.1
     ├── models/
     ├── bridges/
     ├── floating/
@@ -82,7 +82,7 @@ Workspace resolution uses the local library without downloading it from the regi
 Public package imports use paths such as `mizchi/veri/bounds`, `mizchi/veri/bitvector`, and `mizchi/veri/arrays`.
 Run `just prove` to prove the library and examples. In this toolchain, `moon prove`
 on its own selects the current module; `moon -C examples prove` proves the examples.
-Proof reports are written under each module's `_build/verif/` directory.
+Proof reports are written under `_build/verif/`; workspaces nest reports by full package path.
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.

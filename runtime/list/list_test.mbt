@@ -6,7 +6,7 @@ test "persistent list operations preserve their inputs" {
   assert_eq(@list.to_array(@list.reverse(xs)), [2, 1])
   assert_eq(@list.to_array(xs), [1, 2])
   assert_eq(@list.length(xs), 2)
-  let empty : @list.List[Int] = @list.empty()
+  let empty : @list.List[Int32] = @list.empty()
   assert_true(@list.uncons(empty) is None)
 }
 
@@ -20,7 +20,7 @@ test "length handles a long list without recursive call-stack growth" {
 ///|
 test "quickcheck: persistent list append and reverse agree with arrays" {
   @quickcheck.check(
-    (input : (Array[Int], Array[Int])) => {
+    (input : (Array[Int32], Array[Int32])) => {
       let (xs, ys) = input
       let left = @list.from_array(xs)
       let right = @list.from_array(ys)

@@ -14,9 +14,11 @@ pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] serve((C) -> @model_che
 
 // Errors
 type ProtocolError derive(@debug.Debug)
+pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 type Request[C] derive(@json.FromJson)
+pub fn[C : @json.FromJson] Request::from_json(Json, @json.JsonPath) -> Self[C] raise @json.JsonDecodeError
 
 // Type aliases
 

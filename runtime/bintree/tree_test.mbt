@@ -1,5 +1,5 @@
 ///|
-priv struct GeneratedTree(@bintree.Tree[Int]) derive(Debug)
+priv struct GeneratedTree(@bintree.Tree[Int32]) derive(Debug)
 
 ///|
 impl @quickcheck.Arbitrary for GeneratedTree with fn arbitrary(size, state) {
@@ -51,7 +51,7 @@ impl @shrink.Shrink for GeneratedTree with fn shrink(self) {
 }
 
 ///|
-fn reference(tree : @bintree.Tree[Int]) -> Array[Int] {
+fn reference(tree : @bintree.Tree[Int32]) -> Array[Int32] {
   match tree {
     Empty => []
     Node(left, value, right) => reference(left) + [value] + reference(right)
@@ -92,7 +92,7 @@ test "quickcheck: binary tree traversal matches the recursive array model" {
 
 ///|
 test "inorder handles a deep left spine without repeated concatenation" {
-  let mut tree : @bintree.Tree[Int] = @bintree.Empty
+  let mut tree : @bintree.Tree[Int32] = @bintree.Empty
   for value in 0..<20000 {
     tree = @bintree.Node(tree, value, @bintree.Empty)
   }

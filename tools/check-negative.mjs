@@ -35,7 +35,7 @@ for (const check of checks) {
     for (const entry of readdirSync(source, {withFileTypes: true})) {
       if (entry.isFile()) copyFileSync(new URL(entry.name, source), join(directory, entry.name));
     }
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\nimport { "mizchi/veri@0.2.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/veri-negative"\nimport { "mizchi/veri@0.2.1" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' +
       JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     const sourceName = check.fixture.endsWith('.mbt.txt') ? "negative.mbt" : "negative.mbtp";
@@ -51,7 +51,7 @@ for (const check of checks) {
       throw new Error("Negative control did not finish: " + check.claim +
         "\n" + result.stdout + result.stderr, {cause: result.error});
     }
-    const reportPath = join(directory, "_build/verif/veri-negative.proof.json");
+    const reportPath = join(directory, "_build/verif/mizchi/veri-negative/veri-negative.proof.json");
     if (!existsSync(reportPath)) {
       throw new Error("No proof report for " + check.package + "/" + check.fixture +
         "\n" + result.stdout + result.stderr);

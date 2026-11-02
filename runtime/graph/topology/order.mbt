@@ -1,7 +1,7 @@
 ///|
 fn check_ranks(
-  order : FixedArray[Int],
-  ranks : FixedArray[Int],
+  order : FixedArray[Int32],
+  ranks : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => {
     accepted → rank_entries(order, ranks, ranks.length())
@@ -25,7 +25,7 @@ fn check_ranks(
 ///|
 fn check_ranked_edges(
   edges : FixedArray[@checker.Edge],
-  ranks : FixedArray[Int],
+  ranks : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => {
     accepted → ranked_edges(ranks, edges, edges.length())
@@ -53,9 +53,9 @@ fn check_ranked_edges(
 /// Validate a topological permutation against the actual edges. No preconditions.
 /// O(V+E) time and O(V) auxiliary space; weights are irrelevant.
 pub fn check_topological_order(
-  n : Int,
+  n : Int32,
   edges : FixedArray[@checker.Edge],
-  order : FixedArray[Int],
+  order : FixedArray[Int32],
 ) -> Bool where {
   proof_ensure: accepted => accepted → topological(n, edges, order),
   proof_ensure: accepted => accepted → acyclic(edges),

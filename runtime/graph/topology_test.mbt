@@ -37,9 +37,9 @@ test "topological order, cycles and malformed witnesses" {
 ///|
 /// Independent reference: count/search in the supplied sequence, without a rank table.
 fn order_reference(
-  n : Int,
+  n : Int32,
   edges : Array[@graph.Edge],
-  order : ArrayView[Int],
+  order : ArrayView[Int32],
 ) -> Bool {
   if order.length() != n {
     return false
@@ -70,9 +70,9 @@ fn order_reference(
 ///|
 /// Independent reference: pairwise uniqueness and original-input edge membership.
 fn cycle_reference(
-  n : Int,
+  n : Int32,
   edges : Array[@graph.Edge],
-  cycle : ArrayView[Int],
+  cycle : ArrayView[Int32],
 ) -> Bool {
   if cycle.length() < 2 || cycle[0] != cycle[cycle.length() - 1] {
     return false
@@ -96,7 +96,7 @@ fn cycle_reference(
 ///|
 test "quickcheck: topology checkers match independent arbitrary-witness oracles" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int)], Array[Int])) => {
+    (input : (Int32, Array[(Int32, Int32)], Array[Int32])) => {
       let (tag, raw_edges, raw_witness) = input
       let n = 2 + (tag % 6).abs()
       let dag = tag % 2 == 0
@@ -174,7 +174,7 @@ test "quickcheck: topology checkers match independent arbitrary-witness oracles"
 ///|
 test "quickcheck: topological witnesses agree with transitive closure" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32)])) => {
       let (tag, raw) = input
       let n = (tag % 8).abs()
       let edges : Array[@graph.Edge] = if n == 0 {

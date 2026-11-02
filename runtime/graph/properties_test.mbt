@@ -1,12 +1,19 @@
 ///|
-fn small(value : Int, bound : Int) -> Int {
+fn small(value : Int32, bound : Int32) -> Int32 {
   (value % bound).abs()
 }
 
 ///|
 test "quickcheck: complete raw checker acceptance implies the independent optimum" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int)], Array[Int?], Array[Int?])) => {
+    (
+      input : (
+        Int32,
+        Array[(Int32, Int32, Int32)],
+        Array[Int32?],
+        Array[Int32?],
+      ),
+    ) => {
       let n = 1 + small(input.0, 6)
       let source = small(input.0 / 6, n)
       let edges = input.1.map(e => @graph.Edge::{
@@ -77,7 +84,7 @@ test "quickcheck: complete raw checker acceptance implies the independent optimu
 /// None means unreachable. With at most seven vertices, Int64 safely holds sums
 /// of Int weights, including shortest distances that the runtime must reject.
 fn distances(
-  n : Int,
+  n : Int32,
   edges : Array[@graph.Edge],
   weighted : Bool,
 ) -> Array[Array[Int64?]] {
@@ -117,12 +124,12 @@ fn distances(
 ///|
 /// Validate against the original input, not Graph::edge_weight or its checker.
 fn witness_matches(
-  n : Int,
+  n : Int32,
   edges : Array[@graph.Edge],
-  source : Int,
-  target : Int,
+  source : Int32,
+  target : Int32,
   expected : Int64?,
-  path : Array[Int]?,
+  path : Array[Int32]?,
   weighted : Bool,
 ) -> Bool {
   match (expected, path) {
@@ -162,9 +169,9 @@ fn witness_matches(
 
 ///|
 fn result_matches(
-  n : Int,
+  n : Int32,
   edges : Array[@graph.Edge],
-  source : Int,
+  source : Int32,
   result : @graph.SearchResult,
   expected : Array[Int64?],
   weighted : Bool,
@@ -190,7 +197,7 @@ fn result_matches(
 }
 
 ///|
-fn agrees(n : Int, edges : Array[@graph.Edge]) -> Bool {
+fn agrees(n : Int32, edges : Array[@graph.Edge]) -> Bool {
   let graph = try! @graph.Graph::from_array(edges, vertex_count=n)
   let unweighted = distances(n, edges, false)
   let weighted = distances(n, edges, true)
@@ -242,7 +249,7 @@ test "graph reference covers Int limits and unrepresentable shortest paths" {
 ///|
 test "quickcheck: BFS and Dijkstra agree with independent all-pairs distances" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32, Int32)])) => {
       let n = 1 + small(input.0, 7)
       let edges = input.1.map(e => @graph.Edge::{
         from: small(e.0, n),
@@ -262,7 +269,7 @@ test "quickcheck: BFS and Dijkstra agree with independent all-pairs distances" {
 test "quickcheck: Dijkstra distinguishes large finite distances, overflow and unreachability" {
   let weights = [0, 1, 2, 16, 1073741823, 1073741824, 2147483646, 2147483647]
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32, Int32)])) => {
       let n = 1 + small(input.0, 7)
       let edges = input.1.map(e => @graph.Edge::{
         from: small(e.0, n),
@@ -281,7 +288,7 @@ test "quickcheck: Dijkstra distinguishes large finite distances, overflow and un
 ///|
 test "quickcheck: distances survive vertex relabeling and edge reordering" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32, Int32)])) => {
       let n = 1 + small(input.0, 7)
       let edges = input.1.map(e => @graph.Edge::{
         from: small(e.0, n),
@@ -321,7 +328,7 @@ test "quickcheck: distances survive vertex relabeling and edge reordering" {
 ///|
 test "quickcheck: graph edit traces replay and shrink from original inputs" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32, Int32, Int32)])) => {
       let n = 1 + small(input.0, 5)
       let edges : Array[@graph.Edge] = []
       for (tag, from, to, weight) in input.1 {
@@ -353,7 +360,7 @@ test "quickcheck: graph edit traces replay and shrink from original inputs" {
 
 ///|
 test "graph sizes, edge weights, and operation traces all shrink" {
-  let input : (Int, Array[(Int, Int, Int)]) = (7, [(4, 5, 9)])
+  let input : (Int32, Array[(Int32, Int32, Int32)]) = (7, [(4, 5, 9)])
   assert_true(@shrink.Shrink::shrink(input).any(x => x.0 == 0))
   assert_true(@shrink.Shrink::shrink(input).any(x => x.1.is_empty()))
   assert_true(
@@ -369,7 +376,7 @@ test "graph sizes, edge weights, and operation traces all shrink" {
 ///|
 test "quickcheck: a false graph law shrinks to one zero-weight edge" {
   let report = @quickcheck.report(
-    (weights : Array[Int]) => {
+    (weights : Array[Int32]) => {
       let edges = weights.mapi((i, w) => @graph.Edge::{
         from: i,
         to: i + 1,

@@ -2,7 +2,7 @@
 /// Write one cell; return false without mutation if the index is invalid.
 pub fn[T] set(
   array : FixedArray[T],
-  index : Int,
+  index : Int32,
   value : T,
 ) -> Bool where {
   proof_ensure: result => result == (0 <= index && index < array.length()),
@@ -22,8 +22,8 @@ pub fn[T] set(
 /// success/bounds; preservation of other cells is checked by QuickCheck.
 pub fn[T] swap(
   array : FixedArray[T],
-  left : Int,
-  right : Int,
+  left : Int32,
+  right : Int32,
 ) -> Bool where {
   proof_ensure: result => {
     result ==
@@ -55,7 +55,7 @@ pub fn[T] fill(
   },
   proof_ensure: result => {
     result →
-    (∀ i : Int,
+    (∀ i : Int32,
       range.start <= i && i < range.start + range.count →
       same(array[i], value))
   },
@@ -82,7 +82,7 @@ pub fn[T] blit_disjoint(
   source : FixedArray[T],
   target : FixedArray[T],
   source_range : Range,
-  target_start : Int,
+  target_start : Int32,
 ) -> Bool where {
   proof_ensure: result => {
     result ==
@@ -93,7 +93,7 @@ pub fn[T] blit_disjoint(
   },
   proof_ensure: result => {
     result →
-    (∀ i : Int,
+    (∀ i : Int32,
       0 <= i && i < source_range.count →
       same(target[target_start + i], source[source_range.start + i]))
   },
@@ -126,7 +126,7 @@ pub fn[T] blit_disjoint(
 pub fn[T] copy_within(
   array : FixedArray[T],
   source_range : Range,
-  target_start : Int,
+  target_start : Int32,
 ) -> Bool where {
   proof_ensure: result => {
     result ==

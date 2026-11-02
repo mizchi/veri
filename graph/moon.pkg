@@ -6,6 +6,4 @@ import {
   "mizchi/veri/runtime/list",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

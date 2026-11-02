@@ -4,7 +4,7 @@
 /// Node fields represent first child, value and next sibling.
 priv enum Heap {
   Empty
-  Node(Heap, Int, Heap)
+  Node(Heap, Int32, Heap)
 }
 
 ///|
@@ -29,7 +29,7 @@ pub fn IntMinQueue::new() -> IntMinQueue where {
 #owned(children, heap)
 fn link(
   children : Heap,
-  value : Int,
+  value : Int32,
   heap : Heap,
 ) -> Heap where {
   proof_require: ordered(children) && all_ge(value, children),
@@ -107,7 +107,7 @@ fn merge_roots(
 #as_free_fn(push)
 pub fn IntMinQueue::push(
   queue : IntMinQueue,
-  value : Int,
+  value : Int32,
 ) -> IntMinQueue where {
   proof_require: valid(queue),
   proof_ensure: result => valid(result),
@@ -122,7 +122,7 @@ pub fn IntMinQueue::push(
 #as_free_fn(pop)
 pub fn IntMinQueue::pop(
   queue : IntMinQueue,
-) -> (Int, IntMinQueue)? where {
+) -> (Int32, IntMinQueue)? where {
   proof_require: valid(queue),
   proof_ensure: result => {
     match result {
@@ -148,7 +148,7 @@ pub fn IntMinQueue::pop(
 #as_free_fn(peek)
 pub fn IntMinQueue::peek(
   queue : IntMinQueue,
-) -> Int? where {
+) -> Int32? where {
   proof_require: valid(queue),
   proof_ensure: result => {
     match result {
@@ -179,7 +179,7 @@ pub fn IntMinQueue::is_empty(
 ///|
 /// Ascending order; fresh array, checked by runtime tests.
 #as_free_fn(to_array)
-pub fn IntMinQueue::to_array(queue : IntMinQueue) -> Array[Int] {
+pub fn IntMinQueue::to_array(queue : IntMinQueue) -> Array[Int32] {
   let result = []
   let mut rest = queue
   while pop(rest) is Some((value, tail)) {

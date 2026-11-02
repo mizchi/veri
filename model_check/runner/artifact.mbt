@@ -1,11 +1,11 @@
 ///|
 /// The full finite model is the identity: replay compares it, not a lossy hash.
 pub(all) struct Bundle {
-  version : Int
+  version : Int32
   driver : Driver
   config : Json
   property : @model_check.Property
-  justice : Array[Int]
+  justice : Array[Int32]
   require_trigger : Bool
   limits : @model_check.Limits
   // Absent in older version 1 bounded bundles.
@@ -15,15 +15,21 @@ pub(all) struct Bundle {
 } derive(ToJson, @json.FromJson)
 
 ///|
+pub extend Bundle with ToJson::{to_json}
+
+///|
+pub extend Bundle with @json.FromJson::{from_json}
+
+///|
 pub async fn Driver::record(
   self : Driver,
   config : Json,
   property : @model_check.Property,
-  bound? : Int = 8,
-  justice? : Array[Int] = [],
-  z3? : String = "z3",
-  require_trigger? : Bool = false,
-  limits? : @model_check.Limits = @model_check.Limits::new(),
+  bound~ : Int32 = 8,
+  justice~ : Array[Int32] = [],
+  z3~ : String = "z3",
+  require_trigger~ : Bool = false,
+  limits~ : @model_check.Limits = @model_check.Limits::new(),
 ) -> Bundle {
   let model = self.load(config)
   let result = self.check_loaded(
@@ -55,8 +61,8 @@ pub async fn Driver::record_complete(
   self : Driver,
   config : Json,
   property : @model_check.Property,
-  justice? : Array[Int] = [],
-  require_trigger? : Bool = false,
+  justice~ : Array[Int32] = [],
+  require_trigger~ : Bool = false,
 ) -> Bundle {
   let model = self.load(config)
   let result = self.check_complete_loaded(

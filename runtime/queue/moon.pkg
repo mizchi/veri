@@ -8,6 +8,4 @@ import {
   "mizchi/veri/testing/commands",
 } for "test"
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

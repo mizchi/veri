@@ -13,6 +13,7 @@ import {
 pub(all) suberror SuiteError {
   InvalidSuite(String)
 } derive(@debug.Debug)
+pub fn SuiteError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct Case {
@@ -22,14 +23,15 @@ pub(all) struct Case {
   target : String?
   config : Json?
   property : @model_check.Property
-  bound : Int?
+  bound : Int32?
   complete : Bool?
   fair : Bool?
   require_trigger : Bool?
   limits : @model_check.Limits?
-  justice : Array[Int]?
+  justice : Array[Int32]?
   expect : Outcome
 } derive(@json.FromJson)
+pub fn Case::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
 pub(all) enum Outcome {
   Counterexample
@@ -40,17 +42,24 @@ pub(all) enum Outcome {
   CompleteUnreachable
 } derive(Eq, @debug.Debug)
 pub fn Outcome::code(Self) -> String
+pub fn Outcome::equal(Self, Self) -> Bool
+pub fn Outcome::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Outcome::not_equal(Self, Self) -> Bool
+pub fn Outcome::to_json(Self) -> Json
+pub fn Outcome::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Outcome
 pub impl @json.FromJson for Outcome
 
 pub(all) struct Suite {
-  version : Int
+  version : Int32
   cases : Array[Case]
 }
+pub fn Suite::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Suite::validate(Self) -> Unit raise SuiteError
 pub impl @json.FromJson for Suite
 
 type WireSuite derive(@json.FromJson)
+pub fn WireSuite::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
 // Type aliases
 

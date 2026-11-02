@@ -81,7 +81,7 @@ just package-check # Execute and prove both README quickstarts from the package 
 The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, Z3 4.16.0, and CVC5 1.3.4.
 In this toolchain, `moon prove` automatically uses `~/.moon/share/why3`. No separate Why3 installation is needed.
 The `just` proof recipes generate `_build/why3/why3.conf` with Z3 and CVC5 encodings for bitvectors, quantified laws and real-valued IEEE models.
-Proof results appear in `*.proof.json` files under each module’s `_build/verif/` directory.
+Proof results appear in `*.proof.json` files under `_build/verif/`; workspaces nest reports by full package path.
 Use `just prove`: bare `moon prove` uses only the default encoding and can time out on integer/BV bridge goals.
 
 These commands run from a checkout of this repository. To reuse its generated

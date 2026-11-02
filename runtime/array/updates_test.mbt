@@ -12,7 +12,7 @@ test "range validation includes empty endpoints and full Int limits" {
 
 ///|
 test "set validates the index before changing a cell" {
-  let xs : FixedArray[Int] = [10, 20, 30]
+  let xs : FixedArray[Int32] = [10, 20, 30]
   assert_true(@array.set(xs, 1, 99))
   assert_eq(xs, [10, 99, 30])
   for i in [-1, 3, -2147483648, 2147483647] {
@@ -36,7 +36,7 @@ test "swap checks both indices and permits the same index" {
 
 ///|
 test "fill uses start and count and leaves invalid ranges untouched" {
-  let xs : FixedArray[Int] = [0, 1, 2, 3, 4]
+  let xs : FixedArray[Int32] = [0, 1, 2, 3, 4]
   assert_true(@array.fill(xs, 9, { start: 1, count: 3, }))
   assert_eq(xs, [0, 9, 9, 9, 4])
   assert_true(@array.fill(xs, 7, { start: 5, count: 0, }))
@@ -57,8 +57,8 @@ test "fill uses start and count and leaves invalid ranges untouched" {
 
 ///|
 test "blit preserves source and destination cells outside the target range" {
-  let source : FixedArray[Int] = [10, 20, 30, 40]
-  let target : FixedArray[Int] = [0, 1, 2, 3, 4]
+  let source : FixedArray[Int32] = [10, 20, 30, 40]
+  let target : FixedArray[Int32] = [0, 1, 2, 3, 4]
   assert_true(@array.blit(source, target, { start: 1, count: 2, }, 2))
   assert_eq(source, [10, 20, 30, 40])
   assert_eq(target, [0, 1, 20, 30, 4])
@@ -80,10 +80,10 @@ test "blit preserves source and destination cells outside the target range" {
 
 ///|
 test "copy_within handles overlap in both directions without a temporary array" {
-  let right : FixedArray[Int] = [0, 1, 2, 3, 4]
+  let right : FixedArray[Int32] = [0, 1, 2, 3, 4]
   assert_true(@array.copy_within(right, { start: 0, count: 4, }, 1))
   assert_eq(right, [0, 0, 1, 2, 3])
-  let left : FixedArray[Int] = [0, 1, 2, 3, 4]
+  let left : FixedArray[Int32] = [0, 1, 2, 3, 4]
   assert_true(@array.copy_within(left, { start: 1, count: 4, }, 0))
   assert_eq(left, [1, 2, 3, 4, 4])
   assert_true(@array.copy_within(left, { start: 1, count: 3, }, 1))

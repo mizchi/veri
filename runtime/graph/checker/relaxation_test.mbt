@@ -10,7 +10,7 @@ test "relaxation accepts overflowing detours and rejects negative labels" {
 ///|
 test "quickcheck: relaxation agrees with widened arithmetic" {
   @quickcheck.check(
-    (input : (Int, Int, Int)) => {
+    (input : (Int32, Int32, Int32)) => {
       let (cost, next, weight) = input
       @checker.relaxation(cost, next, weight) ==
       (

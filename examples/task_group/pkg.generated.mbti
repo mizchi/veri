@@ -55,6 +55,11 @@ pub(all) enum Body {
   CancelRequested
   Finished
 } derive(Eq, Hash, @debug.Debug)
+pub fn Body::equal(Self, Self) -> Bool
+pub fn Body::hash(Self) -> Int32
+pub fn Body::hash_combine(Self, Hasher) -> Unit
+pub fn Body::not_equal(Self, Self) -> Bool
+pub fn Body::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Child {
   Absent
@@ -64,6 +69,11 @@ pub(all) enum Child {
   Cancelling
   Done
 } derive(Eq, Hash, @debug.Debug)
+pub fn Child::equal(Self, Self) -> Bool
+pub fn Child::hash(Self) -> Int32
+pub fn Child::hash_combine(Self, Hasher) -> Unit
+pub fn Child::not_equal(Self, Self) -> Bool
+pub fn Child::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Event {
   Spawn(TaskId)
@@ -81,6 +91,11 @@ pub(all) enum Event {
   FailDefers
   Tick
 } derive(Eq, Hash, @debug.Debug)
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::hash(Self) -> Int32
+pub fn Event::hash_combine(Self, Hasher) -> Unit
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Phase {
   Open
@@ -88,6 +103,11 @@ pub(all) enum Phase {
   Finalizing
   Returned
 } derive(Eq, Hash, @debug.Debug)
+pub fn Phase::equal(Self, Self) -> Bool
+pub fn Phase::hash(Self) -> Int32
+pub fn Phase::hash_combine(Self, Hasher) -> Unit
+pub fn Phase::not_equal(Self, Self) -> Bool
+pub fn Phase::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Policy {
   first_no_wait : Bool
@@ -95,6 +115,11 @@ pub(all) struct Policy {
   first_allow_failure : Bool
   second_allow_failure : Bool
 } derive(Eq, Hash, @debug.Debug)
+pub fn Policy::equal(Self, Self) -> Bool
+pub fn Policy::hash(Self) -> Int32
+pub fn Policy::hash_combine(Self, Hasher) -> Unit
+pub fn Policy::not_equal(Self, Self) -> Bool
+pub fn Policy::to_repr(Self) -> @debug.Repr
 
 pub(all) struct State {
   phase : Phase
@@ -106,11 +131,21 @@ pub(all) struct State {
   cancel_requested : Bool
   failed : Bool
 } derive(Eq, Hash, @debug.Debug)
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::hash(Self) -> Int32
+pub fn State::hash_combine(Self, Hasher) -> Unit
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::to_repr(Self) -> @debug.Repr
 
 pub(all) enum TaskId {
   First
   Second
 } derive(Eq, Hash, @debug.Debug)
+pub fn TaskId::equal(Self, Self) -> Bool
+pub fn TaskId::hash(Self) -> Int32
+pub fn TaskId::hash_combine(Self, Hasher) -> Unit
+pub fn TaskId::not_equal(Self, Self) -> Bool
+pub fn TaskId::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

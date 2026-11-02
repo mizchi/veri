@@ -39,7 +39,7 @@ for (const [name, parameter, expression, postcondition, expected] of probes) {
 `;
   const imports = '"mizchi/veri/runtime/graph"';
   try {
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/graph-capability"\nimport { "mizchi/veri@0.2.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/graph-capability"\nimport { "mizchi/veri@0.2.1" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' + JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     writeFileSync(join(directory, "moon.pkg"), `import { ${imports} }\noptions("proof-enabled": true)\n`);
     writeFileSync(join(directory, "probe.mbt"), source);
@@ -51,7 +51,7 @@ for (const [name, parameter, expression, postcondition, expected] of probes) {
     const diagnostics = proof.stdout + proof.stderr;
     let status;
     if (proof.status === 0) {
-      const report = JSON.parse(readFileSync(join(directory, "_build/verif/graph-capability.proof.json"), "utf8"));
+      const report = JSON.parse(readFileSync(join(directory, "_build/verif/mizchi/graph-capability/graph-capability.proof.json"), "utf8"));
       if (report.result !== "success" || report.summary.valid < 1) throw new Error("Missing proof report");
       status = "accepted";
     } else if (diagnostics.includes("Error: [4207]") && diagnostics.includes("only contracted functions")) {

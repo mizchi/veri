@@ -2,9 +2,9 @@
 package "mizchi/veri/bounds"
 
 // Values
-pub fn clamp(Int, Int, Int) -> Int
+pub fn clamp(Int32, Int32, Int32) -> Int32
 
-pub fn clamp_half_open(Int, Int, Int) -> Int
+pub fn clamp_half_open(Int32, Int32, Int32) -> Int32
 
 // Errors
 

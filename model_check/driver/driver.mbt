@@ -1,17 +1,23 @@
 ///|
 struct Request[C] {
-  version : Int
+  version : Int32
   mode : String
   config : C
   property : @model_check.Property?
-  justice : Array[Int]
+  justice : Array[Int32]
   witnesses : Array[@model_check.Witness]
 } derive(@json.FromJson)
+
+///|
+pub extend Request with @json.FromJson::{from_json}
 
 ///|
 suberror ProtocolError {
   InvalidRequest(String)
 } derive(Debug)
+
+///|
+pub extend ProtocolError with @debug.Debug::{to_repr}
 
 ///|
 /// Version 1 transport: one JSON argument in, {version: 1, result: ...} out.
@@ -35,9 +41,11 @@ pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] dispatch(
   let result = if request.mode == "export" {
     client.model.to_json()
   } else {
-    request.witnesses
-    .map(w => client.accepts(property.unwrap(), w, justice=request.justice))
-    .to_json()
+    Json(
+      request.witnesses.map(w => {
+        client.accepts(property.unwrap(), w, justice=request.justice)
+      }),
+    )
   }
   { "version": 1, "result": result }
 }

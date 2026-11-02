@@ -6,7 +6,7 @@ pub fn[S : Eq, E, Snapshot] Client::accepts(
   self : Client[S, E, Snapshot],
   property : Property,
   witness : Witness,
-  justice? : Array[Int] = [],
+  justice~ : Array[Int32] = [],
 ) -> Bool {
   let ids = witness.states
   let count = witness.actions.length()

@@ -28,7 +28,7 @@ fn with_node(state : State, id : Node, next : NodeState) -> State {
 }
 
 ///|
-fn wall_now(state : State, id : Node) -> Int {
+fn wall_now(state : State, id : Node) -> Int32 {
   state.now + (if id == A { 0 } else { 1 })
 }
 

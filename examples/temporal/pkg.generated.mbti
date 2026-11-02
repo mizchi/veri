@@ -9,7 +9,7 @@ import {
 // Values
 pub fn action_enabled(State, Action) -> Bool
 
-pub fn decoded(Int, State?) -> Bool
+pub fn decoded(Int32, State?) -> Bool
 
 pub fn enabled(State, Action) -> Bool
 
@@ -25,7 +25,7 @@ pub fn initial_state(State) -> Bool
 
 pub fn replay(State, @list.List[Action]) -> State?
 
-pub fn represents(State, Int) -> Bool
+pub fn represents(State, Int32) -> Bool
 
 pub fn roundtrip(State) -> State?
 
@@ -39,9 +39,9 @@ pub fn safe_state(State) -> Bool
 
 pub fn same_outcome(State?, State?) -> Bool
 
-pub fn state_code(State) -> Int
+pub fn state_code(State) -> Int32
 
-pub fn state_from_code(Int) -> State?
+pub fn state_from_code(Int32) -> State?
 
 pub fn step(State, Action) -> State?
 
@@ -58,11 +58,17 @@ pub(all) enum Action {
   Wait
   Drop
 } derive(Eq, @debug.Debug)
+pub fn Action::equal(Self, Self) -> Bool
+pub fn Action::not_equal(Self, Self) -> Bool
+pub fn Action::to_repr(Self) -> @debug.Repr
 
 pub(all) struct State {
   pending : Bool
   done : Bool
 } derive(Eq, @debug.Debug)
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

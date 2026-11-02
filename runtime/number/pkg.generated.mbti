@@ -2,11 +2,11 @@
 package "mizchi/veri/runtime/number"
 
 // Values
-pub fn div_rem(Int, Int) -> (Int, Int)?
+pub fn div_rem(Int32, Int32) -> (Int32, Int32)?
 
-pub fn euclidean_mod(Int, Int) -> Int?
+pub fn euclidean_mod(Int32, Int32) -> Int32?
 
-pub fn gcd(UInt, UInt) -> UInt
+pub fn gcd(UInt32, UInt32) -> UInt32
 
 // Errors
 

@@ -16,10 +16,13 @@ pub(all) suberror BuilderError {
 } derive(Debug)
 
 ///|
+pub extend BuilderError with @debug.Debug::{to_repr}
+
+///|
 fn[S, E, J] Spec::validate(
   self : Spec[S, E, J],
-) -> Array[Int] raise BuilderError {
-  let names : Map[String, Int] = Map([])
+) -> Array[Int32] raise BuilderError {
+  let names : Map[String, Int32] = Map([])
   for i, pair in self.actions {
     let (name, _) = pair
     guard !name.is_empty() && !names.contains(name) else {
@@ -54,9 +57,9 @@ fn[S, E, J] Spec::validate(
 fn[S, E, J] finish_client(
   spec : Spec[S, E, J],
   states : Array[S],
-  transitions : Array[Array[Int]],
-  initial : Int,
-  justice : Array[Int],
+  transitions : Array[Array[Int32]],
+  initial : Int32,
+  justice : Array[Int32],
   exploration : Scope?,
 ) -> Client[S, E, J] {
   let definitions = spec.predicates.copy()
@@ -93,10 +96,10 @@ fn[S, E, J] finish_client(
 ///|
 pub fn[S : Eq, E, J] build_client(
   spec : Spec[S, E, J],
-  max_depth? : Int = 64,
-  max_states? : Int = 4096,
-  max_transitions? : Int = 4000000,
-  state_hash? : (S) -> Int,
+  max_depth~ : Int32 = 64,
+  max_states~ : Int32 = 4096,
+  max_transitions~ : Int32 = 4000000,
+  state_hash? : (S) -> Int32,
 ) -> Client[S, E, J] raise {
   let justice = spec.validate()
   let explored = explore(

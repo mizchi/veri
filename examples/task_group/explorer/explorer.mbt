@@ -8,16 +8,25 @@ pub(all) enum Fault {
 } derive(Eq, Debug)
 
 ///|
+pub extend Fault with Eq::{not_equal, equal}
+
+///|
+pub extend Fault with @debug.Debug::{to_repr}
+
+///|
 pub(all) struct Snapshot {
-  phase : Int
-  body : Int
-  first : Int
-  second : Int
+  phase : Int32
+  body : Int32
+  first : Int32
+  second : Int32
   first_held : Bool
   second_held : Bool
   cancel_requested : Bool
   failed : Bool
 } derive(ToJson)
+
+///|
+pub extend Snapshot with ToJson::{to_json}
 
 ///|
 pub(all) struct Graph {
@@ -54,7 +63,7 @@ pub fn events() -> Array[@task_group.Event] {
 }
 
 ///|
-pub fn policy(mask : Int) -> @task_group.Policy {
+pub fn policy(mask : Int32) -> @task_group.Policy {
   {
     first_no_wait: (mask & 1) != 0,
     second_no_wait: (mask & 2) != 0,
@@ -90,7 +99,7 @@ pub fn transition(
 }
 
 ///|
-fn child_code(child : @task_group.Child) -> Int {
+fn child_code(child : @task_group.Child) -> Int32 {
   match child {
     Absent => 0
     Active => 1

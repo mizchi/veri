@@ -13,7 +13,7 @@ test "map identity, composition and ordered fold" {
 ///|
 test "quickcheck: map laws and partitioned fold with core shrinking" {
   @quickcheck.check(
-    (input : (Array[Int], Array[Int])) => {
+    (input : (Array[Int32], Array[Int32])) => {
       let (a, b) = input
       // Small exact sums; no dependence on overflow behavior for algebra laws.
       let xs = @list.List::from_array(a.map(x => x % 100))

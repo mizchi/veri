@@ -43,7 +43,7 @@ test "union, sizes, copies and rejected indices" {
 ///|
 test "quickcheck: union-find traces preserve exactly the reference partition" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32)])) => {
       let (tag, commands) = input
       let n = (tag % 12).abs() + 1
       let uf = try! @union_find.UnionFind::new(n)

@@ -1,7 +1,7 @@
 ///|
 test "quickcheck: Float widening roundtrip preserves non-NaN bits" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let value = @float32.from_bits(bits)
       let widened = @float32.to_double(value)
       let restored = @float64.to_float(widened)

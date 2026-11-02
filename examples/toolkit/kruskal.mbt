@@ -4,7 +4,7 @@
 /// Uses core sorting and UnionFind; this example is tested, not formally proved.
 pub fn minimum_spanning_forest(
   edges : ArrayView[@graph.Edge],
-  vertex_count~ : Int,
+  vertex_count~ : Int32,
 ) -> Array[@graph.Edge] raise {
   let validated = @graph.Graph::from_array(edges, vertex_count~)
   let sorted = validated.to_array()

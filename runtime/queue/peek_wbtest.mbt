@@ -1,6 +1,6 @@
 ///|
 test "peek handles a deferred front without consuming the queue" {
-  let queue : Queue[Int] = {
+  let queue : Queue[Int32] = {
     front: @linked.empty(),
     back: @linked.from_array([3, 2, 1]),
   }

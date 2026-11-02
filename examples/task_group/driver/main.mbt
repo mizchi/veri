@@ -1,7 +1,7 @@
 ///|
 struct Config {
-  policy : Int
-  fault : Int
+  policy : Int32
+  fault : Int32
 } derive(@json.FromJson)
 
 ///|

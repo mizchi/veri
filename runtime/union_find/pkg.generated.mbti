@@ -9,23 +9,26 @@ import {
 
 // Errors
 pub(all) suberror UnionFindError {
-  NegativeSize(Int)
-  InvalidElement(Int)
+  NegativeSize(Int32)
+  InvalidElement(Int32)
 } derive(Eq, @debug.Debug)
+pub fn UnionFindError::equal(Self, Self) -> Bool
+pub fn UnionFindError::not_equal(Self, Self) -> Bool
+pub fn UnionFindError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub struct UnionFind {
   // private fields
 }
-pub fn UnionFind::component_count(Self) -> Int
-pub fn UnionFind::component_size(Self, Int) -> Int raise UnionFindError
+pub fn UnionFind::component_count(Self) -> Int32
+pub fn UnionFind::component_size(Self, Int32) -> Int32 raise UnionFindError
 pub fn UnionFind::copy(Self) -> Self
-pub fn UnionFind::find(Self, Int) -> Int raise UnionFindError
-pub fn UnionFind::length(Self) -> Int
-pub fn UnionFind::new(Int) -> Self raise UnionFindError
-pub fn UnionFind::same(Self, Int, Int) -> Bool raise UnionFindError
-pub fn UnionFind::to_array(Self) -> Array[Int]
-pub fn UnionFind::union(Self, Int, Int) -> Bool raise UnionFindError
+pub fn UnionFind::find(Self, Int32) -> Int32 raise UnionFindError
+pub fn UnionFind::length(Self) -> Int32
+pub fn UnionFind::new(Int32) -> Self raise UnionFindError
+pub fn UnionFind::same(Self, Int32, Int32) -> Bool raise UnionFindError
+pub fn UnionFind::to_array(Self) -> Array[Int32]
+pub fn UnionFind::union(Self, Int32, Int32) -> Bool raise UnionFindError
 
 // Type aliases
 

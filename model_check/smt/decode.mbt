@@ -2,7 +2,7 @@
 /// Only the exact get-value grammar for our nonnegative integer IDs is accepted.
 pub fn decode_witness(
   output : String,
-  depth : Int,
+  depth : Int32,
   response~ : Bool,
 ) -> @model_check.Witness raise {
   guard depth >= 0 && depth <= 1000000 else {
@@ -32,7 +32,7 @@ pub fn decode_witness(
     tokens[tokens.length() - 1] == ")" else {
     raise InvalidSolverOutput("Expected sat and values")
   }
-  let values : Map[String, Int] = Map([])
+  let values : Map[String, Int32] = Map([])
   let mut i = 2
   while i < tokens.length() - 1 {
     guard i + 3 < tokens.length() - 1 &&
@@ -92,10 +92,10 @@ pub fn evaluate(
   model : @model_check.Model[Json],
   property : @model_check.Property,
   witness : @model_check.Witness,
-  justice? : Array[Int] = [],
+  justice~ : Array[Int32] = [],
 ) -> Bool raise ModelError {
   validate_query(model, property, witness.actions.length(), justice~)
-  let client : @model_check.Client[Int, Int, Json] = {
+  let client : @model_check.Client[Int32, Int32, Json] = {
     initial: model.initial,
     states: Array::makei(model.states.length(), i => i),
     events: Array::makei(model.actions.length(), i => i),

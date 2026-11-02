@@ -3,12 +3,12 @@
 
 ///|
 /// Reinterpret an encoding. NaN payload preservation is not part of the contract.
-pub fn from_bits(bits : UInt) -> Float {
+pub fn from_bits(bits : UInt32) -> Float {
   Float::reinterpret_from_uint(bits)
 }
 
 ///|
-pub fn to_bits(value : Float) -> UInt {
+pub fn to_bits(value : Float) -> UInt32 {
   value.reinterpret_as_uint()
 }
 

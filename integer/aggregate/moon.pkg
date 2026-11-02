@@ -2,6 +2,4 @@ import {
   "mizchi/veri/integer",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

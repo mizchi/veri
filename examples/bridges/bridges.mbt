@@ -1,15 +1,17 @@
 ///|
 /// The callee's modular arithmetic contract is usable across module boundaries.
-pub fn zero_after_max() -> UInt where { proof_ensure: result => result == 0U, } {
+pub fn zero_after_max() -> UInt32 where {
+  proof_ensure: result => result == 0U,
+} {
   @uint32.add(0xffffffffU, 1U)
 }
 
 ///|
 /// Connect a runtime return value to an element in the logical array model.
 pub fn first_or(
-  array : FixedArray[Int],
-  fallback : Int,
-) -> Int where {
+  array : FixedArray[Int32],
+  fallback : Int32,
+) -> Int32 where {
   proof_ensure: result => {
     if array.length() > 0 {
       result ==
@@ -28,9 +30,9 @@ pub fn first_or(
 ///|
 /// Composition of separately verified operations, even when addition wraps.
 pub fn restore32(
-  value : UInt,
-  delta : UInt,
-) -> UInt where {
+  value : UInt32,
+  delta : UInt32,
+) -> UInt32 where {
   proof_require: 0U <= value && value <= 0xffffffffU,
   proof_require: 0U <= delta && delta <= 0xffffffffU,
   proof_ensure: result => result == value,
@@ -54,11 +56,11 @@ pub fn restore64(
 ///|
 /// A client can use fill's postcondition through a module boundary.
 pub fn fill_and_read(
-  array : FixedArray[Int],
-  start : Int,
-  count : Int,
-  value : Int,
-) -> Int? where {
+  array : FixedArray[Int32],
+  start : Int32,
+  count : Int32,
+  value : Int32,
+) -> Int32? where {
   proof_ensure: result => {
     match result {
       Some(found) =>

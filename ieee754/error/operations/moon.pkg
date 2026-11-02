@@ -5,6 +5,4 @@ import {
   "mizchi/veri/real",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

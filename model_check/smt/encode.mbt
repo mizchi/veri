@@ -28,7 +28,7 @@ fn symbols(model : @model_check.Model[Json]) -> Map[String, String] {
 }
 
 ///|
-fn at(symbols : Map[String, String], name : String, i : Int) -> String {
+fn at(symbols : Map[String, String], name : String, i : Int32) -> String {
   "(" + symbols.get(name).unwrap() + " s" + i.to_string() + ")"
 }
 
@@ -69,7 +69,7 @@ pub fn initial_source(
 /// Add one transition permanently, after popping the previous property's scope.
 pub fn step_source(
   model : @model_check.Model[Json],
-  i : Int,
+  i : Int32,
 ) -> String raise ModelError {
   guard i >= 0 && i < 1000000 else { raise InvalidQuery("Invalid step index") }
   "(declare-const s\{i + 1} Int)\n" +
@@ -84,8 +84,8 @@ pub fn step_source(
 pub fn condition_source(
   model : @model_check.Model[Json],
   property : @model_check.Property,
-  depth : Int,
-  justice? : Array[Int] = [],
+  depth : Int32,
+  justice~ : Array[Int32] = [],
 ) -> String raise ModelError {
   validate_query(model, property, depth, justice~)
   let names = symbols(model)
@@ -153,8 +153,8 @@ pub fn condition_source(
 pub fn query_source(
   model : @model_check.Model[Json],
   property : @model_check.Property,
-  depth : Int,
-  justice? : Array[Int] = [],
+  depth : Int32,
+  justice~ : Array[Int32] = [],
 ) -> String raise ModelError {
   validate_query(model, property, depth, justice~)
   let parts = [initial_source(model)]
@@ -166,7 +166,7 @@ pub fn query_source(
 }
 
 ///|
-pub fn value_command(depth : Int, response~ : Bool) -> String {
+pub fn value_command(depth : Int32, response~ : Bool) -> String {
   let names = Array::makei(depth + 1, i => "s\{i}")
   for i = 0; i < depth; i = i + 1 {
     names.push("a\{i}")

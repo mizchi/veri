@@ -6,15 +6,15 @@ import {
 }
 
 // Values
-pub fn add(UInt, UInt) -> UInt
+pub fn add(UInt32, UInt32) -> UInt32
 
-pub fn less(UInt, UInt) -> Bool
+pub fn less(UInt32, UInt32) -> Bool
 
-pub fn model(UInt) -> @bitvector.Bv32
+pub fn model(UInt32) -> @bitvector.Bv32
 
-pub fn model_preserves_value(UInt) -> Unit
+pub fn model_preserves_value(UInt32) -> Unit
 
-pub fn sub(UInt, UInt) -> UInt
+pub fn sub(UInt32, UInt32) -> UInt32
 
 // Errors
 

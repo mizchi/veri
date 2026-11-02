@@ -7,7 +7,7 @@ pub fn[T] blit(
   source : FixedArray[T],
   target : FixedArray[T],
   source_range : Range,
-  target_start : Int,
+  target_start : Int32,
 ) -> Bool {
   if physical_equal(source, target) {
     copy_within(source, source_range, target_start)

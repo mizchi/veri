@@ -8,7 +8,7 @@ import {
 // Values
 pub fn[T] add(T, Fset[T]) -> Fset[T]
 
-pub fn add_contains(Int, Fset[Int]) -> Unit
+pub fn add_contains(Int32, Fset[Int32]) -> Unit
 
 pub fn[T] added(Fset[T], Fset[T], T) -> Bool
 
@@ -20,7 +20,7 @@ pub fn[T] difference(Fset[T], Fset[T]) -> Fset[T]
 
 pub fn[T] empty() -> Fset[T]
 
-pub fn empty_has_no_member(Int) -> Unit
+pub fn empty_has_no_member(Int32) -> Unit
 
 pub fn[T] eq(Fset[T], Fset[T]) -> Bool
 
@@ -42,7 +42,7 @@ pub fn[T] subset(Fset[T], Fset[T]) -> Bool
 
 pub fn[T] union(Fset[T], Fset[T]) -> Fset[T]
 
-pub fn union_contains_left(Fset[Int], Fset[Int]) -> Unit
+pub fn union_contains_left(Fset[Int32], Fset[Int32]) -> Unit
 
 // Errors
 

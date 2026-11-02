@@ -1,6 +1,6 @@
 ///|
 test "bounds include duplicates and empty arrays" {
-  let xs : FixedArray[Int] = [1, 2, 2, 4]
+  let xs : FixedArray[Int32] = [1, 2, 2, 4]
   assert_eq(@search.lower_bound(xs, 2), 1)
   assert_eq(@search.upper_bound(xs, 2), 3)
   assert_eq(@search.lower_bound(xs, 3), 3)
@@ -17,7 +17,7 @@ test "bounds include duplicates and empty arrays" {
 ///|
 test "quickcheck: bounds match linear counts and core sorting preserves multiplicity" {
   @quickcheck.check(
-    (input : (Array[Int], Int)) => {
+    (input : (Array[Int32], Int32)) => {
       let (before, key) = input
       let sorted = before.copy()
       sorted.sort()
@@ -38,7 +38,7 @@ test "quickcheck: bounds match linear counts and core sorting preserves multipli
 
 ///|
 test "Int endpoints and incorrect multiplicities" {
-  let xs : FixedArray[Int] = [-2147483648, -2147483648, 0, 2147483647]
+  let xs : FixedArray[Int32] = [-2147483648, -2147483648, 0, 2147483647]
   assert_true(@search.is_sorted(xs))
   assert_eq(@search.lower_bound(xs, -2147483648), 0)
   assert_eq(@search.upper_bound(xs, -2147483648), 2)

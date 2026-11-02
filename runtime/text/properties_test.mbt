@@ -1,6 +1,6 @@
 ///|
 // Map arbitrary unsigned values onto exactly the SMT Unicode scalar alphabet.
-fn smt_string(codes : Array[UInt]) -> String {
+fn smt_string(codes : Array[UInt32]) -> String {
   let builder = StringBuilder()
   for value in codes {
     let index = (value % 0x2f800U).reinterpret_as_int()
@@ -12,7 +12,7 @@ fn smt_string(codes : Array[UInt]) -> String {
 
 ///|
 // Independent reference: iterate scalars instead of calculating UTF-16 offsets.
-fn scalar_substring(source : String, start : Int, count : Int) -> String {
+fn scalar_substring(source : String, start : Int32, count : Int32) -> String {
   let builder = StringBuilder()
   if start >= 0 && count > 0 {
     for index, char in source.iter().iter2() {
@@ -43,7 +43,7 @@ test "quickcheck: text accepts exactly the SMT alphabet in valid Unicode" {
 ///|
 test "quickcheck: text length and positions count scalars" {
   @quickcheck.check(
-    (codes : Array[UInt]) => {
+    (codes : Array[UInt32]) => {
       let source = smt_string(codes)
       let text = @text.from_string(source).unwrap()
       let mut agrees = text.length() == codes.length()
@@ -63,7 +63,7 @@ test "quickcheck: text length and positions count scalars" {
 ///|
 test "quickcheck: substring matches a scalar iteration reference" {
   @quickcheck.check(
-    (input : (Array[UInt], Int, Int, UInt)) => {
+    (input : (Array[UInt32], Int32, Int32, UInt32)) => {
       let (codes, start, count, position) = input
       let source = smt_string(codes)
       let text = @text.from_string(source).unwrap()
@@ -86,7 +86,7 @@ test "quickcheck: substring matches a scalar iteration reference" {
 ///|
 test "quickcheck: text rejects isolated surrogate halves" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let code = 0x10000 + (bits % 0x20000U).reinterpret_as_int()
       let pair = code.to_char().unwrap().to_string()
       let high = pair.unsafe_substring(start=0, end=1)

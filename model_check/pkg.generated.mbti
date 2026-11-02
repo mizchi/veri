@@ -7,30 +7,35 @@ import {
 }
 
 // Values
-pub fn[S : Eq, E, J] build_client(Spec[S, E, J], max_depth? : Int, max_states? : Int, max_transitions? : Int, state_hash? : (S) -> Int) -> Client[S, E, J] raise
+pub fn[S : Eq, E, J] build_client(Spec[S, E, J], max_depth? : Int32, max_states? : Int32, max_transitions? : Int32, state_hash? : (S) -> Int32) -> Client[S, E, J] raise
 
 pub fn[S : Eq, E, J] client_from_states(Spec[S, E, J], Array[S]) -> Client[S, E, J] raise
 
-pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int, max_states? : Int, max_transitions? : Int, state_hash? : (S) -> Int) -> Exploration[S] raise ExplorationError
+pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int32, max_states? : Int32, max_transitions? : Int32, state_hash? : (S) -> Int32) -> Exploration[S] raise ExplorationError
 
-pub fn[T] minimize(T, (T) -> Bool, candidates~ : (T) -> Iter[T], cost~ : (T) -> Int, max_attempts? : Int) -> Minimized[T] raise MinimizeError
+pub fn[T] minimize(T, (T) -> Bool, candidates~ : (T) -> Iter[T], cost~ : (T) -> Int32, max_attempts? : Int32) -> Minimized[T] raise MinimizeError
 
 // Errors
 pub(all) suberror BuilderError {
   InvalidDefinition(String)
 } derive(@debug.Debug)
+pub fn BuilderError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror ExplorationError {
-  InvalidDepth(Int)
-  InvalidStateLimit(Int)
-  InvalidEventCount(Int)
-  StateLimitExceeded(Int)
-  TransitionLimitExceeded(Int)
+  InvalidDepth(Int32)
+  InvalidStateLimit(Int32)
+  InvalidEventCount(Int32)
+  StateLimitExceeded(Int32)
+  TransitionLimitExceeded(Int32)
 } derive(Eq, @debug.Debug)
+pub fn ExplorationError::equal(Self, Self) -> Bool
+pub fn ExplorationError::not_equal(Self, Self) -> Bool
+pub fn ExplorationError::to_repr(Self) -> @debug.Repr
 
 pub(all) suberror MinimizeError {
   InvalidMinimization
 } derive(@debug.Debug)
+pub fn MinimizeError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
 pub(all) struct Client[S, E, Snapshot] {
@@ -41,40 +46,44 @@ pub(all) struct Client[S, E, Snapshot] {
   holds : (S, String) -> Bool?
   model : Model[Snapshot]
 }
-pub fn[S : Eq, E, Snapshot] Client::accepts(Self[S, E, Snapshot], Property, Witness, justice? : Array[Int]) -> Bool
+pub fn[S : Eq, E, Snapshot] Client::accepts(Self[S, E, Snapshot], Property, Witness, justice? : Array[Int32]) -> Bool
 
 pub(all) struct Exploration[S] {
   states : Array[S]
-  transitions : Array[Array[Int]]
-  depths : Array[Int]
-  frontier : Array[Int]
-  max_depth : Int
+  transitions : Array[Array[Int32]]
+  depths : Array[Int32]
+  frontier : Array[Int32]
+  max_depth : Int32
   complete : Bool
 }
 
 pub(all) struct Limits {
-  timeout_ms : Int
-  memory_mb : Int
-  max_query_bytes : Int
-  max_output_bytes : Int
+  timeout_ms : Int32
+  memory_mb : Int32
+  max_query_bytes : Int32
+  max_output_bytes : Int32
 } derive(ToJson, @json.FromJson)
-pub fn Limits::new(timeout_ms? : Int, memory_mb? : Int, max_query_bytes? : Int, max_output_bytes? : Int) -> Self
+pub fn Limits::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Limits::new(timeout_ms? : Int32, memory_mb? : Int32, max_query_bytes? : Int32, max_output_bytes? : Int32) -> Self
+pub fn Limits::to_json(Self) -> Json
 
 pub(all) struct Minimized[T] {
   value : T
-  attempts : Int
+  attempts : Int32
   exhausted : Bool
 }
 
 pub(all) struct Model[Snapshot] {
-  initial : Int
+  initial : Int32
   actions : Array[String]
   states : Array[Snapshot]
-  transitions : Array[Array[Int]]
+  transitions : Array[Array[Int32]]
   predicates : Map[String, Array[Bool]]
-  justice : Array[Int]
+  justice : Array[Int32]
   exploration : Scope?
 } derive(ToJson, @json.FromJson)
+pub fn[Snapshot : @json.FromJson] Model::from_json(Json, @json.JsonPath) -> Self[Snapshot] raise @json.JsonDecodeError
+pub fn[Snapshot : ToJson] Model::to_json(Self[Snapshot]) -> Json
 
 pub(all) enum Property {
   Safety(String)
@@ -82,15 +91,22 @@ pub(all) enum Property {
   Response(String, String)
   Deadlock(String)
 } derive(Eq, @debug.Debug)
+pub fn Property::equal(Self, Self) -> Bool
+pub fn Property::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Property::not_equal(Self, Self) -> Bool
+pub fn Property::to_json(Self) -> Json
+pub fn Property::to_repr(Self) -> @debug.Repr
 pub impl ToJson for Property
 pub impl @json.FromJson for Property
 
 pub(all) struct Scope {
   complete : Bool
-  max_depth : Int
-  depths : Array[Int]
-  frontier : Array[Int]
+  max_depth : Int32
+  depths : Array[Int32]
+  frontier : Array[Int32]
 } derive(ToJson, @json.FromJson)
+pub fn Scope::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Scope::to_json(Self) -> Json
 
 pub(all) struct Spec[S, E, Snapshot] {
   initial : S
@@ -103,12 +119,18 @@ pub(all) struct Spec[S, E, Snapshot] {
 pub fn[S, E, J] Spec::holds(Self[S, E, J], S, String) -> Bool?
 
 type WireProperty derive(@json.FromJson)
+pub fn WireProperty::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
 pub(all) struct Witness {
-  states : Array[Int]
-  actions : Array[Int]
-  loop_start : Int?
+  states : Array[Int32]
+  actions : Array[Int32]
+  loop_start : Int32?
 } derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+pub fn Witness::equal(Self, Self) -> Bool
+pub fn Witness::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Witness::not_equal(Self, Self) -> Bool
+pub fn Witness::to_json(Self) -> Json
+pub fn Witness::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

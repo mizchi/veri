@@ -1,6 +1,6 @@
 ///|
 test "tree methods and lazy iteration follow inorder on an arbitrary shape" {
-  let empty : @bintree.Tree[Int] = @bintree.Tree::new()
+  let empty : @bintree.Tree[Int32] = @bintree.Tree::new()
   let left = @bintree.Tree::node(empty, 3, empty)
   let right = @bintree.Tree::node(empty, 1, empty)
   let tree = @bintree.Tree::node(left, 2, right)
@@ -16,8 +16,8 @@ test "tree methods and lazy iteration follow inorder on an arbitrary shape" {
 
 ///|
 test "direct array traversal handles deep trees in both directions" {
-  let mut left : @bintree.Tree[Int] = @bintree.Empty
-  let mut right : @bintree.Tree[Int] = @bintree.Empty
+  let mut left : @bintree.Tree[Int32] = @bintree.Empty
+  let mut right : @bintree.Tree[Int32] = @bintree.Empty
   for value in 0..<20000 {
     left = @bintree.Node(left, value, @bintree.Empty)
     right = @bintree.Node(@bintree.Empty, 19999 - value, right)

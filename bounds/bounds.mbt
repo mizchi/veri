@@ -2,10 +2,10 @@
 /// Clamp to [min, max], matching Int::clamp for min <= max.
 /// The bounds precondition is proof-only; callers must supply a valid interval.
 pub fn clamp(
-  value : Int,
-  min : Int,
-  max : Int,
-) -> Int where {
+  value : Int32,
+  min : Int32,
+  max : Int32,
+) -> Int32 where {
   proof_require: min <= max,
   proof_ensure: result => min <= result && result <= max,
   proof_ensure: result => !(min <= value && value <= max) || result == value,
@@ -24,10 +24,10 @@ pub fn clamp(
 ///|
 /// Clamp to the half-open interval [lower, upper).
 pub fn clamp_half_open(
-  value : Int,
-  lower : Int,
-  upper : Int,
-) -> Int where {
+  value : Int32,
+  lower : Int32,
+  upper : Int32,
+) -> Int32 where {
   proof_require: lower < upper,
   proof_ensure: result => lower <= result && result < upper,
   proof_ensure: result => !(lower <= value && value < upper) || result == value,

@@ -10,11 +10,11 @@ pub fn div(Integer, Integer) -> Integer
 
 pub fn eq(Integer, Integer) -> Bool
 
-pub fn from_int(Int) -> Integer
+pub fn from_int(Int32) -> Integer
 
 pub fn from_int64(Int64) -> Integer
 
-pub fn from_uint(UInt) -> Integer
+pub fn from_uint(UInt32) -> Integer
 
 pub fn from_uint64(UInt64) -> Integer
 

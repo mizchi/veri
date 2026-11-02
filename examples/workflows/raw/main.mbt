@@ -3,7 +3,7 @@
 fn main {
   @model_driver.serve((model : @model_check.Model[Json]) => {
     @smt.validate(model)
-    let client : @model_check.Client[Int, Int, Json] = {
+    let client : @model_check.Client[Int32, Int32, Json] = {
       initial: model.initial,
       states: Array::makei(model.states.length(), i => i),
       events: Array::makei(model.actions.length(), i => i),

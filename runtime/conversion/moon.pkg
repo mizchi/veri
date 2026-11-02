@@ -1,6 +1,5 @@
 import {
   "mizchi/veri/integer",
-  "moonbitlang/core/uint",
 }
 
 import {
@@ -9,6 +8,4 @@ import {
   "moonbitlang/core/quickcheck/shrink",
 } for "test"
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

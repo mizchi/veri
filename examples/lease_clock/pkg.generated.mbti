@@ -28,31 +28,57 @@ pub(all) enum Event {
   TakeOver(Node)
   PublishCurrentOwner
 } derive(Eq, Hash, @debug.Debug)
+pub fn Event::equal(Self, Self) -> Bool
+pub fn Event::hash(Self) -> Int32
+pub fn Event::hash_combine(Self, Hasher) -> Unit
+pub fn Event::not_equal(Self, Self) -> Bool
+pub fn Event::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Node {
   A
   B
 } derive(Eq, Hash, @debug.Debug)
+pub fn Node::equal(Self, Self) -> Bool
+pub fn Node::hash(Self) -> Int32
+pub fn Node::hash_combine(Self, Hasher) -> Unit
+pub fn Node::not_equal(Self, Self) -> Bool
+pub fn Node::to_repr(Self) -> @debug.Repr
 
 pub(all) struct NodeState {
-  expires : Int
-  elapsed : Int
+  expires : Int32
+  elapsed : Int32
   held : Bool
-  resident_epoch : Int
+  resident_epoch : Int32
 } derive(Eq, Hash, ToJson, @debug.Debug)
+pub fn NodeState::equal(Self, Self) -> Bool
+pub fn NodeState::hash(Self) -> Int32
+pub fn NodeState::hash_combine(Self, Hasher) -> Unit
+pub fn NodeState::not_equal(Self, Self) -> Bool
+pub fn NodeState::to_json(Self) -> Json
+pub fn NodeState::to_repr(Self) -> @debug.Repr
 
 pub(all) struct State {
-  now : Int
+  now : Int32
   a : NodeState
   b : NodeState
   owner : Node
-  epoch : Int
+  epoch : Int32
 } derive(Eq, Hash, @debug.Debug)
+pub fn State::equal(Self, Self) -> Bool
+pub fn State::hash(Self) -> Int32
+pub fn State::hash_combine(Self, Hasher) -> Unit
+pub fn State::not_equal(Self, Self) -> Bool
+pub fn State::to_repr(Self) -> @debug.Repr
 
 pub(all) enum Variant {
   Vulnerable
   BoundedSkew
 } derive(Eq, Hash, @debug.Debug)
+pub fn Variant::equal(Self, Self) -> Bool
+pub fn Variant::hash(Self) -> Int32
+pub fn Variant::hash_combine(Self, Hasher) -> Unit
+pub fn Variant::not_equal(Self, Self) -> Bool
+pub fn Variant::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

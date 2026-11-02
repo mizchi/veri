@@ -1,6 +1,6 @@
 ///|
 test "stack methods and iteration use LIFO order" {
-  let empty : @stack.Stack[Int] = @stack.Stack::new()
+  let empty : @stack.Stack[Int32] = @stack.Stack::new()
   let xs = empty.push(1).push(2)
   assert_true(empty.is_empty())
   assert_eq(xs.peek(), Some(2))

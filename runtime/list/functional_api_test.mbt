@@ -1,6 +1,6 @@
 ///|
 priv suberror Stop {
-  Stop(Int)
+  Stop(Int32)
 }
 
 ///|
@@ -8,7 +8,7 @@ test "core fold labels and iterator construction" {
   let xs = @list.List::from_iter([1, 2, 3].iter())
   assert_eq(xs.fold(init="", (acc, x) => acc + x.to_string()), "123")
   assert_eq(
-    @list.List::from_iter(Iter::empty()).fold(init=7, (a, b : Int) => a + b),
+    @list.List::from_iter(Iter::empty()).fold(init=7, (a, b : Int32) => a + b),
     7,
   )
 }

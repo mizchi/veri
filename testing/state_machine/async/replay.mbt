@@ -12,9 +12,15 @@ pub(all) struct System[S, C, O, V] {
 pub(all) struct Failure[C, O, V] {
   commands : Array[C]
   replay : @state_machine.Replay[O, V]
-  shrink_attempts : Int
+  shrink_attempts : Int32
   seed : UInt64
 } derive(Debug, ToJson)
+
+///|
+pub extend Failure with @debug.Debug::{to_repr}
+
+///|
+pub extend Failure with ToJson::{to_json}
 
 ///|
 pub(all) suberror CheckError {
@@ -24,11 +30,14 @@ pub(all) suberror CheckError {
 } derive(Debug)
 
 ///|
+pub extend CheckError with @debug.Debug::{to_repr}
+
+///|
 pub async fn[M, S, C, O : Eq, V : Eq] replay(
   model : @state_machine.Model[M, C, O, V],
   system : System[S, C, O, V],
   commands : Array[C],
-  timeout_ms? : Int = 1000,
+  timeout_ms~ : Int32 = 1000,
 ) -> @state_machine.Replay[O, V] {
   guard timeout_ms > 0 else { raise InvalidOptions }
   @moon_async.with_timeout(timeout_ms, () => {
@@ -95,9 +104,9 @@ pub async fn[M, S, C : @shrink.Shrink, O : Eq, V : Eq] shrink_failure(
   model : @state_machine.Model[M, C, O, V],
   system : System[S, C, O, V],
   commands : Array[C],
-  max_shrinks? : Int = 1000,
-  timeout_ms? : Int = 1000,
-  seed? : UInt64 = 20260916,
+  max_shrinks~ : Int32 = 1000,
+  timeout_ms~ : Int32 = 1000,
+  seed~ : UInt64 = 20260916,
 ) -> Failure[C, O, V] {
   guard max_shrinks >= 0 else { raise InvalidOptions }
   let mut current = commands.copy()
@@ -135,11 +144,11 @@ pub async fn[M, S, C : @shrink.Shrink, O : Eq, V : Eq] shrink_failure(
 pub async fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink, O : Eq, V : Eq] find_failure(
   model : @state_machine.Model[M, C, O, V],
   system : System[S, C, O, V],
-  count? : Int = 1000,
-  max_size? : Int = 128,
-  max_shrinks? : Int = 1000,
-  seed? : UInt64 = 20260916,
-  timeout_ms? : Int = 1000,
+  count~ : Int32 = 1000,
+  max_size~ : Int32 = 128,
+  max_shrinks~ : Int32 = 1000,
+  seed~ : UInt64 = 20260916,
+  timeout_ms~ : Int32 = 1000,
 ) -> Failure[C, O, V]? {
   guard count > 0 &&
     count <= 1000000 &&
@@ -148,7 +157,7 @@ pub async fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink, O : Eq, V : Eq] f
     max_shrinks >= 0 else {
     raise InvalidOptions
   }
-  let state = @splitmix.new(seed~)
+  let state = @splitmix.RandomState(seed~)
   let mut accepted = 0
   let mut draws = 0
   while accepted < count {

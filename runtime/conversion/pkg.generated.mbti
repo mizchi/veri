@@ -12,11 +12,11 @@ pub fn can_int64_to_uint(Int64) -> Bool
 
 pub fn can_int64_to_uint64(Int64) -> Bool
 
-pub fn can_int_to_int64(Int) -> Bool
+pub fn can_int_to_int64(Int32) -> Bool
 
-pub fn can_int_to_uint(Int) -> Bool
+pub fn can_int_to_uint(Int32) -> Bool
 
-pub fn can_int_to_uint64(Int) -> Bool
+pub fn can_int_to_uint64(Int32) -> Bool
 
 pub fn can_uint64_to_int(UInt64) -> Bool
 
@@ -24,35 +24,35 @@ pub fn can_uint64_to_int64(UInt64) -> Bool
 
 pub fn can_uint64_to_uint(UInt64) -> Bool
 
-pub fn can_uint_to_int(UInt) -> Bool
+pub fn can_uint_to_int(UInt32) -> Bool
 
-pub fn can_uint_to_int64(UInt) -> Bool
+pub fn can_uint_to_int64(UInt32) -> Bool
 
-pub fn can_uint_to_uint64(UInt) -> Bool
+pub fn can_uint_to_uint64(UInt32) -> Bool
 
-pub fn checked_int64_to_int(Int64) -> Int?
+pub fn checked_int64_to_int(Int64) -> Int32?
 
-pub fn checked_int64_to_uint(Int64) -> UInt?
+pub fn checked_int64_to_uint(Int64) -> UInt32?
 
 pub fn checked_int64_to_uint64(Int64) -> UInt64?
 
-pub fn checked_int_to_uint(Int) -> UInt?
+pub fn checked_int_to_uint(Int32) -> UInt32?
 
-pub fn checked_int_to_uint64(Int) -> UInt64?
+pub fn checked_int_to_uint64(Int32) -> UInt64?
 
-pub fn checked_uint64_to_int(UInt64) -> Int?
+pub fn checked_uint64_to_int(UInt64) -> Int32?
 
 pub fn checked_uint64_to_int64(UInt64) -> Int64?
 
-pub fn checked_uint64_to_uint(UInt64) -> UInt?
+pub fn checked_uint64_to_uint(UInt64) -> UInt32?
 
-pub fn checked_uint_to_int(UInt) -> Int?
+pub fn checked_uint_to_int(UInt32) -> Int32?
 
-pub fn converted_int(@integer.Integer, Int?) -> Bool
+pub fn converted_int(@integer.Integer, Int32?) -> Bool
 
 pub fn converted_int64(@integer.Integer, Int64?) -> Bool
 
-pub fn converted_uint(@integer.Integer, UInt?) -> Bool
+pub fn converted_uint(@integer.Integer, UInt32?) -> Bool
 
 pub fn converted_uint64(@integer.Integer, UInt64?) -> Bool
 
@@ -64,11 +64,11 @@ pub fn fits_uint(@integer.Integer) -> Bool
 
 pub fn fits_uint64(@integer.Integer) -> Bool
 
-pub fn int_to_int64(Int) -> Int64
+pub fn int_to_int64(Int32) -> Int64
 
-pub fn uint_to_int64(UInt) -> Int64
+pub fn uint_to_int64(UInt32) -> Int64
 
-pub fn uint_to_uint64(UInt) -> UInt64
+pub fn uint_to_uint64(UInt32) -> UInt64
 
 // Errors
 

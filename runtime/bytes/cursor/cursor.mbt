@@ -3,7 +3,7 @@
 /// failed reads leave the original available for another parser. No byte copy.
 pub struct Cursor {
   priv data : BytesView
-  priv offset : Int
+  priv offset : Int32
 }
 
 ///|
@@ -12,12 +12,12 @@ pub fn Cursor::new(data : BytesView) -> Cursor {
 }
 
 ///|
-pub fn Cursor::position(self : Cursor) -> Int {
+pub fn Cursor::position(self : Cursor) -> Int32 {
   self.offset
 }
 
 ///|
-pub fn Cursor::remaining(self : Cursor) -> Int {
+pub fn Cursor::remaining(self : Cursor) -> Int32 {
   self.data.length() - self.offset
 }
 
@@ -25,7 +25,7 @@ pub fn Cursor::remaining(self : Cursor) -> Int {
 /// Composable read specification. Run through Cursor::read; parser state cannot
 /// be forged externally. Native codecs and combinators are differential-tested.
 pub struct Parser[T] {
-  priv parse : (BytesView, Int) -> @codec.Decoded[T]?
+  priv parse : (BytesView, Int32) -> @codec.Decoded[T]?
 }
 
 ///|
@@ -103,7 +103,7 @@ pub fn[T] Parser::or_else(self : Parser[T], other : Parser[T]) -> Parser[T] {
 
 ///|
 /// Read exactly count bytes without copying them; reject negative or truncated counts.
-pub fn take(count : Int) -> Parser[BytesView] {
+pub fn take(count : Int32) -> Parser[BytesView] {
   {
     parse: (data, offset) => {
       match @codec.read_end(data.length(), offset, count) {

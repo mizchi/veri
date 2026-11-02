@@ -10,6 +10,4 @@ import {
   "mizchi/veri/ieee754/error",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

@@ -8,6 +8,9 @@ struct WireProperty {
 } derive(@json.FromJson)
 
 ///|
+pub extend WireProperty with @json.FromJson::{from_json}
+
+///|
 pub impl @json.FromJson for Property with fn from_json(json, path) {
   let wire : WireProperty = @json.from_json(json, path~)
   match (wire.kind, wire.predicate, wire.trigger, wire.goal, wire.terminal) {
@@ -21,17 +24,18 @@ pub impl @json.FromJson for Property with fn from_json(json, path) {
 }
 
 ///|
+pub extend Property with @json.FromJson::{from_json}
+
+///|
 pub impl ToJson for Property with fn to_json(self) {
   match self {
-    Deadlock(terminal) => { "kind": "deadlock", "terminal": terminal.to_json() }
-    Safety(name) => { "kind": "safety", "predicate": name.to_json() }
-    Reachability(name) =>
-      { "kind": "reachability", "predicate": name.to_json() }
+    Deadlock(terminal) => { "kind": "deadlock", "terminal": Json(terminal) }
+    Safety(name) => { "kind": "safety", "predicate": Json(name) }
+    Reachability(name) => { "kind": "reachability", "predicate": Json(name) }
     Response(trigger, goal) =>
-      {
-        "kind": "response",
-        "trigger": trigger.to_json(),
-        "goal": goal.to_json(),
-      }
+      { "kind": "response", "trigger": Json(trigger), "goal": Json(goal) }
   }
 }
+
+///|
+pub extend Property with ToJson::{to_json}

@@ -8,7 +8,7 @@ import {
 }
 
 // Values
-pub fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink + @debug.Debug, O : Eq + @debug.Debug, V : Eq + @debug.Debug] check(Model[M, C, O, V], System[S, C, O, V], count? : UInt, max_size? : UInt, max_shrinks? : UInt, seed? : UInt64) -> Unit raise
+pub fn[M, S, C : @quickcheck.Arbitrary + @shrink.Shrink + @debug.Debug, O : Eq + @debug.Debug, V : Eq + @debug.Debug] check(Model[M, C, O, V], System[S, C, O, V], count? : UInt32, max_size? : UInt32, max_shrinks? : UInt32, seed? : UInt64) -> Unit raise
 
 pub fn[M, S, C, O : Eq, V : Eq] replay(Model[M, C, O, V], System[S, C, O, V], Array[C]) -> Replay[O, V] raise
 
@@ -25,12 +25,14 @@ pub(all) struct Model[M, C, O, V] {
 
 pub(all) struct Replay[O, V] {
   verdict : Verdict
-  index : Int
+  index : Int32
   expected_output : O?
   actual_output : O?
   expected_state : V?
   actual_state : V?
 } derive(ToJson, @debug.Debug)
+pub fn[O : ToJson, V : ToJson] Replay::to_json(Self[O, V]) -> Json
+pub fn[O : @debug.Debug, V : @debug.Debug] Replay::to_repr(Self[O, V]) -> @debug.Repr
 
 pub(all) struct System[S, C, O, V] {
   create : () -> S raise
@@ -44,6 +46,10 @@ pub(all) enum Verdict {
   Mismatch
   InvalidCommand
 } derive(Eq, ToJson, @debug.Debug)
+pub fn Verdict::equal(Self, Self) -> Bool
+pub fn Verdict::not_equal(Self, Self) -> Bool
+pub fn Verdict::to_json(Self) -> Json
+pub fn Verdict::to_repr(Self) -> @debug.Repr
 
 // Type aliases
 

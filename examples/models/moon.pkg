@@ -7,6 +7,4 @@ import {
   "mizchi/veri/strings",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

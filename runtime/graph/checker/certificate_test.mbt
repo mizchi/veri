@@ -5,7 +5,7 @@ test "complete checker accepts paths, parallel edges, zero weights and Int max" 
     { from: 0, to: 1, weight: 0, },
     { from: 1, to: 2, weight: 2147483647, },
   ]
-  let parents : FixedArray[Int?] = [None, Some(0), Some(1), None]
+  let parents : FixedArray[Int32?] = [None, Some(0), Some(1), None]
   assert_true(
     @checker.check_certificate(
       4,

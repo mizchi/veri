@@ -24,6 +24,7 @@ pub fn[T] Tree::new() -> Self[T]
 #as_free_fn(node)
 pub fn[T] Tree::node(Self[T], T, Self[T]) -> Self[T]
 pub fn[T] Tree::to_array(Self[T]) -> Array[T]
+pub fn[T : @debug.Debug] Tree::to_repr(Self[T]) -> @debug.Repr
 
 // Type aliases
 

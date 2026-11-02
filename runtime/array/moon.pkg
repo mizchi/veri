@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/debug",
   "mizchi/veri/arrays",
   "mizchi/veri/arrays/range",
   "mizchi/veri/integer",
@@ -7,9 +8,6 @@ import {
 import {
   "moonbitlang/core/quickcheck",
   "moonbitlang/core/quickcheck/shrink",
-  "moonbitlang/core/debug",
 } for "test"
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

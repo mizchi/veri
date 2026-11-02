@@ -14,11 +14,16 @@ import {
 
 // Types and methods
 pub(all) enum Command {
-  Push(Int)
+  Push(Int32)
   Pop
   Peek
   Clear
 } derive(Eq, @debug.Debug)
+pub fn Command::arbitrary(Int32, @splitmix.RandomState) -> Self
+pub fn Command::equal(Self, Self) -> Bool
+pub fn Command::not_equal(Self, Self) -> Bool
+pub fn Command::shrink(Self) -> Iter[Self]
+pub fn Command::to_repr(Self) -> @debug.Repr
 pub impl @quickcheck.Arbitrary for Command
 pub impl @shrink.Shrink for Command
 

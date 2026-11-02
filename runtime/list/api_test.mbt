@@ -1,6 +1,6 @@
 ///|
 test "list methods preserve order and compose with Iter" {
-  let empty : @list.List[Int] = @list.List::new()
+  let empty : @list.List[Int32] = @list.List::new()
   let xs = empty.prepend(2).prepend(1)
   let ys = @list.List::from_array([3, 4])
   assert_true(empty.is_empty())

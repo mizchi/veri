@@ -5,6 +5,9 @@ pub(all) struct Snapshot {
 } derive(ToJson)
 
 ///|
+pub extend Snapshot with ToJson::{to_json}
+
+///|
 /// Preserve the state identifiers used by the proof clients.
 pub fn client(
   allow_drop : Bool,

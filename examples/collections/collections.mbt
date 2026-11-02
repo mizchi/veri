@@ -1,8 +1,8 @@
 ///|
 pub fn stack_last(
-  first : Int,
-  last : Int,
-) -> Int? where {
+  first : Int32,
+  last : Int32,
+) -> Int32? where {
   proof_ensure: result => {
     match result {
       Some(value) => value == last
@@ -15,9 +15,9 @@ pub fn stack_last(
 
 ///|
 pub fn queue_first(
-  first : Int,
-  last : Int,
-) -> Int? where {
+  first : Int32,
+  last : Int32,
+) -> Int32? where {
   proof_ensure: result => {
     match result {
       Some(value) => value == first
@@ -30,9 +30,9 @@ pub fn queue_first(
 
 ///|
 pub fn minimum_of_two(
-  first : Int,
-  last : Int,
-) -> Int? where {
+  first : Int32,
+  last : Int32,
+) -> Int32? where {
   proof_ensure: result => {
     match result {
       Some(value) =>
@@ -46,7 +46,7 @@ pub fn minimum_of_two(
 
 ///|
 pub fn inserted_is_found(
-  value : Int,
+  value : Int32,
 ) -> Bool where {
   proof_ensure: result => result,
 } {
@@ -55,7 +55,7 @@ pub fn inserted_is_found(
 
 ///|
 pub fn empty_search_misses(
-  value : Int,
+  value : Int32,
 ) -> Bool where {
   proof_ensure: result => result == false,
 } {

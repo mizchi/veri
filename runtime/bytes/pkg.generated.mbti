@@ -16,35 +16,35 @@ pub fn byte_to_bytes(Byte) -> Bytes
 
 pub fn byte_to_integer(Byte) -> @integer.Integer
 
-pub fn decode_byte(BytesView, Int) -> Decoded[Byte]?
+pub fn decode_byte(BytesView, Int32) -> Decoded[Byte]?
 
-pub fn decode_uint16_be(BytesView, Int) -> Decoded[UInt16]?
+pub fn decode_uint16_be(BytesView, Int32) -> Decoded[UInt16]?
 
-pub fn decode_uint16_le(BytesView, Int) -> Decoded[UInt16]?
+pub fn decode_uint16_le(BytesView, Int32) -> Decoded[UInt16]?
 
-pub fn decode_uint64_be(BytesView, Int) -> Decoded[UInt64]?
+pub fn decode_uint64_be(BytesView, Int32) -> Decoded[UInt64]?
 
-pub fn decode_uint64_le(BytesView, Int) -> Decoded[UInt64]?
+pub fn decode_uint64_le(BytesView, Int32) -> Decoded[UInt64]?
 
-pub fn decode_uint_be(BytesView, Int) -> Decoded[UInt]?
+pub fn decode_uint_be(BytesView, Int32) -> Decoded[UInt32]?
 
-pub fn decode_uint_le(BytesView, Int) -> Decoded[UInt]?
+pub fn decode_uint_le(BytesView, Int32) -> Decoded[UInt32]?
 
-pub fn read_byte(BytesView, Int) -> Byte?
+pub fn read_byte(BytesView, Int32) -> Byte?
 
-pub fn read_end(Int, Int, Int) -> Int?
+pub fn read_end(Int32, Int32, Int32) -> Int32?
 
-pub fn read_uint16_be(BytesView, Int) -> UInt16?
+pub fn read_uint16_be(BytesView, Int32) -> UInt16?
 
-pub fn read_uint16_le(BytesView, Int) -> UInt16?
+pub fn read_uint16_le(BytesView, Int32) -> UInt16?
 
-pub fn read_uint64_be(BytesView, Int) -> UInt64?
+pub fn read_uint64_be(BytesView, Int32) -> UInt64?
 
-pub fn read_uint64_le(BytesView, Int) -> UInt64?
+pub fn read_uint64_le(BytesView, Int32) -> UInt64?
 
-pub fn read_uint_be(BytesView, Int) -> UInt?
+pub fn read_uint_be(BytesView, Int32) -> UInt32?
 
-pub fn read_uint_le(BytesView, Int) -> UInt?
+pub fn read_uint_le(BytesView, Int32) -> UInt32?
 
 pub fn uint16_to_be_bytes(UInt16) -> Bytes
 
@@ -54,17 +54,20 @@ pub fn uint64_to_be_bytes(UInt64) -> Bytes
 
 pub fn uint64_to_le_bytes(UInt64) -> Bytes
 
-pub fn uint_to_be_bytes(UInt) -> Bytes
+pub fn uint_to_be_bytes(UInt32) -> Bytes
 
-pub fn uint_to_le_bytes(UInt) -> Bytes
+pub fn uint_to_le_bytes(UInt32) -> Bytes
 
 // Errors
 
 // Types and methods
 pub(all) struct Decoded[T] {
   value : T
-  next_offset : Int
+  next_offset : Int32
 } derive(Eq, @debug.Debug)
+pub fn[T : Eq] Decoded::equal(Self[T], Self[T]) -> Bool
+pub fn[T : Eq] Decoded::not_equal(Self[T], Self[T]) -> Bool
+pub fn[T : @debug.Debug] Decoded::to_repr(Self[T]) -> @debug.Repr
 
 // Type aliases
 

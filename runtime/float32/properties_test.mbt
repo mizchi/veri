@@ -3,7 +3,7 @@
 // deliberately not compared; every other value is checked bit for bit.
 
 ///|
-fn expected(bits : UInt) -> @float32.Expected {
+fn expected(bits : UInt32) -> @float32.Expected {
   if (bits & 0x7fffffffU) > 0x7f800000U {
     AnyNaN
   } else {
@@ -14,7 +14,7 @@ fn expected(bits : UInt) -> @float32.Expected {
 ///|
 test "quickcheck: binary32 classification and bit roundtrip" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let value = @float32.from_bits(bits)
       let magnitude = bits & 0x7fffffffU
       @float32.is_nan(value) == (magnitude > 0x7f800000U) &&
@@ -31,7 +31,7 @@ test "quickcheck: binary32 classification and bit roundtrip" {
 ///|
 test "quickcheck: binary32 sign operations match the encoding" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let value = @float32.from_bits(bits)
       @float32.matches(@float32.neg(value), expected(bits ^ 0x80000000U)) &&
       @float32.matches(@float32.abs(value), expected(bits & 0x7fffffffU))
@@ -44,7 +44,7 @@ test "quickcheck: binary32 sign operations match the encoding" {
 ///|
 test "quickcheck: finite binary32 self subtraction gives positive zero" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let value = @float32.from_bits(bits)
       @float32.matches(@float32.sub(value, value), Bits(0U))
     },
@@ -57,7 +57,7 @@ test "quickcheck: finite binary32 self subtraction gives positive zero" {
 ///|
 test "quickcheck: binary32 multiplication and division by one preserve values" {
   @quickcheck.check(
-    (bits : UInt) => {
+    (bits : UInt32) => {
       let value = @float32.from_bits(bits)
       let one = @float32.from_bits(0x3f800000U)
       @float32.matches(@float32.mul(value, one), expected(bits)) &&
@@ -71,7 +71,7 @@ test "quickcheck: binary32 multiplication and division by one preserve values" {
 ///|
 test "quickcheck: binary32 addition and multiplication commute" {
   @quickcheck.check(
-    (input : (UInt, UInt)) => {
+    (input : (UInt32, UInt32)) => {
       let x = @float32.from_bits(input.0)
       let y = @float32.from_bits(input.1)
       let sum = @float32.add(x, y)

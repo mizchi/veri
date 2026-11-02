@@ -112,7 +112,7 @@ fn rejects_corruptions(
 ///|
 test "quickcheck: certificates reject corrupted distances, reachability and parents" {
   @quickcheck.check(
-    (input : (Int, Array[(Int, Int, Int)])) => {
+    (input : (Int32, Array[(Int32, Int32, Int32)])) => {
       let n = 2 + (input.0 % 6).abs()
       let edges = input.1.map(e => Edge::{
         from: (e.0 % n).abs(),

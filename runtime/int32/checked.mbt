@@ -1,9 +1,9 @@
 ///|
 /// Return the exact Int result, or None precisely when it is unrepresentable.
 pub fn checked_add(
-  x : Int,
-  y : Int,
-) -> Int? where {
+  x : Int32,
+  y : Int32,
+) -> Int32? where {
   proof_require: -2147483648 <= x && x <= 2147483647,
   proof_require: -2147483648 <= y && y <= 2147483647,
   proof_ensure: result => {
@@ -30,9 +30,9 @@ pub fn checked_add(
 ///|
 /// Return the exact Int result, or None precisely when it is unrepresentable.
 pub fn checked_sub(
-  x : Int,
-  y : Int,
-) -> Int? where {
+  x : Int32,
+  y : Int32,
+) -> Int32? where {
   proof_require: -2147483648 <= x && x <= 2147483647,
   proof_require: -2147483648 <= y && y <= 2147483647,
   proof_ensure: result => {
@@ -59,9 +59,9 @@ pub fn checked_sub(
 ///|
 /// Return the exact Int result, or None precisely when it is unrepresentable.
 pub fn checked_mul(
-  x : Int,
-  y : Int,
-) -> Int? where {
+  x : Int32,
+  y : Int32,
+) -> Int32? where {
   proof_require: -2147483648 <= x && x <= 2147483647,
   proof_require: -2147483648 <= y && y <= 2147483647,
   proof_ensure: result => {

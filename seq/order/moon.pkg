@@ -4,6 +4,4 @@ import {
   "mizchi/veri/relations",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

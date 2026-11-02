@@ -1,9 +1,15 @@
 ///|
 /// Exact encoding for non-NaN results, or any NaN encoding.
 pub(all) enum Expected {
-  Bits(UInt)
+  Bits(UInt32)
   AnyNaN
 } derive(Eq, Debug)
+
+///|
+pub extend Expected with Eq::{not_equal, equal}
+
+///|
+pub extend Expected with @debug.Debug::{to_repr}
 
 ///|
 /// Compare an observed result with a reference, preserving the sign of zero.

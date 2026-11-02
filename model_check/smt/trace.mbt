@@ -26,7 +26,7 @@ fn changes(
     }
   } else {
     output.push({
-      "path": path.to_json(),
+      "path": Json(path),
       "before": before.unwrap_or(null),
       "after": after.unwrap_or(null),
       "before_present": before is Some(_),
@@ -41,7 +41,7 @@ pub fn describe(
   model : @model_check.Model[Json],
   property : @model_check.Property,
   witness : @model_check.Witness,
-  justice? : Array[Int] = [],
+  justice~ : Array[Int32] = [],
 ) -> Json raise {
   guard evaluate(model, property, witness, justice~) else {
     raise InvalidSolverOutput("Cannot explain an invalid witness")
@@ -53,11 +53,11 @@ pub fn describe(
     let diff = []
     changes(Some(before), Some(after), "", diff)
     steps.push({
-      "index": i.to_json(),
-      "action": model.actions[action].to_json(),
-      "from": witness.states[i].to_json(),
-      "to": witness.states[i + 1].to_json(),
-      "changes": diff.to_json(),
+      "index": Json(i),
+      "action": Json(model.actions[action]),
+      "from": Json(witness.states[i]),
+      "to": Json(witness.states[i + 1]),
+      "changes": Json(diff),
     })
   }
   let mut violation_at = -1
@@ -73,14 +73,14 @@ pub fn describe(
   let result : Map[String, Json] = {
     "property": property.to_json(),
     "initial": model.states[model.initial],
-    "steps": steps.to_json(),
-    "justice": justice.map(a => model.actions[a]).to_json(),
+    "steps": Json(steps),
+    "justice": Json(justice.map(a => model.actions[a])),
   }
   if violation_at >= 0 {
-    result.set("violation_at", violation_at.to_json())
+    result.set("violation_at", Json(violation_at))
   }
   if witness.loop_start is Some(index) {
-    result.set("loop_start", index.to_json())
+    result.set("loop_start", Json(index))
   }
-  result.to_json()
+  Json(result)
 }

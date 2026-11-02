@@ -14,7 +14,7 @@ test "snapshots share stored values while preserving separate stack spines" {
 
 ///|
 test "LIFO and persistent snapshots" {
-  let empty : @stack.Stack[Int] = @stack.empty()
+  let empty : @stack.Stack[Int32] = @stack.empty()
   let first = @stack.push(empty, 10)
   let second = @stack.push(first, 20)
   assert_eq(@stack.to_array(first), [10])
@@ -30,8 +30,8 @@ test "LIFO and persistent snapshots" {
 test "quickcheck: stack operation traces agree with an array model" {
   @quickcheck.check(
     (operations : Array[@commands.Command]) => {
-      let mut state : @stack.Stack[Int] = @stack.empty()
-      let reference : Array[Int] = []
+      let mut state : @stack.Stack[Int32] = @stack.empty()
+      let reference : Array[Int32] = []
       for operation in operations {
         let before = state
         let snapshot = @stack.to_array(before)

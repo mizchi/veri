@@ -10,6 +10,12 @@ pub(all) enum Outcome {
 } derive(Eq, Debug)
 
 ///|
+pub extend Outcome with Eq::{not_equal, equal}
+
+///|
+pub extend Outcome with @debug.Debug::{to_repr}
+
+///|
 pub fn Outcome::code(self : Outcome) -> String {
   match self {
     Counterexample => "counterexample"
@@ -23,8 +29,11 @@ pub fn Outcome::code(self : Outcome) -> String {
 
 ///|
 pub impl ToJson for Outcome with fn to_json(self) {
-  self.code().to_json()
+  Json(self.code())
 }
+
+///|
+pub extend Outcome with ToJson::{to_json}
 
 ///|
 pub impl @json.FromJson for Outcome with fn from_json(json, path) {
@@ -41,6 +50,9 @@ pub impl @json.FromJson for Outcome with fn from_json(json, path) {
 }
 
 ///|
+pub extend Outcome with @json.FromJson::{from_json}
+
+///|
 pub(all) struct Case {
   name : String
   driver : String
@@ -48,26 +60,32 @@ pub(all) struct Case {
   target : String?
   config : Json?
   property : @model_check.Property
-  bound : Int?
+  bound : Int32?
   complete : Bool?
   fair : Bool?
   require_trigger : Bool?
   limits : @model_check.Limits?
-  justice : Array[Int]?
+  justice : Array[Int32]?
   expect : Outcome
 } derive(@json.FromJson)
 
 ///|
+pub extend Case with @json.FromJson::{from_json}
+
+///|
 pub(all) struct Suite {
-  version : Int
+  version : Int32
   cases : Array[Case]
 }
 
 ///|
 struct WireSuite {
-  version : Int
+  version : Int32
   cases : Array[Case]
 } derive(@json.FromJson)
+
+///|
+pub extend WireSuite with @json.FromJson::{from_json}
 
 ///|
 pub impl @json.FromJson for Suite with fn from_json(json, path) {
@@ -110,9 +128,15 @@ pub impl @json.FromJson for Suite with fn from_json(json, path) {
 }
 
 ///|
+pub extend Suite with @json.FromJson::{from_json}
+
+///|
 pub(all) suberror SuiteError {
   InvalidSuite(String)
 } derive(Debug)
+
+///|
+pub extend SuiteError with @debug.Debug::{to_repr}
 
 ///|
 /// Validate the entire suite before starting a driver or solver.

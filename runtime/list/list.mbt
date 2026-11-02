@@ -125,7 +125,7 @@ pub fn[T] List::rev(
 #as_free_fn(length)
 pub fn[T] List::length(
   xs : List[T],
-) -> Int where {
+) -> Int32 where {
   proof_require: @integer.le(
     @logic_list.length(model(xs)),
     @integer.from_int(2147483647),
@@ -140,8 +140,8 @@ pub fn[T] List::length(
 ///|
 fn[T] length_from(
   xs : List[T],
-  count : Int,
-) -> Int where {
+  count : Int32,
+) -> Int32 where {
   proof_decrease: xs,
   proof_require: 0 <= count,
   proof_require: @integer.le(

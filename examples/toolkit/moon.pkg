@@ -16,6 +16,4 @@ import {
   "mizchi/veri/runtime/graph",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

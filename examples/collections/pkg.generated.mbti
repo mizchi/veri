@@ -2,15 +2,15 @@
 package "mizchi/veri-examples/collections"
 
 // Values
-pub fn empty_search_misses(Int) -> Bool
+pub fn empty_search_misses(Int32) -> Bool
 
-pub fn inserted_is_found(Int) -> Bool
+pub fn inserted_is_found(Int32) -> Bool
 
-pub fn minimum_of_two(Int, Int) -> Int?
+pub fn minimum_of_two(Int32, Int32) -> Int32?
 
-pub fn queue_first(Int, Int) -> Int?
+pub fn queue_first(Int32, Int32) -> Int32?
 
-pub fn stack_last(Int, Int) -> Int?
+pub fn stack_last(Int32, Int32) -> Int32?
 
 // Errors
 

@@ -18,7 +18,7 @@ for (const probe of probes) {
   const directory = mkdtempSync(join(tmpdir(), "veri-array-capability-"));
   try {
     const source = readFileSync(new URL(`../checks/capabilities/${probe.name}.mbt.txt`, import.meta.url), "utf8");
-    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/array-capability"\nimport { "mizchi/veri@0.2.0" }\n');
+    writeFileSync(join(directory, "moon.mod"), 'name = "mizchi/array-capability"\nimport { "mizchi/veri@0.2.1" }\n');
     writeFileSync(join(directory, "moon.work"), 'members = [".", ' + JSON.stringify(fileURLToPath(new URL("../", import.meta.url))) + ']\n');
     writeFileSync(join(directory, "moon.pkg"), (probe.imports.length ? `import { ${probe.imports.join(", ")} }\n` : "") + 'options("proof-enabled": true)\n');
     writeFileSync(join(directory, "probe.mbt"), source);
@@ -38,7 +38,7 @@ for (const probe of probes) {
     const diagnostics = proved.stdout + proved.stderr;
     let status;
     if (proved.status === 0 && probe.name !== "array-alias") {
-      const result = JSON.parse(readFileSync(join(directory, "_build/verif/array-capability.proof.json"), "utf8"));
+      const result = JSON.parse(readFileSync(join(directory, "_build/verif/mizchi/array-capability/array-capability.proof.json"), "utf8"));
       if (result.result !== "success" || result.summary.valid < 1) throw new Error("Missing positive capability proof");
       status = "accepted";
     } else if (proved.status !== 0 && probe.status !== "accepted" && diagnostics.includes(probe.diagnostic)) {

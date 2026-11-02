@@ -4,6 +4,4 @@ import {
   "mizchi/veri/bitvector" @bv,
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

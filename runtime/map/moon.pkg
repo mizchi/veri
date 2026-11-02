@@ -4,5 +4,4 @@ import {
 
 import {
   "moonbitlang/core/quickcheck",
-  "moonbitlang/core/quickcheck/shrink",
 } for "test"

@@ -4,10 +4,10 @@ using @list {type List}
 ///|
 /// Allocation size: neither the product nor the header addition can wrap.
 pub fn allocation_size(
-  count : Int,
-  stride : Int,
-  header : Int,
-) -> Int? where {
+  count : Int32,
+  stride : Int32,
+  header : Int32,
+) -> Int32? where {
   proof_require: 0 <= count && count <= 2147483647,
   proof_require: 0 <= stride && stride <= 2147483647,
   proof_require: 0 <= header && header <= 2147483647,
@@ -41,7 +41,10 @@ pub fn allocation_size(
 
 ///|
 /// Parse a network-order record header from a view; offset is carried explicitly.
-pub fn read_header(data : BytesView, offset : Int) -> (UInt16, UInt, Int)? {
+pub fn read_header(
+  data : BytesView,
+  offset : Int32,
+) -> (UInt16, UInt32, Int32)? {
   match @bytes.decode_uint16_be(data, offset) {
     None => None
     Some(tag) =>
@@ -54,7 +57,7 @@ pub fn read_header(data : BytesView, offset : Int) -> (UInt16, UInt, Int)? {
 
 ///|
 /// A checked bridge from decoded unsigned lengths to MoonBit collection indices.
-pub fn length_as_int(length : UInt) -> Int? {
+pub fn length_as_int(length : UInt32) -> Int32? {
   @conversion.checked_uint_to_int(length)
 }
 
@@ -63,10 +66,10 @@ pub fn length_as_int(length : UInt) -> Int? {
 /// The caller can independently validate the returned distances and paths.
 pub fn route(
   edges : ArrayView[@graph.Edge],
-  vertex_count : Int,
-  source : Int,
-  target : Int,
-) -> Array[Int]? raise @graph.GraphError {
+  vertex_count : Int32,
+  source : Int32,
+  target : Int32,
+) -> Array[Int32]? raise @graph.GraphError {
   let graph = @graph.Graph::from_array(edges, vertex_count~)
   graph.dijkstra(source).path_to(target)
 }

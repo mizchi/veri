@@ -1,8 +1,8 @@
 ///|
 struct Config {
-  variant : Int
-  bound : Int
-  max_states : Int?
+  variant : Int32
+  bound : Int32
+  max_states : Int32?
 } derive(@json.FromJson)
 
 ///|

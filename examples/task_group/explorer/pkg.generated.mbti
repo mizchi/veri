@@ -16,7 +16,7 @@ pub fn explore(@task_group.Policy, Fault) -> Graph
 
 pub fn holds(@task_group.State, String) -> Bool
 
-pub fn policy(Int) -> @task_group.Policy
+pub fn policy(Int32) -> @task_group.Policy
 
 pub fn transition(@task_group.Policy, @task_group.State, @task_group.Event, Fault) -> @task_group.State?
 
@@ -29,6 +29,9 @@ pub(all) enum Fault {
   LeakCleanup
   LostCancel
 } derive(Eq, @debug.Debug)
+pub fn Fault::equal(Self, Self) -> Bool
+pub fn Fault::not_equal(Self, Self) -> Bool
+pub fn Fault::to_repr(Self) -> @debug.Repr
 
 pub(all) struct Graph {
   model : @model_check.Model[Snapshot]
@@ -37,15 +40,16 @@ pub(all) struct Graph {
 pub fn Graph::client(Self, @task_group.Policy, Fault) -> @model_check.Client[@task_group.State, @task_group.Event, Snapshot]
 
 pub(all) struct Snapshot {
-  phase : Int
-  body : Int
-  first : Int
-  second : Int
+  phase : Int32
+  body : Int32
+  first : Int32
+  second : Int32
   first_held : Bool
   second_held : Bool
   cancel_requested : Bool
   failed : Bool
 } derive(ToJson)
+pub fn Snapshot::to_json(Self) -> Json
 
 // Type aliases
 pub using @model_check {type Witness}

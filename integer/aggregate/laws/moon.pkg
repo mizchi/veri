@@ -3,6 +3,4 @@ import {
   "mizchi/veri/integer/aggregate",
 }
 
-options(
-  "proof-enabled": true,
-)
+proof_enabled = true

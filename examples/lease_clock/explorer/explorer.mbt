@@ -1,11 +1,14 @@
 ///|
 pub(all) struct Snapshot {
-  now : Int
+  now : Int32
   a : @lease_clock.NodeState
   b : @lease_clock.NodeState
-  owner : Int
-  epoch : Int
+  owner : Int32
+  epoch : Int32
 } derive(ToJson)
+
+///|
+pub extend Snapshot with ToJson::{to_json}
 
 ///|
 pub(all) struct Graph {
@@ -51,8 +54,8 @@ fn definition(
 ///|
 pub fn explore(
   variant : @lease_clock.Variant,
-  bound : Int,
-  max_states? : Int = 4096,
+  bound : Int32,
+  max_states~ : Int32 = 4096,
 ) -> Graph raise {
   let client = @model_check.build_client(
     definition(variant),

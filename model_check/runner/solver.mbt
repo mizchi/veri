@@ -1,13 +1,13 @@
 ///|
 priv struct OutputBudget {
-  mut used : Int
-  limit : Int
+  mut used : Int32
+  limit : Int32
 }
 
 ///|
 fn OutputBudget::consume(
   self : OutputBudget,
-  size : Int,
+  size : Int32,
 ) -> Unit raise RunnerError {
   guard size <= self.limit - self.used else {
     raise SolverFailure("Solver output budget exceeded")
@@ -22,7 +22,7 @@ priv struct Solver {
   limits : @model_check.Limits
   mut buffer : String
   budget : OutputBudget
-  mut bytes_written : Int
+  mut bytes_written : Int32
 }
 
 ///|
@@ -71,8 +71,8 @@ fn validate_limits(limits : @model_check.Limits) -> Unit raise RunnerError {
 async fn solve(
   model : @model_check.Model[Json],
   property : @model_check.Property,
-  bound : Int,
-  justice : Array[Int],
+  bound : Int32,
+  justice : Array[Int32],
   z3 : String,
   limits : @model_check.Limits,
 ) -> @model_check.Witness? {

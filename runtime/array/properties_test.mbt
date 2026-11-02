@@ -1,7 +1,7 @@
 ///|
 test "quickcheck: safe reads match every cell and reject invalid indices" {
   @quickcheck.check(
-    (input : (FixedArray[Int], Int)) => {
+    (input : (FixedArray[Int32], Int32)) => {
       let (xs, index) = input
       let expected = if 0 <= index && index < xs.length() {
         Some(xs[index])
@@ -27,7 +27,7 @@ test "quickcheck: safe reads match every cell and reject invalid indices" {
 ///|
 test "quickcheck: reads observe a write and preserve other cells" {
   @quickcheck.check(
-    (input : (FixedArray[Int], UInt, Int)) => {
+    (input : (FixedArray[Int32], UInt32, Int32)) => {
       let (original, position, value) = input
       // Keep generated input immutable so replay and shrinking see the same data.
       let xs = FixedArray::makei(original.length(), i => original[i])

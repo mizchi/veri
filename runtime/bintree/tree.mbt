@@ -6,6 +6,9 @@ pub(all) enum Tree[T] {
 } derive(Debug)
 
 ///|
+pub extend Tree with @debug.Debug::{to_repr}
+
+///|
 #as_free_fn(empty)
 pub fn[T] Tree::new() -> Tree[T] where {
   proof_ensure: result => @logic_tree.is_empty(model(result)),

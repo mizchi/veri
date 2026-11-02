@@ -7,7 +7,7 @@ priv enum Color {
 ///|
 priv enum Node {
   Empty
-  Branch(Color, Node, Int, Node)
+  Branch(Color, Node, Int32, Node)
 }
 
 ///|
@@ -31,7 +31,7 @@ pub fn IntSet::new() -> IntSet where {
 fn balance_left(
   color : Color,
   left : Node,
-  key : Int,
+  key : Int32,
   right : Node,
 ) -> Node where {
   proof_require: ordered(Branch(color, left, key, right)),
@@ -56,7 +56,7 @@ fn balance_left(
 fn balance_right(
   color : Color,
   left : Node,
-  key : Int,
+  key : Int32,
   right : Node,
 ) -> Node where {
   proof_require: ordered(Branch(color, left, key, right)),
@@ -79,7 +79,7 @@ fn balance_right(
 ///|
 fn insert_node(
   tree : Node,
-  value : Int,
+  value : Int32,
 ) -> Node where {
   proof_decrease: tree,
   proof_require: ordered(tree),
@@ -104,7 +104,7 @@ fn insert_node(
 #as_free_fn(insert)
 pub fn IntSet::insert(
   tree : IntSet,
-  value : Int,
+  value : Int32,
 ) -> IntSet where {
   proof_require: valid(tree),
   proof_ensure: result => valid(result),
@@ -120,7 +120,7 @@ pub fn IntSet::insert(
 ///|
 fn contains_node(
   tree : Node,
-  value : Int,
+  value : Int32,
 ) -> Bool where {
   proof_decrease: tree,
   proof_require: ordered(tree),
@@ -143,7 +143,7 @@ fn contains_node(
 #as_free_fn(contains)
 pub fn IntSet::contains(
   tree : IntSet,
-  value : Int,
+  value : Int32,
 ) -> Bool where {
   proof_require: valid(tree),
   proof_ensure: result => result == @logic_tree.mem(value, model(tree)),
@@ -154,8 +154,8 @@ pub fn IntSet::contains(
 ///|
 /// Sorted unique contents in a fresh array. Conversion is runtime-tested.
 #as_free_fn(to_array)
-pub fn IntSet::to_array(tree : IntSet) -> Array[Int] {
-  fn visit(node : Node, output : Array[Int]) -> Unit {
+pub fn IntSet::to_array(tree : IntSet) -> Array[Int32] {
+  fn visit(node : Node, output : Array[Int32]) -> Unit {
     match node {
       Empty => ()
       Branch(_, left, key, right) => {

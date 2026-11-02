@@ -6,6 +6,9 @@ pub(all) suberror ModelError {
 } derive(Debug)
 
 ///|
+pub extend ModelError with @debug.Debug::{to_repr}
+
+///|
 pub fn validate(model : @model_check.Model[Json]) -> Unit raise ModelError {
   let n = model.transitions.length()
   let m = model.actions.length()
@@ -65,7 +68,7 @@ pub fn validate(model : @model_check.Model[Json]) -> Unit raise ModelError {
 ///|
 fn validate_justice(
   model : @model_check.Model[Json],
-  justice : Array[Int],
+  justice : Array[Int32],
 ) -> Unit raise ModelError {
   let seen = Array::make(model.actions.length(), false)
   for action in justice {
@@ -80,8 +83,8 @@ fn validate_justice(
 pub fn validate_query(
   model : @model_check.Model[Json],
   property : @model_check.Property,
-  depth : Int,
-  justice? : Array[Int] = [],
+  depth : Int32,
+  justice~ : Array[Int32] = [],
 ) -> Unit raise ModelError {
   validate(model)
   guard depth >= 0 && depth <= 1000000 else {

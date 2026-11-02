@@ -3,23 +3,29 @@ pub using @checker {type Edge}
 
 ///|
 pub(all) suberror GraphError {
-  NegativeVertexCount(Int)
-  InvalidVertex(Int)
-  NegativeWeight(Int)
-  DistanceOverflow(Int)
+  NegativeVertexCount(Int32)
+  InvalidVertex(Int32)
+  NegativeWeight(Int32)
+  DistanceOverflow(Int32)
 } derive(Debug, Eq)
+
+///|
+pub extend GraphError with @debug.Debug::{to_repr}
+
+///|
+pub extend GraphError with Eq::{not_equal, equal}
 
 ///|
 /// Immutable CSR storage with vertices numbered 0..<vertex_count.
 /// Producers are differential-tested; certificate checking uses these exact edges.
 pub struct Graph {
   priv edge_data : FixedArray[Edge]
-  priv starts : FixedArray[Int]
+  priv starts : FixedArray[Int32]
 }
 
 ///|
 /// Construct a graph with the requested vertices and no edges.
-pub fn Graph::new(vertex_count~ : Int) -> Graph raise GraphError {
+pub fn Graph::new(vertex_count~ : Int32) -> Graph raise GraphError {
   Graph::from_array([], vertex_count~)
 }
 
@@ -27,7 +33,7 @@ pub fn Graph::new(vertex_count~ : Int) -> Graph raise GraphError {
 /// Validate endpoints and nonnegative weights, copying the input edges.
 pub fn Graph::from_array(
   edges : ArrayView[Edge],
-  vertex_count~ : Int,
+  vertex_count~ : Int32,
 ) -> Graph raise GraphError {
   if vertex_count < 0 {
     raise NegativeVertexCount(vertex_count)
@@ -72,7 +78,7 @@ pub fn Graph::from_array(
 /// A negative vertex count is rejected before consuming any input.
 pub fn Graph::from_iter(
   edges : Iter[Edge],
-  vertex_count~ : Int,
+  vertex_count~ : Int32,
 ) -> Graph raise GraphError {
   if vertex_count < 0 {
     raise NegativeVertexCount(vertex_count)
@@ -83,7 +89,7 @@ pub fn Graph::from_iter(
 ///|
 pub fn Graph::vertex_count(
   self : Graph,
-) -> Int where {
+) -> Int32 where {
   proof_ensure: result => result == self.starts.length(),
 } {
   self.starts.length()
@@ -110,14 +116,14 @@ pub fn Graph::to_array(self : Graph) -> Array[Edge] {
 
 ///|
 /// Minimum weight among parallel edges, or None for absent/invalid endpoints.
-pub fn Graph::edge_weight(self : Graph, from : Int, to : Int) -> Int? {
+pub fn Graph::edge_weight(self : Graph, from : Int32, to : Int32) -> Int32? {
   if from < 0 ||
     from >= self.vertex_count() ||
     to < 0 ||
     to >= self.vertex_count() {
     return None
   }
-  let mut best : Int? = None
+  let mut best : Int32? = None
   for e in self.outgoing(from) {
     if e.to == to {
       match best {
@@ -132,15 +138,15 @@ pub fn Graph::edge_weight(self : Graph, from : Int, to : Int) -> Int? {
 ///|
 /// Distances and predecessor witnesses owned by one search, with no mutable views.
 pub struct SearchResult {
-  priv origin : Int
-  priv distances : FixedArray[Int?]
-  priv parents : FixedArray[Int?]
+  priv origin : Int32
+  priv distances : FixedArray[Int32?]
+  priv parents : FixedArray[Int32?]
 }
 
 ///|
 pub fn SearchResult::source(
   self : SearchResult,
-) -> Int where {
+) -> Int32 where {
   proof_ensure: result => result == self.origin,
 } {
   self.origin
@@ -151,8 +157,8 @@ pub fn SearchResult::source(
 /// an unrepresentable reachable distance: the whole search returns DistanceOverflow.
 pub fn SearchResult::distance(
   self : SearchResult,
-  vertex : Int,
-) -> Int? where {
+  vertex : Int32,
+) -> Int32? where {
   proof_ensure: result => @relations.same(result, result_distance(self, vertex)),
 } {
   if vertex < 0 || vertex >= self.distances.length() {
@@ -164,7 +170,10 @@ pub fn SearchResult::distance(
 
 ///|
 /// A fresh source-to-target path, including both endpoints.
-pub fn SearchResult::path_to(self : SearchResult, target : Int) -> Array[Int]? {
+pub fn SearchResult::path_to(
+  self : SearchResult,
+  target : Int32,
+) -> Array[Int32]? {
   if self.distance(target) is None {
     return None
   }
@@ -191,13 +200,16 @@ pub fn SearchResult::path_to(self : SearchResult, target : Int) -> Array[Int]? {
 
 ///|
 /// O(V+E) shortest edge counts, ignoring weights, using runtime/queue.
-pub fn Graph::bfs(self : Graph, source : Int) -> SearchResult raise GraphError {
+pub fn Graph::bfs(
+  self : Graph,
+  source : Int32,
+) -> SearchResult raise GraphError {
   let n = self.vertex_count()
   if source < 0 || source >= n {
     raise InvalidVertex(source)
   }
-  let distances : FixedArray[Int?] = FixedArray::make(n, None)
-  let parents : FixedArray[Int?] = FixedArray::make(n, None)
+  let distances : FixedArray[Int32?] = FixedArray::make(n, None)
+  let parents : FixedArray[Int32?] = FixedArray::make(n, None)
   distances[source] = Some(0)
   let mut frontier = @queue.Queue::new().push(source)
   while frontier.pop() is Some((vertex, rest)) {
@@ -222,15 +234,15 @@ pub fn Graph::bfs(self : Graph, source : Int) -> SearchResult raise GraphError {
 /// cost cannot fit in Int; a representable alternative is never rejected.
 pub fn Graph::dijkstra(
   self : Graph,
-  source : Int,
+  source : Int32,
 ) -> SearchResult raise GraphError {
   let n = self.vertex_count()
   if source < 0 || source >= n {
     raise InvalidVertex(source)
   }
-  let distances : FixedArray[Int?] = FixedArray::make(n, None)
-  let parents : FixedArray[Int?] = FixedArray::make(n, None)
-  let buckets : Map[Int, @queue.Queue[Int]] = Map([])
+  let distances : FixedArray[Int32?] = FixedArray::make(n, None)
+  let parents : FixedArray[Int32?] = FixedArray::make(n, None)
+  let buckets : Map[Int32, @queue.Queue[Int32]] = Map([])
   let mut priorities = @pqueue.IntMinQueue::new().push(0)
   buckets[0] = @queue.Queue::new().push(source)
   distances[source] = Some(0)
@@ -276,7 +288,7 @@ pub fn Graph::dijkstra(
 }
 
 ///|
-fn Graph::outgoing(self : Graph, vertex : Int) -> ArrayView[Edge] {
+fn Graph::outgoing(self : Graph, vertex : Int32) -> ArrayView[Edge] {
   let end = if vertex + 1 < self.starts.length() {
     self.starts[vertex + 1]
   } else {

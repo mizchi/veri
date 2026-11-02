@@ -3,9 +3,12 @@ pub(all) suberror RunnerError {
   InvalidResponse(String)
   SolverFailure(String)
   ReplayRejected
-  TriggerUnreachable(Int)
+  TriggerUnreachable(Int32)
   TriggerUnreachableInCompleteModel
 } derive(Debug)
+
+///|
+pub extend RunnerError with @debug.Debug::{to_repr}
 
 ///|
 /// Process configuration only. Model configuration is a separate JSON value.
@@ -16,17 +19,35 @@ pub(all) struct Driver {
 } derive(Debug, ToJson, @json.FromJson)
 
 ///|
+pub extend Driver with @debug.Debug::{to_repr}
+
+///|
+pub extend Driver with ToJson::{to_json}
+
+///|
+pub extend Driver with @json.FromJson::{from_json}
+
+///|
 struct Response[T] {
-  version : Int
+  version : Int32
   result : T
 } derive(@json.FromJson)
 
 ///|
+pub extend Response with @json.FromJson::{from_json}
+
+///|
 pub(all) struct CheckResult {
   result : String
-  bound : Int
+  bound : Int32
   witness : @model_check.Witness?
 } derive(ToJson, @json.FromJson)
+
+///|
+pub extend CheckResult with ToJson::{to_json}
+
+///|
+pub extend CheckResult with @json.FromJson::{from_json}
 
 ///|
 async fn[T : @json.FromJson] Driver::request(
@@ -34,20 +55,20 @@ async fn[T : @json.FromJson] Driver::request(
   mode : String,
   config : Json,
   property : @model_check.Property?,
-  justice : Array[Int],
+  justice : Array[Int32],
   witnesses : Array[@model_check.Witness],
 ) -> T {
   let fields : Map[String, Json] = {
     "version": 1,
-    "mode": mode.to_json(),
+    "mode": Json(mode),
     "config": config,
-    "justice": justice.to_json(),
-    "witnesses": witnesses.to_json(),
+    "justice": Json(justice),
+    "witnesses": Json(witnesses),
   }
   if property is Some(property) {
     fields.set("property", property.to_json())
   }
-  let input = fields.to_json().stringify()
+  let input = Json(fields).stringify()
   let output = @shell.Cmd("moon", [
     "-C",
     self.module_dir,
@@ -83,7 +104,7 @@ pub async fn Driver::replay(
   config : Json,
   property : @model_check.Property,
   witnesses : Array[@model_check.Witness],
-  justice? : Array[Int] = [],
+  justice~ : Array[Int32] = [],
 ) -> Array[Bool] {
   let accepted : Array[Bool] = self.request(
     "replay",
@@ -104,11 +125,11 @@ pub async fn Driver::check(
   self : Driver,
   config : Json,
   property : @model_check.Property,
-  bound? : Int = 8,
-  justice? : Array[Int] = [],
-  z3? : String = "z3",
-  require_trigger? : Bool = false,
-  limits? : @model_check.Limits = @model_check.Limits::new(),
+  bound~ : Int32 = 8,
+  justice~ : Array[Int32] = [],
+  z3~ : String = "z3",
+  require_trigger~ : Bool = false,
+  limits~ : @model_check.Limits = @model_check.Limits::new(),
 ) -> CheckResult {
   self.check_loaded(
     self.load(config),
@@ -128,11 +149,11 @@ async fn Driver::check_loaded(
   model : @model_check.Model[Json],
   config : Json,
   property : @model_check.Property,
-  bound~ : Int,
-  justice~ : Array[Int],
+  bound~ : Int32,
+  justice~ : Array[Int32],
   z3~ : String,
-  require_trigger? : Bool = false,
-  limits? : @model_check.Limits = @model_check.Limits::new(),
+  require_trigger~ : Bool = false,
+  limits~ : @model_check.Limits = @model_check.Limits::new(),
 ) -> CheckResult {
   @smt.validate_query(model, property, bound, justice~)
   if require_trigger {
@@ -183,8 +204,8 @@ pub async fn Driver::check_complete(
   self : Driver,
   config : Json,
   property : @model_check.Property,
-  justice? : Array[Int] = [],
-  require_trigger? : Bool = false,
+  justice~ : Array[Int32] = [],
+  require_trigger~ : Bool = false,
 ) -> CheckResult {
   self.check_complete_loaded(
     self.load(config),
@@ -201,7 +222,7 @@ async fn Driver::check_complete_loaded(
   model : @model_check.Model[Json],
   config : Json,
   property : @model_check.Property,
-  justice~ : Array[Int],
+  justice~ : Array[Int32],
   require_trigger~ : Bool,
 ) -> CheckResult {
   if require_trigger {

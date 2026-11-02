@@ -1,7 +1,7 @@
 ///|
 pub(all) struct Minimized[T] {
   value : T
-  attempts : Int
+  attempts : Int32
   exhausted : Bool
 }
 
@@ -11,6 +11,9 @@ pub(all) suberror MinimizeError {
 } derive(Debug)
 
 ///|
+pub extend MinimizeError with @debug.Debug::{to_repr}
+
+///|
 /// Greedy shrinking under a strictly decreasing nonnegative cost, with a hard
 /// candidate budget. preserves must replay the failure using fresh state.
 /// Supply core Shrink::shrink(input).iter() as candidates when appropriate.
@@ -18,8 +21,8 @@ pub fn[T] minimize(
   input : T,
   preserves : (T) -> Bool,
   candidates~ : (T) -> Iter[T],
-  cost~ : (T) -> Int,
-  max_attempts? : Int = 1000,
+  cost~ : (T) -> Int32,
+  max_attempts~ : Int32 = 1000,
 ) -> Minimized[T] raise MinimizeError {
   guard max_attempts > 0 && cost(input) >= 0 && preserves(input) else {
     raise InvalidMinimization

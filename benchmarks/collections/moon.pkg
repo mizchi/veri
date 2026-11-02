@@ -1,4 +1,5 @@
 import {
+  "moonbitlang/core/debug",
   "moonbitlang/core/bench",
   "moonbitlang/core/list" @core_list,
   "moonbitlang/core/queue" @core_queue,

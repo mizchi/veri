@@ -6,13 +6,13 @@ import {
 }
 
 // Values
-pub fn add_lookup(@fmap.Fmap[Int, Int], Int, Int) -> Unit
+pub fn add_lookup(@fmap.Fmap[Int32, Int32], Int32, Int32) -> Unit
 
-pub fn preserve_other(@fmap.Fmap[Int, Int], Int, Int, Int) -> Unit
+pub fn preserve_other(@fmap.Fmap[Int32, Int32], Int32, Int32, Int32) -> Unit
 
-pub fn remove_key(@fmap.Fmap[Int, Int], Int) -> Unit
+pub fn remove_key(@fmap.Fmap[Int32, Int32], Int32) -> Unit
 
-pub fn replace_preserves_size(@fmap.Fmap[Int, Int], Int, Int) -> Unit
+pub fn replace_preserves_size(@fmap.Fmap[Int32, Int32], Int32, Int32) -> Unit
 
 // Errors
 

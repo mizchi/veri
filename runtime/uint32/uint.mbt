@@ -2,9 +2,9 @@
 /// Wrapping addition with a proof over unbounded integers. Branches avoid
 /// intermediate overflow even with Why3's checked machine-integer prelude.
 pub fn add(
-  x : UInt,
-  y : UInt,
-) -> UInt where {
+  x : UInt32,
+  y : UInt32,
+) -> UInt32 where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
   proof_ensure: result => Bv32::eq(model(result), Bv32::add(model(x), model(y))),
@@ -30,9 +30,9 @@ pub fn add(
 ///|
 /// Wrapping subtraction, with no underflow in intermediate operations.
 pub fn sub(
-  x : UInt,
-  y : UInt,
-) -> UInt where {
+  x : UInt32,
+  y : UInt32,
+) -> UInt32 where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
   proof_ensure: result => Bv32::eq(model(result), Bv32::sub(model(x), model(y))),
@@ -57,8 +57,8 @@ pub fn sub(
 ///|
 /// Unsigned comparison, proved equivalent to bitvector unsigned order.
 pub fn less(
-  x : UInt,
-  y : UInt,
+  x : UInt32,
+  y : UInt32,
 ) -> Bool where {
   proof_require: 0U <= x && x <= 0xffffffffU,
   proof_require: 0U <= y && y <= 0xffffffffU,
