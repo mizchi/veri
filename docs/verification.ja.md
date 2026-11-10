@@ -59,7 +59,7 @@ just conversion-capabilities # ネイティブ変換と UInt16 の証明変換�
 just array-capabilities # 更新前の状態・snapshot の対応状況と共有参照の拒否を確認
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
 just smtlib       # smtlib の評価器・出力・復号を乱数生成した項で Z3 と比較
-just smtlib 1000 7 # ラウンド数とシードを変更
+just smtlib-seed 1000 7 # ラウンド数とシードを変更
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just negative bitvector runtime/uint32 runtime/uint64 # 関連する負例だけを選択
 just test js      # 実行時検査

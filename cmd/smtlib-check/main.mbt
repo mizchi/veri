@@ -17,7 +17,15 @@ priv struct Tally {
   mut closed : Int32
   mut open : Int32
   mut skipped : Int32
+  /// Terms the solver answered `unknown` for within its time limit.
+  mut undecided : Int32
 }
+
+///|
+/// Solver time per query in milliseconds. Some true claims, such as an
+/// integer-indexed array being equal to itself after a redundant store, are
+/// beyond Z3 in reasonable time; those are counted, not treated as failures.
+const QUERY_TIMEOUT : String = "10000"
 
 ///|
 /// Closed terms: the interpreter's value must be the only possible one, so
@@ -44,27 +52,35 @@ async fn check_closed(z3 : String, random : Random, tally : Tally) -> Unit {
     claims.push((term, ctx.value(value)))
   }
   let differs = ctx.any(claims.map(claim => ctx.distinct(claim.0, claim.1)))
-  if @solver.check(ctx, [differs], z3~, timeout_ms=120000) is Unsatisfiable {
-    tally.closed += claims.length()
-    return
-  }
-  // Report the first individual disagreement, in one incremental session.
-  @solver.with_session(z3~, timeout_ms=120000, session => {
+  @solver.with_session(z3~, timeout_ms=600000, session => {
     let script = @smtlib.Script::new(ctx, logic="ALL")
+    script.set_option("timeout", QUERY_TIMEOUT)
+    script.push()
+    script.assert_term(differs)
+    let status = session.check_sat(script)
+    script.pop()
+    if status == Unsat {
+      tally.closed += claims.length()
+      return
+    }
+    // Decide each claim on its own: only `sat` is a disagreement.
     for claim in claims {
       script.push()
       script.assert_term(ctx.distinct(claim.0, claim.1))
       let status = session.check_sat(script)
       script.pop()
-      if status != Unsat {
-        println("Interpreter and solver disagree:")
-        println("  term:  " + ctx.to_smtlib(claim.0))
-        println("  value: " + ctx.to_smtlib(claim.1))
-        abort("smtlib differential check failed")
+      match status {
+        Unsat => tally.closed += 1
+        Unknown => tally.undecided += 1
+        Sat => {
+          println("Interpreter and solver disagree:")
+          println("  term:  " + ctx.to_smtlib(claim.0))
+          println("  value: " + ctx.to_smtlib(claim.1))
+          abort("smtlib differential check failed")
+        }
       }
     }
   })
-  abort("A batch was not unsat although each of its claims is")
 }
 
 ///|
@@ -103,12 +119,18 @@ async fn check_open(z3 : String, random : Random, tally : Tally) -> Unit {
     script.assert_term(ctx.eq(result, term))
     result
   })
-  let actual = @solver.with_session(z3~, timeout_ms=120000, session => {
-    guard session.check_sat(script) == Sat else {
-      abort("Naming the terms of defined constants was not satisfiable")
+  script.set_option("timeout", QUERY_TIMEOUT)
+  let answer = @solver.with_session(z3~, timeout_ms=120000, session => {
+    match session.check_sat(script) {
+      Sat => Some(session.values(ctx, script, results))
+      Unknown => None
+      Unsat => abort("Naming the terms of defined constants was unsatisfiable")
     }
-    session.values(ctx, script, results)
   })
+  guard answer is Some(actual) else {
+    tally.undecided += terms.length()
+    return
+  }
   for index, term in terms {
     if actual[index] != expected[index] {
       println("Interpreter and solver model disagree:")
@@ -246,16 +268,24 @@ async fn main {
   let random : Random = {
     state: seed.to_uint64() * 0x9e37_79b9_7f4a_7c15UL + 1UL,
   }
-  let tally : Tally = { closed: 0, open: 0, skipped: 0, }
-  for _ in 0..<rounds {
+  let tally : Tally = { closed: 0, open: 0, skipped: 0, undecided: 0, }
+  for round in 0..<rounds {
+    if args.length() > 4 {
+      println("round \{round}")
+    }
     check_closed(z3, random, tally)
     check_open(z3, random, tally)
   }
   let solved = check_solved(z3)
+  // The check is only meaningful while the solver decides nearly everything.
+  guard tally.undecided * 50 <= tally.closed + tally.open else {
+    abort("The solver left too many terms undecided: \{tally.undecided}")
+  }
   println(
     "smtlib: \{tally.closed} closed terms proved equal to their values, " +
     "\{tally.open} open terms matched solver models, " +
-    "\{tally.skipped} skipped as unspecified, \{solved} solved queries verified natively " +
+    "\{tally.skipped} skipped as unspecified, \{tally.undecided} left undecided by the solver, " +
+    "\{solved} solved queries verified natively " +
     "(rounds=\{rounds}, seed=\{seed})",
   )
 }

@@ -157,7 +157,13 @@ smt:
     node tools/check-smt.mjs
 
 # mizchi/veri/smtlib against Z3: random terms, solver models and solved queries.
-smtlib rounds="200" seed="2026":
+# No parameters: a recipe with parameters would consume the names that follow it
+# in `just smt smtlib temporal ...`.
+smtlib:
+    moon run cmd/smtlib-check --target native -- 200 2026
+
+# The same check with a chosen number of rounds and seed.
+smtlib-seed rounds seed:
     moon run cmd/smtlib-check --target native -- {{rounds}} {{seed}}
 
 # Fixed job model: inductive safety and bounded liveness/fairness experiments.
