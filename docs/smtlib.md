@@ -165,6 +165,9 @@ The proof bindings and `smtlib` are separate: a `Term` is not a proof-level
   compares with the interpreter. Six fixed queries are solved and their models
   confirmed with native operations. The default 200 rounds cover about 12,000
   terms; terms whose value SMT-LIB leaves unspecified are skipped and counted.
+  A claim Z3 answers `unknown` for within ten seconds is counted as undecided, not
+  as a failure; only `sat`, an actual disagreement, fails, and the run also fails
+  if more than 2% of the terms stay undecided.
 - The model-check encoder's output is pinned byte for byte by snapshots taken
   from the previous implementation.
 

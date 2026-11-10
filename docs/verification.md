@@ -63,7 +63,7 @@ just conversion-capabilities # Probe native numeric casts and UInt16 support
 just array-capabilities # Report old-state/snapshot support and mutable-alias rejection
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
 just smtlib        # Compare the smtlib interpreter, printer and decoder with Z3 on random terms
-just smtlib 1000 7 # More rounds with another seed
+just smtlib-seed 1000 7 # More rounds with another seed
 just negative      # Check that deliberately false claims in each model are not proved
 just negative bitvector runtime/uint32 runtime/uint64 # Select affected negative controls
 just test js       # Run runtime checks
