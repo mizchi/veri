@@ -1,5 +1,6 @@
 ///|
-priv struct GeneratedTree(@bintree.Tree[Int32]) derive(Debug)
+#derive(Debug)
+priv struct GeneratedTree(@bintree.Tree[Int32])
 
 ///|
 impl @quickcheck.Arbitrary for GeneratedTree with fn arbitrary(size, state) {

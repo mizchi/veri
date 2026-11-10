@@ -10,18 +10,20 @@ import {
 // Values
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror SuiteError {
   InvalidSuite(String)
-} derive(@debug.Debug)
+}
 pub fn SuiteError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(@json.FromJson)
 pub(all) struct Case {
   name : String
   driver : String
   module_dir : String?
   target : String?
-  config : Json?
+  config : @json.Json?
   property : @model_check.Property
   bound : Int32?
   complete : Bool?
@@ -30,9 +32,10 @@ pub(all) struct Case {
   limits : @model_check.Limits?
   justice : Array[Int32]?
   expect : Outcome
-} derive(@json.FromJson)
-pub fn Case::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+}
+pub fn Case::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Outcome {
   Counterexample
   Witness
@@ -40,26 +43,27 @@ pub(all) enum Outcome {
   BoundedUnreachable
   CompleteSafe
   CompleteUnreachable
-} derive(Eq, @debug.Debug)
+}
 pub fn Outcome::code(Self) -> String
 pub fn Outcome::equal(Self, Self) -> Bool
-pub fn Outcome::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Outcome::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Outcome::not_equal(Self, Self) -> Bool
-pub fn Outcome::to_json(Self) -> Json
+pub fn Outcome::to_json(Self) -> @json.Json
 pub fn Outcome::to_repr(Self) -> @debug.Repr
-pub impl ToJson for Outcome
 pub impl @json.FromJson for Outcome
+pub impl @json.ToJson for Outcome
 
 pub(all) struct Suite {
   version : Int32
   cases : Array[Case]
 }
-pub fn Suite::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Suite::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Suite::validate(Self) -> Unit raise SuiteError
 pub impl @json.FromJson for Suite
 
-type WireSuite derive(@json.FromJson)
-pub fn WireSuite::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+#derive(@json.FromJson)
+type WireSuite
+pub fn WireSuite::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
 // Type aliases
 

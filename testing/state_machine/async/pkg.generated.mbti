@@ -4,6 +4,7 @@ package "mizchi/veri/testing/state_machine/async"
 import {
   "mizchi/veri/testing/state_machine",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitlang/core/quickcheck",
   "moonbitlang/core/quickcheck/shrink",
 }
@@ -16,21 +17,23 @@ pub async fn[M, S, C, O : Eq, V : Eq] replay(@state_machine.Model[M, C, O, V], S
 pub async fn[M, S, C : @shrink.Shrink, O : Eq, V : Eq] shrink_failure(@state_machine.Model[M, C, O, V], System[S, C, O, V], Array[C], max_shrinks? : Int32, timeout_ms? : Int32, seed? : UInt64) -> Failure[C, O, V]
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror CheckError {
   InvalidOptions
   Exhausted
   NotAMismatch
-} derive(@debug.Debug)
+}
 pub fn CheckError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct Failure[C, O, V] {
   commands : Array[C]
   replay : @state_machine.Replay[O, V]
   shrink_attempts : Int32
   seed : UInt64
-} derive(ToJson, @debug.Debug)
-pub fn[C : ToJson, O : ToJson, V : ToJson] Failure::to_json(Self[C, O, V]) -> Json
+}
+pub fn[C : @json.ToJson, O : @json.ToJson, V : @json.ToJson] Failure::to_json(Self[C, O, V]) -> @json.Json
 pub fn[C : @debug.Debug, O : @debug.Debug, V : @debug.Debug] Failure::to_repr(Self[C, O, V]) -> @debug.Repr
 
 pub(all) struct System[S, C, O, V] {

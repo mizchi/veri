@@ -1,4 +1,5 @@
 ///|
+#derive(Eq)
 priv enum Scenario {
   Normal
   NoWait
@@ -9,7 +10,7 @@ priv enum Scenario {
   ExternalCancel
   BodyFailure
   DeferFailure
-} derive(Eq)
+}
 
 ///|
 suberror WorkerError
@@ -57,6 +58,8 @@ async fn exercise(scenario : Scenario, reverse : Bool) -> Unit {
   let mut actual_cancelled = false
   @async.with_task_group(supervisor => {
     let task = supervisor.spawn(() => {
+      // Cancellation is no longer an error value: observe it while unwinding.
+      defer (if @async.is_being_cancelled() { actual_cancelled = true })
       @async.with_task_group(group => {
         // Group defers run in reverse registration order, after child defers.
         group.add_defer(() => {
@@ -142,11 +145,8 @@ async fn exercise(scenario : Scenario, reverse : Bool) -> Unit {
         }
       }) catch {
         err => {
-          actual_cancelled = @async.is_cancellation_error(err)
-          if !actual_cancelled {
-            guard err is WorkerError else { raise err }
-            actual_failed = true
-          }
+          guard err is WorkerError else { raise err }
+          actual_failed = true
         }
       }
     })

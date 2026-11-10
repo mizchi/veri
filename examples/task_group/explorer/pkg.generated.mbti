@@ -5,6 +5,7 @@ import {
   "mizchi/veri-examples/task_group",
   "mizchi/veri/model_check",
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -23,12 +24,13 @@ pub fn transition(@task_group.Policy, @task_group.State, @task_group.Event, Faul
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Fault {
   Correct
   EarlyJoin
   LeakCleanup
   LostCancel
-} derive(Eq, @debug.Debug)
+}
 pub fn Fault::equal(Self, Self) -> Bool
 pub fn Fault::not_equal(Self, Self) -> Bool
 pub fn Fault::to_repr(Self) -> @debug.Repr
@@ -39,6 +41,7 @@ pub(all) struct Graph {
 }
 pub fn Graph::client(Self, @task_group.Policy, Fault) -> @model_check.Client[@task_group.State, @task_group.Event, Snapshot]
 
+#derive(@json.ToJson)
 pub(all) struct Snapshot {
   phase : Int32
   body : Int32
@@ -48,8 +51,8 @@ pub(all) struct Snapshot {
   second_held : Bool
   cancel_requested : Bool
   failed : Bool
-} derive(ToJson)
-pub fn Snapshot::to_json(Self) -> Json
+}
+pub fn Snapshot::to_json(Self) -> @json.Json
 
 // Type aliases
 pub using @model_check {type Witness}

@@ -1,11 +1,12 @@
 ///|
+#derive(Debug, Eq)
 pub(all) suberror ExplorationError {
   InvalidDepth(Int32)
   InvalidStateLimit(Int32)
   InvalidEventCount(Int32)
   StateLimitExceeded(Int32)
   TransitionLimitExceeded(Int32)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend ExplorationError with @debug.Debug::{to_repr}

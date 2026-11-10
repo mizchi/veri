@@ -11,9 +11,10 @@ pub(all) struct Spec[S, E, Snapshot] {
 }
 
 ///|
+#derive(Debug)
 pub(all) suberror BuilderError {
   InvalidDefinition(String)
-} derive(Debug)
+}
 
 ///|
 pub extend BuilderError with @debug.Debug::{to_repr}

@@ -1,22 +1,24 @@
 ///|
+#derive(Debug)
 pub(all) suberror RunnerError {
   InvalidResponse(String)
   SolverFailure(String)
   ReplayRejected
   TriggerUnreachable(Int32)
   TriggerUnreachableInCompleteModel
-} derive(Debug)
+}
 
 ///|
 pub extend RunnerError with @debug.Debug::{to_repr}
 
 ///|
 /// Process configuration only. Model configuration is a separate JSON value.
+#derive(Debug, ToJson, @json.FromJson)
 pub(all) struct Driver {
   driver_pkg : String
   module_dir : String
   target : String
-} derive(Debug, ToJson, @json.FromJson)
+}
 
 ///|
 pub extend Driver with @debug.Debug::{to_repr}
@@ -28,20 +30,22 @@ pub extend Driver with ToJson::{to_json}
 pub extend Driver with @json.FromJson::{from_json}
 
 ///|
+#derive(@json.FromJson)
 struct Response[T] {
   version : Int32
   result : T
-} derive(@json.FromJson)
+}
 
 ///|
 pub extend Response with @json.FromJson::{from_json}
 
 ///|
+#derive(ToJson, @json.FromJson)
 pub(all) struct CheckResult {
   result : String
   bound : Int32
   witness : @model_check.Witness?
-} derive(ToJson, @json.FromJson)
+}
 
 ///|
 pub extend CheckResult with ToJson::{to_json}

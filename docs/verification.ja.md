@@ -18,7 +18,7 @@ Ubuntu 24.04 上で以下を独立したジョブに分け、最後の `CI resul
 | 配布物を別プロジェクトから利用・証明 | `just package-check` |
 | Nix の Apalache と Z3 の照合 | `just apalache apalache-lease-clock` |
 
-MoonBit `0.10.12+1634b282e`、Z3 `4.16.0`、CVC5 `1.3.4` を固定し、
+MoonBit `0.10.20+65efd5b93`、Z3 `4.16.0`、CVC5 `1.3.4` を固定し、
 取得したアーカイブの SHA-256 を照合する。Node.js は `24.21.0`、just は `1.58.0`、
 Apalache は `flake.lock` に基づく `0.62.2`。Actions もコミット SHA に固定し、
 Dependabot で更新を提案する。ツールと依存のみをキャッシュし、検査は毎回実行する。
@@ -32,7 +32,7 @@ Why3 の同時ソルバー数と最終段階の制限秒数を調整する。ロ
 Apalache は生成した大きな遷移関係を型検査できるよう `JVM_ARGS=-Xss16m` を設定する。
 
 MoonBit の固定値は [.github/toolchain.env](../.github/toolchain.env) で管理する。
-上流の版別アーカイブは60日で削除されるため、この pin は2026年11月8日より前に更新する。
+上流の版別アーカイブは60日で削除されるため、この pin は2027年1月4日より前に更新する。
 更新時はコンパイラと core を同じ版に揃え、SHA-256 と全ジョブの結果を確認する。
 
 ## リポジトリを検証する
@@ -74,7 +74,7 @@ just fmt          # フォーマット・公開インターフェース生成
 just package-check # 公開用 ZIP から日英 README の最小例を実行・証明
 ```
 
-手元で確認した環境は moon 0.1.20260904、moonc v0.10.12+1634b282e、Z3 4.16.0、CVC5 1.3.4。
+手元で確認した環境は moon 0.1.20261104、moonc v0.10.20+65efd5b93、Z3 4.16.0、CVC5 1.3.4。
 このツールチェインの `moon prove` は `~/.moon/share/why3` を自動で利用する。別の Why3 インストールは行わない。
 `just` の証明レシピは、BV、量化式、実数に基づく IEEE モデルに対応する Z3 / CVC5 の経路を `_build/why3/why3.conf` に登録する。
 証明結果は `_build/verif/` 配下の `*.proof.json` に出力される。ワークスペースでは完全なパッケージパスごとのディレクトリに分かれる。

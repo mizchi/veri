@@ -1,9 +1,10 @@
 ///|
 /// A successful read advances by exactly the selected width, relative to the view.
+#derive(Debug, Eq)
 pub(all) struct Decoded[T] {
   value : T
   next_offset : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Decoded with @debug.Debug::{to_repr}

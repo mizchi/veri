@@ -1,11 +1,12 @@
 ///|
+#derive(ToJson)
 pub(all) struct Snapshot {
   now : Int32
   a : @lease_clock.NodeState
   b : @lease_clock.NodeState
   owner : Int32
   epoch : Int32
-} derive(ToJson)
+}
 
 ///|
 pub extend Snapshot with ToJson::{to_json}

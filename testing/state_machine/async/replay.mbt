@@ -9,12 +9,13 @@ pub(all) struct System[S, C, O, V] {
 }
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct Failure[C, O, V] {
   commands : Array[C]
   replay : @state_machine.Replay[O, V]
   shrink_attempts : Int32
   seed : UInt64
-} derive(Debug, ToJson)
+}
 
 ///|
 pub extend Failure with @debug.Debug::{to_repr}
@@ -23,11 +24,12 @@ pub extend Failure with @debug.Debug::{to_repr}
 pub extend Failure with ToJson::{to_json}
 
 ///|
+#derive(Debug)
 pub(all) suberror CheckError {
   InvalidOptions
   Exhausted
   NotAMismatch
-} derive(Debug)
+}
 
 ///|
 pub extend CheckError with @debug.Debug::{to_repr}

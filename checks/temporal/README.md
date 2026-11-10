@@ -90,7 +90,7 @@ and [temporal encoding design](https://apalache-mc.org/docs/adr/017pdr-temporal.
 
 `just verify-temporal` also checks the implemented bridge in
 [`examples/temporal`](../../examples/temporal/job.mbt). The installed
-`moonc v0.10.12+1634b282e` proves the model and client under both normal and machine
+`moonc v0.10.20+65efd5b93` proves the model and client under both normal and machine
 integers (13 + 2 goals per prelude).
 
 ```mermaid

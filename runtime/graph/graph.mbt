@@ -2,12 +2,13 @@
 pub using @checker {type Edge}
 
 ///|
+#derive(Debug, Eq)
 pub(all) suberror GraphError {
   NegativeVertexCount(Int32)
   InvalidVertex(Int32)
   NegativeWeight(Int32)
   DistanceOverflow(Int32)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend GraphError with @debug.Debug::{to_repr}

@@ -32,12 +32,13 @@ pub fn topological_order(Graph, FixedArray[Int32]) -> Bool
 pub fn valid_topology(Graph, Topology) -> Bool
 
 // Errors
+#derive(Eq, @debug.Debug)
 pub(all) suberror GraphError {
   NegativeVertexCount(Int32)
   InvalidVertex(Int32)
   NegativeWeight(Int32)
   DistanceOverflow(Int32)
-} derive(Eq, @debug.Debug)
+}
 pub fn GraphError::equal(Self, Self) -> Bool
 pub fn GraphError::not_equal(Self, Self) -> Bool
 pub fn GraphError::to_repr(Self) -> @debug.Repr
@@ -72,10 +73,11 @@ pub fn SearchResult::distance(Self, Int32) -> Int32?
 pub fn SearchResult::path_to(Self, Int32) -> Array[Int32]?
 pub fn SearchResult::source(Self) -> Int32
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Topology {
   Ordered(FixedArray[Int32])
   Cyclic(FixedArray[Int32])
-} derive(Eq, @debug.Debug)
+}
 pub fn Topology::equal(Self, Self) -> Bool
 pub fn Topology::not_equal(Self, Self) -> Bool
 pub fn Topology::to_repr(Self) -> @debug.Repr

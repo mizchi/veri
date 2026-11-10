@@ -3,12 +3,13 @@ using @list {type List}
 
 ///|
 /// A directed edge. Parallel edges and self-loops are retained.
+#derive(Debug, Eq)
 #valtype
 pub(all) struct Edge {
   from : Int32
   to : Int32
   weight : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Edge with @debug.Debug::{to_repr}

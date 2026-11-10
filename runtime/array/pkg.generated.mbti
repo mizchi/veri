@@ -31,10 +31,11 @@ pub fn valid_range(Int32, Range) -> Bool
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct Range {
   start : Int32
   count : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn Range::equal(Self, Self) -> Bool
 pub fn Range::not_equal(Self, Self) -> Bool
 pub fn Range::to_repr(Self) -> @debug.Repr

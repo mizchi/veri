@@ -1,11 +1,12 @@
 ///|
+#derive(@json.FromJson)
 struct WireProperty {
   kind : String
   predicate : String?
   trigger : String?
   goal : String?
   terminal : String?
-} derive(@json.FromJson)
+}
 
 ///|
 pub extend WireProperty with @json.FromJson::{from_json}

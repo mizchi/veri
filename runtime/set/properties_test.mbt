@@ -1,7 +1,8 @@
 ///|
+#derive(Eq)
 priv struct Key {
   value : Int32
-} derive(Eq)
+}
 
 ///|
 impl Hash for Key with fn hash_combine(self, hasher) {

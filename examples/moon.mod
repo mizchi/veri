@@ -4,5 +4,5 @@ version = "0.1.0"
 
 import {
   "mizchi/veri@0.2.1",
-  "moonbitlang/async@0.21.3",
+  "moonbitlang/async@0.22.9",
 }

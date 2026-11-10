@@ -1,11 +1,12 @@
 ///|
 /// Solver process budgets. Limits are checked before launching a subprocess.
+#derive(ToJson, @json.FromJson)
 pub(all) struct Limits {
   timeout_ms : Int32
   memory_mb : Int32
   max_query_bytes : Int32
   max_output_bytes : Int32
-} derive(ToJson, @json.FromJson)
+}
 
 ///|
 pub extend Limits with ToJson::{to_json}

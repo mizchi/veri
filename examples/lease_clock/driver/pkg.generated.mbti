@@ -9,10 +9,12 @@ import {
 // Values
 
 // Errors
-type ConfigError derive(@debug.Debug)
+#derive(@debug.Debug)
+type ConfigError
 
 // Types and methods
-type Config derive(@json.FromJson)
+#derive(@json.FromJson)
+type Config
 
 // Type aliases
 

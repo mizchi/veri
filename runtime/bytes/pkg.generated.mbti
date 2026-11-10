@@ -61,10 +61,11 @@ pub fn uint_to_le_bytes(UInt32) -> Bytes
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) struct Decoded[T] {
   value : T
   next_offset : Int32
-} derive(Eq, @debug.Debug)
+}
 pub fn[T : Eq] Decoded::equal(Self[T], Self[T]) -> Bool
 pub fn[T : Eq] Decoded::not_equal(Self[T], Self[T]) -> Bool
 pub fn[T : @debug.Debug] Decoded::to_repr(Self[T]) -> @debug.Repr

@@ -12,74 +12,81 @@ import {
 pub async fn run_suite(@suite.Suite, base_dir? : String, z3? : String) -> SuiteReport
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror RunnerError {
   InvalidResponse(String)
   SolverFailure(String)
   ReplayRejected
   TriggerUnreachable(Int32)
   TriggerUnreachableInCompleteModel
-} derive(@debug.Debug)
+}
 pub fn RunnerError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Bundle {
   version : Int32
   driver : Driver
-  config : Json
+  config : @json.Json
   property : @model_check.Property
   justice : Array[Int32]
   require_trigger : Bool
   limits : @model_check.Limits
   complete : Bool?
-  model : @model_check.Model[Json]
+  model : @model_check.Model[@json.Json]
   result : CheckResult
-} derive(ToJson, @json.FromJson)
-pub fn Bundle::explain(Self) -> Json raise
-pub fn Bundle::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+}
+pub fn Bundle::explain(Self) -> @json.Json raise
+pub fn Bundle::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub async fn Bundle::replay(Self, module_dir? : String) -> Unit
-pub fn Bundle::to_json(Self) -> Json
+pub fn Bundle::to_json(Self) -> @json.Json
 
+#derive(@json.ToJson)
 pub(all) struct CaseReport {
   name : String
   expected : @suite.Outcome
   passed : Bool
   result : CheckResult?
   error : String?
-} derive(ToJson)
-pub fn CaseReport::to_json(Self) -> Json
+}
+pub fn CaseReport::to_json(Self) -> @json.Json
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct CheckResult {
   result : String
   bound : Int32
   witness : @model_check.Witness?
-} derive(ToJson, @json.FromJson)
-pub fn CheckResult::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
-pub fn CheckResult::to_json(Self) -> Json
+}
+pub fn CheckResult::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn CheckResult::to_json(Self) -> @json.Json
 
+#derive(@debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Driver {
   driver_pkg : String
   module_dir : String
   target : String
-} derive(ToJson, @debug.Debug, @json.FromJson)
-pub async fn Driver::check(Self, Json, @model_check.Property, bound? : Int32, justice? : Array[Int32], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> CheckResult
-pub async fn Driver::check_complete(Self, Json, @model_check.Property, justice? : Array[Int32], require_trigger? : Bool) -> CheckResult
-pub fn Driver::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
-pub async fn Driver::load(Self, Json) -> @model_check.Model[Json]
-pub async fn Driver::record(Self, Json, @model_check.Property, bound? : Int32, justice? : Array[Int32], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> Bundle
-pub async fn Driver::record_complete(Self, Json, @model_check.Property, justice? : Array[Int32], require_trigger? : Bool) -> Bundle
-pub async fn Driver::replay(Self, Json, @model_check.Property, Array[@model_check.Witness], justice? : Array[Int32]) -> Array[Bool]
-pub fn Driver::to_json(Self) -> Json
+}
+pub async fn Driver::check(Self, @json.Json, @model_check.Property, bound? : Int32, justice? : Array[Int32], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> CheckResult
+pub async fn Driver::check_complete(Self, @json.Json, @model_check.Property, justice? : Array[Int32], require_trigger? : Bool) -> CheckResult
+pub fn Driver::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub async fn Driver::load(Self, @json.Json) -> @model_check.Model[@json.Json]
+pub async fn Driver::record(Self, @json.Json, @model_check.Property, bound? : Int32, justice? : Array[Int32], z3? : String, require_trigger? : Bool, limits? : @model_check.Limits) -> Bundle
+pub async fn Driver::record_complete(Self, @json.Json, @model_check.Property, justice? : Array[Int32], require_trigger? : Bool) -> Bundle
+pub async fn Driver::replay(Self, @json.Json, @model_check.Property, Array[@model_check.Witness], justice? : Array[Int32]) -> Array[Bool]
+pub fn Driver::to_json(Self) -> @json.Json
 pub fn Driver::to_repr(Self) -> @debug.Repr
 
-type Response[T] derive(@json.FromJson)
-pub fn[T : @json.FromJson] Response::from_json(Json, @json.JsonPath) -> Self[T] raise @json.JsonDecodeError
+#derive(@json.FromJson)
+type Response[T]
+pub fn[T : @json.FromJson] Response::from_json(@json.Json, @json.JsonPath) -> Self[T] raise @json.JsonDecodeError
 
+#derive(@json.ToJson)
 pub(all) struct SuiteReport {
   version : Int32
   passed : Bool
   cases : Array[CaseReport]
-} derive(ToJson)
-pub fn SuiteReport::to_json(Self) -> Json
+}
+pub fn SuiteReport::to_json(Self) -> @json.Json
 
 // Type aliases
 

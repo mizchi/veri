@@ -1,5 +1,6 @@
 ///|
 /// Expected semantic result; a solver failure is never an expected success.
+#derive(Eq, Debug)
 pub(all) enum Outcome {
   Counterexample
   Witness
@@ -7,7 +8,7 @@ pub(all) enum Outcome {
   BoundedUnreachable
   CompleteSafe
   CompleteUnreachable
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Outcome with Eq::{not_equal, equal}
@@ -53,6 +54,7 @@ pub impl @json.FromJson for Outcome with fn from_json(json, path) {
 pub extend Outcome with @json.FromJson::{from_json}
 
 ///|
+#derive(@json.FromJson)
 pub(all) struct Case {
   name : String
   driver : String
@@ -67,7 +69,7 @@ pub(all) struct Case {
   limits : @model_check.Limits?
   justice : Array[Int32]?
   expect : Outcome
-} derive(@json.FromJson)
+}
 
 ///|
 pub extend Case with @json.FromJson::{from_json}
@@ -79,10 +81,11 @@ pub(all) struct Suite {
 }
 
 ///|
+#derive(@json.FromJson)
 struct WireSuite {
   version : Int32
   cases : Array[Case]
-} derive(@json.FromJson)
+}
 
 ///|
 pub extend WireSuite with @json.FromJson::{from_json}
@@ -131,9 +134,10 @@ pub impl @json.FromJson for Suite with fn from_json(json, path) {
 pub extend Suite with @json.FromJson::{from_json}
 
 ///|
+#derive(Debug)
 pub(all) suberror SuiteError {
   InvalidSuite(String)
-} derive(Debug)
+}
 
 ///|
 pub extend SuiteError with @debug.Debug::{to_repr}

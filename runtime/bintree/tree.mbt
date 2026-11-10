@@ -1,9 +1,10 @@
 ///|
 /// Immutable binary-tree shape; stored values may themselves be mutable.
+#derive(Debug)
 pub(all) enum Tree[T] {
   Empty
   Node(Tree[T], T, Tree[T])
-} derive(Debug)
+}
 
 ///|
 pub extend Tree with @debug.Debug::{to_repr}

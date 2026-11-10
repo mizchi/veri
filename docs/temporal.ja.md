@@ -14,7 +14,7 @@ SAT の実行列は独立した有限状態モデルでも再生する。
 
 `just verify-task-group` は、子2個と本体からなる TaskGroup のモデルを検査する。
 `no_wait`・`allow_failure`・キャンセル・終了待ち・グループの後始末を扱い、
-`moon prove`、Z3 の応答性検査、shrinking 付き QuickCheck、本物の `moonbitlang/async@0.21.3`
+`moon prove`、Z3 の応答性検査、shrinking 付き QuickCheck、本物の `moonbitlang/async@0.22.9`
 の実行履歴との照合を行う。実ランタイムとの対応はテストの対象で、未証明。
 [TaskGroup の使い方と保証範囲](../checks/task_group/README.ja.md)を参照。
 

@@ -1,7 +1,8 @@
 ///|
+#derive(@json.FromJson)
 struct Config {
   mode : Int32
-} derive(@json.FromJson)
+}
 
 ///|
 fn main {

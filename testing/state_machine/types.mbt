@@ -18,11 +18,12 @@ pub(all) struct System[S, C, O, V] {
 }
 
 ///|
+#derive(Eq, Debug, ToJson)
 pub(all) enum Verdict {
   Matched
   Mismatch
   InvalidCommand
-} derive(Eq, Debug, ToJson)
+}
 
 ///|
 pub extend Verdict with Eq::{not_equal, equal}
@@ -34,6 +35,7 @@ pub extend Verdict with @debug.Debug::{to_repr}
 pub extend Verdict with ToJson::{to_json}
 
 ///|
+#derive(Debug, ToJson)
 pub(all) struct Replay[O, V] {
   verdict : Verdict
   index : Int32
@@ -41,7 +43,7 @@ pub(all) struct Replay[O, V] {
   actual_output : O?
   expected_state : V?
   actual_state : V?
-} derive(Debug, ToJson)
+}
 
 ///|
 pub extend Replay with @debug.Debug::{to_repr}

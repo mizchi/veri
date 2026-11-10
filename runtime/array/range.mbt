@@ -1,11 +1,12 @@
 ///|
 /// A half-open range [start, start + count). Creating a Range does not validate it;
 /// operations check it without overflowing and reject invalid ranges atomically.
+#derive(Debug, Eq)
 #valtype
 pub(all) struct Range {
   start : Int32
   count : Int32
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Range with @debug.Debug::{to_repr}

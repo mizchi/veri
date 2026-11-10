@@ -2,7 +2,7 @@
 
 [English](README.md)
 
-`moonbitlang/async@0.21.3` の TaskGroup を題材に、**子タスク2個とグループ本体**を
+`moonbitlang/async@0.22.9` の TaskGroup を題材に、**子タスク2個とグループ本体**を
 有限状態にモデル化する。実行する状態遷移と `moon prove` の定義を共有し、Z3 で
 時相性質の反例を探索する。実際の async 実装との対応は、実行履歴を採取するテストで確認する。
 この例は `mizchi/veri-examples/task_group` にあり、公開済みライブラリの汎用 TaskGroup API ではない。
@@ -29,7 +29,7 @@ moon -C examples prove task_group/client
 
 ## 状態とイベント
 
-契約の基準は [v0.21.3 の TaskGroup の実装と API コメント](https://github.com/moonbitlang/async/blob/v0.21.3/src/task_group.mbt)。
+契約の基準は [v0.22.9 の TaskGroup の実装と API コメント](https://github.com/moonbitlang/async/blob/v0.22.9/src/task_group.mbt)。
 最新版の未リリース API に依存しない。
 
 ```mermaid
@@ -148,6 +148,8 @@ Apalache は任意で、`just verify-task-group` の依存には含めない。
 本体の失敗、グループ defer の失敗の9種類を、子の生成順を入れ替えて検査する。
 子のリソース解放、グループ defer の実行順、実際の終了理由も確認する。
 タイミング調整の sleep は使わず、5秒の制限はテスト停止用の watchdog とする。
+async 0.22 以降、キャンセルは `catch` で捕捉できるエラー値ではない。
+テストは巻き戻し中の `is_being_cancelled` で外部キャンセルを観測する。
 
 - 純粋なモデルの初期状態・遷移・任意長の有限実行列の安全性は `moon prove` の対象。
 - 全16設定の到達状態と全遷移を、独立した命令的な実装と照合する。

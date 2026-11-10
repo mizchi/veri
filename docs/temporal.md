@@ -17,7 +17,7 @@ This is a development PoC, not a general public temporal API.
 `just verify-task-group` checks a TaskGroup model with two children and its body:
 `no_wait`, `allow_failure`, cancellation, joining and group cleanup. It combines
 `moon prove`, Z3 response checks, shrinking QuickCheck, and observed traces from
-the real `moonbitlang/async@0.21.3` runtime. Runtime correspondence is tested,
+the real `moonbitlang/async@0.22.9` runtime. Runtime correspondence is tested,
 not proved. See [TaskGroup usage and boundaries](../checks/task_group/README.md).
 
 `just apalache` installs pinned Apalache 0.62.2 and Java 21 through Nix, compares

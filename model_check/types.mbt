@@ -1,11 +1,12 @@
 ///|
 /// The property is evaluated on a replay of the actual model function.
+#derive(Eq, Debug)
 pub(all) enum Property {
   Safety(String)
   Reachability(String)
   Response(String, String)
   Deadlock(String)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Property with Eq::{not_equal, equal}
@@ -14,11 +15,12 @@ pub extend Property with Eq::{not_equal, equal}
 pub extend Property with @debug.Debug::{to_repr}
 
 ///|
+#derive(@json.FromJson, ToJson, Eq, Debug)
 pub(all) struct Witness {
   states : Array[Int32]
   actions : Array[Int32]
   loop_start : Int32?
-} derive(@json.FromJson, ToJson, Eq, Debug)
+}
 
 ///|
 pub extend Witness with @json.FromJson::{from_json}
@@ -33,12 +35,13 @@ pub extend Witness with Eq::{not_equal, equal}
 pub extend Witness with @debug.Debug::{to_repr}
 
 ///|
+#derive(ToJson, @json.FromJson)
 pub(all) struct Scope {
   complete : Bool
   max_depth : Int32
   depths : Array[Int32]
   frontier : Array[Int32]
-} derive(ToJson, @json.FromJson)
+}
 
 ///|
 pub extend Scope with ToJson::{to_json}
@@ -49,6 +52,7 @@ pub extend Scope with @json.FromJson::{from_json}
 ///|
 /// Shared finite-model wire format. Snapshots are for inspection, not replay.
 /// None means the adapter enumerates the complete state domain or closure.
+#derive(ToJson, @json.FromJson)
 pub(all) struct Model[Snapshot] {
   initial : Int32
   actions : Array[String]
@@ -57,7 +61,7 @@ pub(all) struct Model[Snapshot] {
   predicates : Map[String, Array[Bool]]
   justice : Array[Int32]
   exploration : Scope?
-} derive(ToJson, @json.FromJson)
+}
 
 ///|
 pub extend Model with ToJson::{to_json}
