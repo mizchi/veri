@@ -1,7 +1,8 @@
 ///|
+#derive(@json.FromJson)
 struct Config {
   allow_drop : Bool
-} derive(@json.FromJson)
+}
 
 ///|
 fn main {

@@ -1,0 +1,9 @@
+import {
+  "mizchi/veri/smtlib",
+  "moonbitlang/core/debug",
+  "moonbitlang/async",
+  "moonbitlang/async/process",
+  "moonbitlang/async/io",
+}
+
+supported_targets = "wasm+native"

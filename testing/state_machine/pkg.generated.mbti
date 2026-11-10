@@ -3,6 +3,7 @@ package "mizchi/veri/testing/state_machine"
 
 import {
   "moonbitlang/core/debug",
+  "moonbitlang/core/json",
   "moonbitlang/core/quickcheck",
   "moonbitlang/core/quickcheck/shrink",
 }
@@ -23,6 +24,7 @@ pub(all) struct Model[M, C, O, V] {
   observe : (M) -> V
 }
 
+#derive(@debug.Debug, @json.ToJson)
 pub(all) struct Replay[O, V] {
   verdict : Verdict
   index : Int32
@@ -30,8 +32,8 @@ pub(all) struct Replay[O, V] {
   actual_output : O?
   expected_state : V?
   actual_state : V?
-} derive(ToJson, @debug.Debug)
-pub fn[O : ToJson, V : ToJson] Replay::to_json(Self[O, V]) -> Json
+}
+pub fn[O : @json.ToJson, V : @json.ToJson] Replay::to_json(Self[O, V]) -> @json.Json
 pub fn[O : @debug.Debug, V : @debug.Debug] Replay::to_repr(Self[O, V]) -> @debug.Repr
 
 pub(all) struct System[S, C, O, V] {
@@ -41,14 +43,15 @@ pub(all) struct System[S, C, O, V] {
   close : (S) -> Unit
 }
 
+#derive(Eq, @debug.Debug, @json.ToJson)
 pub(all) enum Verdict {
   Matched
   Mismatch
   InvalidCommand
-} derive(Eq, ToJson, @debug.Debug)
+}
 pub fn Verdict::equal(Self, Self) -> Bool
 pub fn Verdict::not_equal(Self, Self) -> Bool
-pub fn Verdict::to_json(Self) -> Json
+pub fn Verdict::to_json(Self) -> @json.Json
 pub fn Verdict::to_repr(Self) -> @debug.Repr
 
 // Type aliases

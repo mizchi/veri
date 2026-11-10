@@ -1,0 +1,21 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri-examples/midpoint"
+
+import {
+  "mizchi/veri/smtlib",
+}
+
+// Values
+pub fn in_range(@smtlib.Context, @smtlib.Term, @smtlib.Term, @smtlib.Term) -> @smtlib.Term raise @smtlib.SmtError
+
+pub fn midpoint(@smtlib.Context, @smtlib.Term, @smtlib.Term) -> @smtlib.Term raise @smtlib.SmtError
+
+pub fn safe_midpoint(@smtlib.Context, @smtlib.Term, @smtlib.Term) -> @smtlib.Term raise @smtlib.SmtError
+
+// Errors
+
+// Types and methods
+
+// Type aliases
+
+// Traits

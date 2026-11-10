@@ -4,6 +4,7 @@ package "mizchi/veri-examples/temporal/explorer"
 import {
   "mizchi/veri-examples/temporal",
   "mizchi/veri/model_check",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -12,11 +13,12 @@ pub fn client(Bool) -> @model_check.Client[@temporal.State, @temporal.Action, Sn
 // Errors
 
 // Types and methods
+#derive(@json.ToJson)
 pub(all) struct Snapshot {
   pending : Bool
   done : Bool
-} derive(ToJson)
-pub fn Snapshot::to_json(Self) -> Json
+}
+pub fn Snapshot::to_json(Self) -> @json.Json
 
 // Type aliases
 

@@ -1,0 +1,7 @@
+import {
+  "moonbitlang/core/bench",
+  "moonbitlang/core/string",
+  "mizchi/veri/model_check",
+  "mizchi/veri/model_check/smt" @mc_smt,
+  "mizchi/veri/smtlib" @smt,
+} for "test"

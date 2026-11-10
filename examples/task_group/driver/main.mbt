@@ -1,13 +1,15 @@
 ///|
+#derive(@json.FromJson)
 struct Config {
   policy : Int32
   fault : Int32
-} derive(@json.FromJson)
+}
 
 ///|
+#derive(Debug)
 suberror ConfigError {
   InvalidConfig(String)
-} derive(Debug)
+}
 
 ///|
 fn main {

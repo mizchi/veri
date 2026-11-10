@@ -1,11 +1,12 @@
 ///|
 /// Faults are test mutations, never part of the proved transition relation.
+#derive(Eq, Debug)
 pub(all) enum Fault {
   Correct
   EarlyJoin
   LeakCleanup
   LostCancel
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Fault with Eq::{not_equal, equal}
@@ -14,6 +15,7 @@ pub extend Fault with Eq::{not_equal, equal}
 pub extend Fault with @debug.Debug::{to_repr}
 
 ///|
+#derive(ToJson)
 pub(all) struct Snapshot {
   phase : Int32
   body : Int32
@@ -23,7 +25,7 @@ pub(all) struct Snapshot {
   second_held : Bool
   cancel_requested : Bool
   failed : Bool
-} derive(ToJson)
+}
 
 ///|
 pub extend Snapshot with ToJson::{to_json}

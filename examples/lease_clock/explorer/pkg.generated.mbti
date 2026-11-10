@@ -4,6 +4,7 @@ package "mizchi/veri-examples/lease_clock/explorer"
 import {
   "mizchi/veri-examples/lease_clock",
   "mizchi/veri/model_check",
+  "moonbitlang/core/json",
 }
 
 // Values
@@ -20,14 +21,15 @@ pub(all) struct Graph {
 }
 pub fn Graph::client(Self, @lease_clock.Variant) -> @model_check.Client[@lease_clock.State, @lease_clock.Event, Snapshot]
 
+#derive(@json.ToJson)
 pub(all) struct Snapshot {
   now : Int32
   a : @lease_clock.NodeState
   b : @lease_clock.NodeState
   owner : Int32
   epoch : Int32
-} derive(ToJson)
-pub fn Snapshot::to_json(Self) -> Json
+}
+pub fn Snapshot::to_json(Self) -> @json.Json
 
 // Type aliases
 pub using @model_check {type Witness}

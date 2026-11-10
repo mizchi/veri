@@ -39,10 +39,11 @@ pub fn to_double(Float) -> Double
 // Errors
 
 // Types and methods
+#derive(Eq, @debug.Debug)
 pub(all) enum Expected {
   Bits(UInt32)
   AnyNaN
-} derive(Eq, @debug.Debug)
+}
 pub fn Expected::equal(Self, Self) -> Bool
 pub fn Expected::not_equal(Self, Self) -> Bool
 pub fn Expected::to_repr(Self) -> @debug.Repr

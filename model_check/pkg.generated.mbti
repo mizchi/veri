@@ -16,25 +16,28 @@ pub fn[S : Eq, E] explore(S, Array[E], (S, E) -> S?, max_depth~ : Int32, max_sta
 pub fn[T] minimize(T, (T) -> Bool, candidates~ : (T) -> Iter[T], cost~ : (T) -> Int32, max_attempts? : Int32) -> Minimized[T] raise MinimizeError
 
 // Errors
+#derive(@debug.Debug)
 pub(all) suberror BuilderError {
   InvalidDefinition(String)
-} derive(@debug.Debug)
+}
 pub fn BuilderError::to_repr(Self) -> @debug.Repr
 
+#derive(Eq, @debug.Debug)
 pub(all) suberror ExplorationError {
   InvalidDepth(Int32)
   InvalidStateLimit(Int32)
   InvalidEventCount(Int32)
   StateLimitExceeded(Int32)
   TransitionLimitExceeded(Int32)
-} derive(Eq, @debug.Debug)
+}
 pub fn ExplorationError::equal(Self, Self) -> Bool
 pub fn ExplorationError::not_equal(Self, Self) -> Bool
 pub fn ExplorationError::to_repr(Self) -> @debug.Repr
 
+#derive(@debug.Debug)
 pub(all) suberror MinimizeError {
   InvalidMinimization
-} derive(@debug.Debug)
+}
 pub fn MinimizeError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
@@ -57,15 +60,16 @@ pub(all) struct Exploration[S] {
   complete : Bool
 }
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Limits {
   timeout_ms : Int32
   memory_mb : Int32
   max_query_bytes : Int32
   max_output_bytes : Int32
-} derive(ToJson, @json.FromJson)
-pub fn Limits::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+}
+pub fn Limits::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Limits::new(timeout_ms? : Int32, memory_mb? : Int32, max_query_bytes? : Int32, max_output_bytes? : Int32) -> Self
-pub fn Limits::to_json(Self) -> Json
+pub fn Limits::to_json(Self) -> @json.Json
 
 pub(all) struct Minimized[T] {
   value : T
@@ -73,6 +77,7 @@ pub(all) struct Minimized[T] {
   exhausted : Bool
 }
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Model[Snapshot] {
   initial : Int32
   actions : Array[String]
@@ -81,32 +86,34 @@ pub(all) struct Model[Snapshot] {
   predicates : Map[String, Array[Bool]]
   justice : Array[Int32]
   exploration : Scope?
-} derive(ToJson, @json.FromJson)
-pub fn[Snapshot : @json.FromJson] Model::from_json(Json, @json.JsonPath) -> Self[Snapshot] raise @json.JsonDecodeError
-pub fn[Snapshot : ToJson] Model::to_json(Self[Snapshot]) -> Json
+}
+pub fn[Snapshot : @json.FromJson] Model::from_json(@json.Json, @json.JsonPath) -> Self[Snapshot] raise @json.JsonDecodeError
+pub fn[Snapshot : @json.ToJson] Model::to_json(Self[Snapshot]) -> @json.Json
 
+#derive(Eq, @debug.Debug)
 pub(all) enum Property {
   Safety(String)
   Reachability(String)
   Response(String, String)
   Deadlock(String)
-} derive(Eq, @debug.Debug)
+}
 pub fn Property::equal(Self, Self) -> Bool
-pub fn Property::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Property::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Property::not_equal(Self, Self) -> Bool
-pub fn Property::to_json(Self) -> Json
+pub fn Property::to_json(Self) -> @json.Json
 pub fn Property::to_repr(Self) -> @debug.Repr
-pub impl ToJson for Property
 pub impl @json.FromJson for Property
+pub impl @json.ToJson for Property
 
+#derive(@json.FromJson, @json.ToJson)
 pub(all) struct Scope {
   complete : Bool
   max_depth : Int32
   depths : Array[Int32]
   frontier : Array[Int32]
-} derive(ToJson, @json.FromJson)
-pub fn Scope::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
-pub fn Scope::to_json(Self) -> Json
+}
+pub fn Scope::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Scope::to_json(Self) -> @json.Json
 
 pub(all) struct Spec[S, E, Snapshot] {
   initial : S
@@ -118,18 +125,20 @@ pub(all) struct Spec[S, E, Snapshot] {
 }
 pub fn[S, E, J] Spec::holds(Self[S, E, J], S, String) -> Bool?
 
-type WireProperty derive(@json.FromJson)
-pub fn WireProperty::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+#derive(@json.FromJson)
+type WireProperty
+pub fn WireProperty::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 
+#derive(Eq, @debug.Debug, @json.FromJson, @json.ToJson)
 pub(all) struct Witness {
   states : Array[Int32]
   actions : Array[Int32]
   loop_start : Int32?
-} derive(Eq, ToJson, @debug.Debug, @json.FromJson)
+}
 pub fn Witness::equal(Self, Self) -> Bool
-pub fn Witness::from_json(Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
+pub fn Witness::from_json(@json.Json, @json.JsonPath) -> Self raise @json.JsonDecodeError
 pub fn Witness::not_equal(Self, Self) -> Bool
-pub fn Witness::to_json(Self) -> Json
+pub fn Witness::to_json(Self) -> @json.Json
 pub fn Witness::to_repr(Self) -> @debug.Repr
 
 // Type aliases

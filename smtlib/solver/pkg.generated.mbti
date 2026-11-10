@@ -1,0 +1,51 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/smtlib/solver"
+
+import {
+  "mizchi/veri/smtlib",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub async fn check(@smtlib.Context, ArrayView[@smtlib.Term], logic? : String, z3? : String, timeout_ms? : Int32) -> Outcome
+
+pub async fn[T] with_session(async (Session) -> T, z3? : String, timeout_ms? : Int32, memory_mb? : Int32, max_query_bytes? : Int32, max_output_bytes? : Int32) -> T
+
+// Errors
+#derive(@debug.Debug)
+pub(all) suberror SolverError {
+  SolverFailure(String)
+}
+pub fn SolverError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+#derive(@debug.Debug)
+pub(all) enum Outcome {
+  Satisfiable(@smtlib.Model)
+  Unsatisfiable
+  Undetermined
+}
+pub fn Outcome::to_repr(Self) -> @debug.Repr
+
+pub struct Session {
+  // private fields
+}
+pub async fn Session::check_sat(Self, @smtlib.Script) -> Status
+pub async fn Session::line(Self) -> String
+pub async fn Session::response(Self) -> String
+pub async fn Session::send(Self, String) -> Unit
+pub async fn Session::values(Self, @smtlib.Context, @smtlib.Script, ArrayView[@smtlib.Term]) -> Array[@smtlib.Value]
+
+#derive(Eq, @debug.Debug)
+pub(all) enum Status {
+  Sat
+  Unsat
+  Unknown
+}
+pub fn Status::equal(Self, Self) -> Bool
+pub fn Status::not_equal(Self, Self) -> Bool
+pub fn Status::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

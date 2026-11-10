@@ -1,5 +1,6 @@
 ///|
 /// The full finite model is the identity: replay compares it, not a lossy hash.
+#derive(ToJson, @json.FromJson)
 pub(all) struct Bundle {
   version : Int32
   driver : Driver
@@ -12,7 +13,7 @@ pub(all) struct Bundle {
   complete : Bool?
   model : @model_check.Model[Json]
   result : CheckResult
-} derive(ToJson, @json.FromJson)
+}
 
 ///|
 pub extend Bundle with ToJson::{to_json}

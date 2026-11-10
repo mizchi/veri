@@ -1,11 +1,12 @@
 ///|
 /// Shared commands for replayable stack, queue, and priority-queue tests.
+#derive(Debug, Eq)
 pub(all) enum Command {
   Push(Int32)
   Pop
   Peek
   Clear
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Command with @debug.Debug::{to_repr}

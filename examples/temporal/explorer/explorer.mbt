@@ -1,8 +1,9 @@
 ///|
+#derive(ToJson)
 pub(all) struct Snapshot {
   pending : Bool
   done : Bool
-} derive(ToJson)
+}
 
 ///|
 pub extend Snapshot with ToJson::{to_json}

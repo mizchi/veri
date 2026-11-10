@@ -9,11 +9,15 @@ The MoonBit API binds to **Why3 theories**. Why3's solver driver then maps suppo
 ```text
 MoonBit contracts / .mbtp → Why3 theories → SMT-LIB 2 → Z3 / CVC5
 checks/**/*.smt2 ─────────────────────────→ SMT-LIB 2 → Z3
+runtime values → smtlib terms ────────────→ SMT-LIB 2 → Z3, and back as runtime values
 ```
 
 `#proof_external` maps a logical type; `#proof_import` maps a logical operation.
 The `.smt2` checks use a separate direct path, without going through MoonBit or Why3.
-These are proof APIs, not a runtime Z3 FFI or a general-purpose SMT-LIB 2 expression builder.
+These are proof APIs, not a runtime Z3 FFI or an SMT-LIB 2 expression builder.
+The third path is the runtime counterpart: [`smtlib`](smtlib.md) builds, prints and evaluates
+terms of the same theories from MoonBit values. It shares operation names with the bindings
+but no proof-level meaning, and `moon prove` assumes nothing about it.
 
 | Package | Why3 theory | Main operations |
 | --- | --- | --- |
@@ -56,6 +60,7 @@ only establish that the false claims were not proved; the direct SAT checks supp
 | `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]`, plus `a.length()` | Reads, range validation and update contracts under both preludes; see [array updates](collections.md#fixedarray-updates-and-ranges) for the limits of before/after proofs |
 | `String` | `@text.from_string(s)` → `@text.Text?` | Validate UTF-16 and the shared alphabet; 72 Z3 reference cases for length, char_at, substring |
 | `Float` / `Double` | binary32 / binary64 encoding | 122 operation cases per format plus 62 precision conversion cases against Z3; native FP operations still lack a universal correspondence proof |
+| `Bool`, `Byte`, `UInt16`, `UInt`, `Int`, `UInt64`, `Int64`, `BigInt`, `String`, `Float`, `Double`, FixedArray cells, `Map` | `@smtlib.Encode` → `@smtlib.Value` / `Term` | Runtime-only encoding in both directions; the interpreter is compared with native operators and, by `just smtlib`, with Z3 on random terms. Not a proof |
 
 `Integer` is an abstract, unbounded **proof-only** type. It stays mathematical even when runtime `Int`
 uses the checked machine prelude. These projections are logical functions, not runtime numeric casts.

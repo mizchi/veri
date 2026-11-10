@@ -1,7 +1,8 @@
 ///|
+#derive(Debug)
 suberror UsageError {
   InvalidArgument(String)
-} derive(Debug)
+}
 
 ///|
 let help : String =

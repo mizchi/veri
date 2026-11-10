@@ -19,7 +19,7 @@ every job to succeed.
 | Separate consumer of the package archive | `just package-check` |
 | Pinned Nix Apalache cross-checks against Z3 | `just apalache apalache-lease-clock` |
 
-MoonBit `0.10.12+1634b282e`, Z3 `4.16.0`, and CVC5 `1.3.4` are pinned and
+MoonBit `0.10.20+65efd5b93`, Z3 `4.16.0`, and CVC5 `1.3.4` are pinned and
 downloaded archives are checked against SHA-256 digests. Node.js is `24.21.0`,
 just is `1.58.0`, and Apalache is `0.62.2` through `flake.lock`. Actions use commit
 SHA pins with Dependabot update proposals. Only tools and dependencies are cached;
@@ -36,7 +36,7 @@ Apalache uses `JVM_ARGS=-Xss16m` for typechecking large generated transition rel
 
 [.github/toolchain.env](../.github/toolchain.env) contains the MoonBit pin.
 Upstream versioned archives expire after 60 days, so refresh this pin before
-November 8, 2026. Update the compiler and core together, verify their SHA-256
+January 4, 2027. Update the compiler and core together, verify their SHA-256
 digests, and rerun every job.
 
 ## Verify the repository
@@ -62,6 +62,8 @@ just core-capabilities # Probe direct calls to core from contracted functions
 just conversion-capabilities # Probe native numeric casts and UInt16 support
 just array-capabilities # Report old-state/snapshot support and mutable-alias rejection
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
+just smtlib        # Compare the smtlib interpreter, printer and decoder with Z3 on random terms
+just smtlib 1000 7 # More rounds with another seed
 just negative      # Check that deliberately false claims in each model are not proved
 just negative bitvector runtime/uint32 runtime/uint64 # Select affected negative controls
 just test js       # Run runtime checks
@@ -69,6 +71,7 @@ just quickcheck js # Run only the QuickCheck properties
 just bench native # Compare collections with core; save timings and ratios
 just bench-backends # Run the comparisons sequentially on all four backends
 just bench-check native 1.0 # Fail unless both measurement orders meet the ratio limit
+just bench-smtlib native # Reference vs tuned SMT-LIB encoders, printing, parsing and evaluation
 just test-backends # JS / wasm / wasm-gc / native
 just test-release  # Run the same checks in optimized builds
 just fp-capabilities # Report native Float/Double proof-lowering support
@@ -78,7 +81,7 @@ just fmt           # Format sources and generate public interfaces
 just package-check # Execute and prove both README quickstarts from the package ZIP
 ```
 
-The locally verified environment uses moon 0.1.20260904, moonc v0.10.12+1634b282e, Z3 4.16.0, and CVC5 1.3.4.
+The locally verified environment uses moon 0.1.20261104, moonc v0.10.20+65efd5b93, Z3 4.16.0, and CVC5 1.3.4.
 In this toolchain, `moon prove` automatically uses `~/.moon/share/why3`. No separate Why3 installation is needed.
 The `just` proof recipes generate `_build/why3/why3.conf` with Z3 and CVC5 encodings for bitvectors, quantified laws and real-valued IEEE models.
 Proof results appear in `*.proof.json` files under `_build/verif/`; workspaces nest reports by full package path.

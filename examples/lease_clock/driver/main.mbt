@@ -1,14 +1,16 @@
 ///|
+#derive(@json.FromJson)
 struct Config {
   variant : Int32
   bound : Int32
   max_states : Int32?
-} derive(@json.FromJson)
+}
 
 ///|
+#derive(Debug)
 suberror ConfigError {
   InvalidConfig(String)
-} derive(Debug)
+}
 
 ///|
 fn main {

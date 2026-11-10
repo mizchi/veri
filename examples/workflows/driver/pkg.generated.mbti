@@ -10,7 +10,8 @@ import {
 // Errors
 
 // Types and methods
-type Config derive(@json.FromJson)
+#derive(@json.FromJson)
+type Config
 
 // Type aliases
 

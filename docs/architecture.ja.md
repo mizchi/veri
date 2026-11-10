@@ -9,11 +9,15 @@ MoonBit 側の API は **Why3 の理論**に接続する。Why3 のソルバー�
 ```text
 MoonBit の契約 / .mbtp → Why3 の理論 → SMT-LIB 2 → Z3 / CVC5
 checks/**/*.smt2 ──────────────────→ SMT-LIB 2 → Z3
+実行時の値 → smtlib の項 ──────────→ SMT-LIB 2 → Z3、応答は実行時の値に戻す
 ```
 
 `#proof_external` が論理型、`#proof_import` が論理演算の対応を定義する。
 `.smt2` の検査は MoonBit / Why3 を経由しない別経路。
-これらは証明用 API であり、実行時に Z3 を呼ぶ FFI や汎用 SMT-LIB 2 式ビルダーではない。
+これらは証明用 API であり、実行時に Z3 を呼ぶ FFI や SMT-LIB 2 式ビルダーではない。
+3つ目の経路が実行時側の対応物で、[`smtlib`](smtlib.ja.md) が同じ理論の項を MoonBit の値から
+構築・出力・評価する。バインディングと演算名を共有するが証明上の意味は持たず、
+`moon prove` はこれについて何も仮定しない。
 
 | パッケージ | Why3 の理論 | 主な演算 |
 | --- | --- | --- |
@@ -55,6 +59,7 @@ MoonBit の実行時の UTF-16 長とは異なる。`char_at` の返り値は文
 | `FixedArray[T]` | `@runtime_array.model(a)` → `SmtArray[Integer, T]` と `a.length()` | 読み取り・範囲検査・更新の契約を両モデルで証明。更新前後の証明範囲は[配列の更新](collections.ja.md#fixedarray-の更新と範囲操作)を参照 |
 | `String` | `@text.from_string(s)` → `@text.Text?` | UTF-16 と共通の文字集合を検査し、長さ・char_at・substring を Z3 の 72 ケースで照合 |
 | `Float` / `Double` | binary32 / binary64 のビット表現 | 各型 122 演算ケースと精度変換 62 ケースを Z3 と照合。実演算との全入力の一致証明は未対応 |
+| `Bool`・`Byte`・`UInt16`・`UInt`・`Int`・`UInt64`・`Int64`・`BigInt`・`String`・`Float`・`Double`・FixedArray のセル・`Map` | `@smtlib.Encode` → `@smtlib.Value` / `Term` | 実行時専用の双方向の符号化。評価器をネイティブ演算と比較し、`just smtlib` で乱数生成した項を Z3 と比較する。証明ではない |
 
 `Integer` は上限のない **証明専用** の抽象型。機械整数 prelude を選んでも数学的整数として扱える。
 射影は論理関数であり、実行時の数値キャストではない。

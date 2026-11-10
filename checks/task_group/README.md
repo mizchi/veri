@@ -3,7 +3,7 @@
 [日本語](README.ja.md)
 
 This example models **two child tasks and the group body** of
-`moonbitlang/async@0.21.3`. Execution and `moon prove` share a pure transition
+`moonbitlang/async@0.22.9`. Execution and `moon prove` share a pure transition
 definition. Z3 searches for temporal counterexamples, and tests compare observed
 traces from the actual async runtime with the model. It lives in
 `mizchi/veri-examples/task_group`; it is not a published general-purpose TaskGroup API.
@@ -31,7 +31,7 @@ moon -C examples prove task_group/client
 ## Model
 
 The behavioral reference is the
-[v0.21.3 implementation and API comments](https://github.com/moonbitlang/async/blob/v0.21.3/src/task_group.mbt),
+[v0.22.9 implementation and API comments](https://github.com/moonbitlang/async/blob/v0.22.9/src/task_group.mbt),
 not unreleased API changes on the default branch.
 
 ```mermaid
@@ -158,6 +158,8 @@ allowed failure, manual cancellation, immediate return, external cancellation,
 body failure and group-defer failure, with both child creation orders. Tests
 check actual resource release, group-defer order and exit reasons. There are no
 timing sleeps; a five-second timeout is only a watchdog for test failure.
+Since async 0.22 cancellation is no longer an error value that `catch` can see,
+so the test observes external cancellation with `is_being_cancelled` while unwinding.
 
 - `moon prove` covers the pure initial state, transition preservation and safety
   of arbitrary finite traces.

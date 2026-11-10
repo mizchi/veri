@@ -1,8 +1,9 @@
 ///|
+#derive(Eq, Debug)
 pub(all) struct State {
   pending : Bool
   done : Bool
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend State with Eq::{not_equal, equal}
@@ -12,12 +13,13 @@ pub extend State with @debug.Debug::{to_repr}
 
 ///|
 /// Drop is an explicit broken-protocol variant used to find lost requests.
+#derive(Eq, Debug)
 pub(all) enum Action {
   Request
   Complete
   Wait
   Drop
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Action with Eq::{not_equal, equal}

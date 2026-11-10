@@ -2,11 +2,9 @@ import {
   "mizchi/veri/model_check",
   "mizchi/veri/model_check/smt",
   "mizchi/veri/model_check/suite",
+  "mizchi/veri/smtlib/solver",
   "moonbitlang/core/debug",
   "moonbitlang/async/shell",
-  "moonbitlang/async",
-  "moonbitlang/async/process",
-  "moonbitlang/async/io",
   "moonbitlang/core/json",
 }
 

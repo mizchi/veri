@@ -11,7 +11,7 @@ const models = new Map();
 function checkedAsyncVersion() {
   const manifest = readFileSync(new URL("../.mooncakes/moonbitlang/async/moon.mod", import.meta.url), "utf8");
   const version = manifest.match(/^version\s*=\s*"([^"]+)"/m)?.[1];
-  assert.equal(version, "0.21.3", "Recheck TaskGroup semantics before changing the async reference version");
+  assert.equal(version, "0.22.9", "Recheck TaskGroup semantics before changing the async reference version");
   return version;
 }
 function getModel(policy, fault) {

@@ -6,9 +6,10 @@ pub(all) struct Minimized[T] {
 }
 
 ///|
+#derive(Debug)
 pub(all) suberror MinimizeError {
   InvalidMinimization
-} derive(Debug)
+}
 
 ///|
 pub extend MinimizeError with @debug.Debug::{to_repr}

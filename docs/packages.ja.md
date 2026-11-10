@@ -42,6 +42,9 @@
 | `graph` | 経路・到達性・重み・有限集合の証明 | 連結と分解、閉じた集合、距離ラベルによる最短経路・BFS の証明書 |
 | `runtime/graph` | 不変の有向グラフ、BFS・Dijkstra・トポロジー | 検査器全体の証明、独立モデル、グラフと操作列の shrinking |
 | `examples/toolkit` | 安全な確保サイズ、ヘッダ読取、集計、経路 | 別モジュールでの契約の合成と実行例 |
+| `smtlib` | SMT-LIB 2 の項・値・スクリプト・応答の解析・評価器 | 評価結果を4バックエンドでネイティブ演算と、乱数生成した項で Z3 と比較。[SMT-LIB ガイド](smtlib.ja.md)を参照 |
+| `smtlib/solver` / `cmd/smtlib-check` | ソルバーのセッション（native・wasm）と Z3 との差分検査 | 閉じた項が値と等しいことの証明、ソルバーのモデルの復号とネイティブ演算での確認 |
+| `examples/midpoint` | 項を実行時の入力で評価し、出力・復号する例 | wrap する中点計算の反例を評価器で確認 |
 | `checks/` | FP・bitvector・array・string の SMT-LIB 2 検査 | 全入力に対する性質と、固定入力の反例 |
 | `checks/negative` | 意図的に誤った補題 | 誤った主張を検証経路が成功扱いしないこと |
 
@@ -59,6 +62,7 @@ veri/
 ├── graph/
 ├── arrays/
 ├── strings/
+├── smtlib/                  # 項・値・評価器。solver/ は Z3 を実行
 ├── fset/
 ├── seq/
 ├── list/                    # laws, indexed, conversions
@@ -85,7 +89,7 @@ workspace 内の依存はローカルの本体へ解決され、レジストリ�
 証明結果は `_build/verif/` 配下に出力される。ワークスペースでは完全なパッケージパスごとのディレクトリに分かれる。
 
 `.mbt` が実装・型・契約、`.mbtp` が論理モデル・補題。`pkg.generated.mbti` で公開 API を確認できる。
-`fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bitvector`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。
+`fset`・`seq`・`list`・`bag`・`fmap`・`bintree`・`ieee754`・`ieee754/float32`・`bitvector`・`arrays`・`strings` の抽象型は **証明専用**。実行時の値との対応は、保証を明記した `runtime/` の実装が別途提供する。`smtlib` はその逆で、同じ理論の項と値を実行時専用のデータとして扱い、証明上の意味は持たない。
 
 最小の利用例:
 

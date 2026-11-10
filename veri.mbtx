@@ -1,7 +1,7 @@
 ///|
 import {
-  "moonbitlang/async@0.21.3",
-  "moonbitlang/async@0.21.3/shell",
+  "moonbitlang/async@0.22.9",
+  "moonbitlang/async@0.22.9/shell",
   "moonbitlang/core/env",
 }
 

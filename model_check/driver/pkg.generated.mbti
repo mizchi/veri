@@ -8,17 +8,19 @@ import {
 }
 
 // Values
-pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] dispatch(String, (C) -> @model_check.Client[S, E, Snapshot] raise?) -> Json raise
+pub fn[C : @json.FromJson, S : Eq, E, Snapshot : @json.ToJson] dispatch(String, (C) -> @model_check.Client[S, E, Snapshot] raise?) -> @json.Json raise
 
-pub fn[C : @json.FromJson, S : Eq, E, Snapshot : ToJson] serve((C) -> @model_check.Client[S, E, Snapshot] raise?) -> Unit
+pub fn[C : @json.FromJson, S : Eq, E, Snapshot : @json.ToJson] serve((C) -> @model_check.Client[S, E, Snapshot] raise?) -> Unit
 
 // Errors
-type ProtocolError derive(@debug.Debug)
+#derive(@debug.Debug)
+type ProtocolError
 pub fn ProtocolError::to_repr(Self) -> @debug.Repr
 
 // Types and methods
-type Request[C] derive(@json.FromJson)
-pub fn[C : @json.FromJson] Request::from_json(Json, @json.JsonPath) -> Self[C] raise @json.JsonDecodeError
+#derive(@json.FromJson)
+type Request[C]
+pub fn[C : @json.FromJson] Request::from_json(@json.Json, @json.JsonPath) -> Self[C] raise @json.JsonDecodeError
 
 // Type aliases
 

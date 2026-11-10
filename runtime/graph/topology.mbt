@@ -1,10 +1,11 @@
 ///|
 /// Either a permutation in dependency order, or a simple directed cycle with
 /// its first vertex repeated at the end. Empty graphs yield Ordered([]).
+#derive(Debug, Eq)
 pub(all) enum Topology {
   Ordered(FixedArray[Int32])
   Cyclic(FixedArray[Int32])
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend Topology with @debug.Debug::{to_repr}

@@ -12,10 +12,11 @@ pub fn[T] model(Tree[T]) -> @mizchi/veri/bintree.Tree[T]
 // Errors
 
 // Types and methods
+#derive(@debug.Debug)
 pub(all) enum Tree[T] {
   Empty
   Node(Tree[T], T, Tree[T])
-} derive(@debug.Debug)
+}
 #as_free_fn(inorder)
 pub fn[T] Tree::inorder(Self[T]) -> @list.List[T]
 pub fn[T] Tree::iter(Self[T]) -> Iter[T]

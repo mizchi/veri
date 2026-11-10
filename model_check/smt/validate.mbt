@@ -1,9 +1,10 @@
 ///|
+#derive(Debug)
 pub(all) suberror ModelError {
   InvalidModel(String)
   InvalidQuery(String)
   InvalidSolverOutput(String)
-} derive(Debug)
+}
 
 ///|
 pub extend ModelError with @debug.Debug::{to_repr}

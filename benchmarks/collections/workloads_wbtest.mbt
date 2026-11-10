@@ -1,8 +1,9 @@
 ///|
+#derive(Eq, Debug)
 enum Output {
   Values(Array[Int32])
   Count(Int32)
-} derive(Eq, Debug)
+}
 
 ///|
 pub extend Output with Eq::{not_equal, equal}

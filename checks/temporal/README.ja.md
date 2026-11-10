@@ -80,7 +80,7 @@ TLA+・JSON の遷移表・Z3 の制約・ログ・ITF 形式の反例を出力�
 
 `just verify-temporal` は、実装済みの
 [`examples/temporal`](../../examples/temporal/job.mbt) との接続も検査する。
-手元の `moonc v0.10.12+1634b282e` で、通常・機械整数の両モデルとも
+手元の `moonc v0.10.20+65efd5b93` で、通常・機械整数の両モデルとも
 本体13件＋利用側2件の証明が通る。
 
 ```mermaid

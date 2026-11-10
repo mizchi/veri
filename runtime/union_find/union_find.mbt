@@ -1,8 +1,9 @@
 ///|
+#derive(Debug, Eq)
 pub(all) suberror UnionFindError {
   NegativeSize(Int32)
   InvalidElement(Int32)
-} derive(Debug, Eq)
+}
 
 ///|
 pub extend UnionFindError with @debug.Debug::{to_repr}

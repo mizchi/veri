@@ -1,4 +1,4 @@
-# Collection benchmarks
+# Benchmarks
 
 [日本語](benchmarks.ja.md) | [README](../README.md)
 
@@ -52,3 +52,39 @@ bindings have no runtime operations to benchmark. Rerun on your deployment
 backend and workload before relying on a performance comparison.
 The [2026-09-14 measurements](../benchmarks/collections/RESULTS.md) remain available
 as a historical snapshot of the previous skew-heap implementation.
+
+## SMT-LIB benchmarks
+
+`benchmarks/smtlib` measures the SMT-LIB paths with the same benchmark API:
+the model-check encoder and witness decoder, and `smtlib` term building,
+printing, evaluation and answer decoding. `just bench-smtlib native` (or `js`,
+`wasm`, `wasm-gc`) saves a log, JSON and Markdown report under
+`_build/benchmarks/smtlib-<target>.*`.
+
+Where a previous implementation exists it stays in the benchmark package as
+the **reference**: the 0.2.1 encoder and decoder, nested string concatenation
+for term building, and the expanded tree for a shared term. Reference and
+tuned outputs are compared for exact equality on the measured backend before
+timing, so the reference is also the oracle for the tuned code. Each variant
+runs in two passes with the order reversed, five calibrated batches per pass,
+and every resulting string is materialized so that a JavaScript rope is not
+compared with a flat string.
+
+The [recorded measurements](../benchmarks/smtlib/RESULTS.md) show that the
+tuning **does not make every workload faster on every backend**:
+
+| Workload | native | js | wasm | wasm-gc |
+| --- | ---: | ---: | ---: | ---: |
+| Encode a fair response query, depth 64 | 4.17× | 1.88× | 6.87× | 3.12× |
+| Encode initial definitions, 2,048 states | 3.22× | 1.03× | 3.04× | 2.08× |
+| Incremental safety conditions, depth 64 | 1.96× | 1.07× | 2.07× | 2.40× |
+| Decode a witness, depth 1,024 | 5.08× | 2.43× | 8.51× | 5.39× |
+| Build and print 6,146 unshared terms | 10.15× | 0.10× | 5.29× | 57.41× |
+| Print a term shared across 10 rounds | 242× | 157× | 117× | 1,768× |
+
+Values are reference time divided by tuned time, so values below 1 are
+slowdowns. On JavaScript, string concatenation of an unshared term is about
+ten times faster than building it in a `Context`: engines keep concatenation
+results as ropes. Choose `smtlib` there for sharing, sort checking,
+evaluation and decoding rather than for raw printing speed. Timings come from
+one shared cloud VM; rerun on your backend and workload before relying on them.

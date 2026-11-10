@@ -32,7 +32,7 @@ process.stdout.write(run("moon", ["package"], root));
 const archive = join(root, "_build", "publish", `${name.replaceAll("/", "-")}-${version}.zip`);
 const entries = run("unzip", ["-Z1", archive], root).trim().split("\n");
 for (const guide of ["packages", "toolkit", "collections", "numerics", "verification",
-  "benchmarks", "architecture", "floating-point", "temporal", "model-workflows"]) {
+  "benchmarks", "architecture", "smtlib", "floating-point", "temporal", "model-workflows"]) {
   for (const suffix of [".md", ".ja.md"]) {
     const file = `docs/${guide}${suffix}`;
     assert.ok(entries.includes(file), `Missing packaged guide: ${file}`);
@@ -52,6 +52,8 @@ for (const required of ["LICENSE", "README.md", "README.ja.md", "moon.mod",
   "runtime/graph/topology/soundness.mbtp", "runtime/graph/topology.mbtp", "runtime/bytes/cursor/cursor.mbt",
   "model_check/types.mbt", "model_check/driver/driver.mbt", "model_check/smt/encode.mbt",
   "model_check/runner/runner.mbt", "cmd/model-check/main.mbt",
+  "smtlib/context.mbt", "smtlib/eval.mbt", "smtlib/parse.mbt", "smtlib/solver/session.mbt",
+  "cmd/smtlib-check/main.mbt",
   "model_check/builder.mbt", "model_check/suite/types.mbt", "model_check/runner/artifact.mbt",
   "model_check/runner/solver.mbt", "model_check/smt/exhaustive.mbt", "model_check/smt/response.mbt",
   "testing/state_machine/replay.mbt", "testing/state_machine/async/replay.mbt"]) {

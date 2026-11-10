@@ -1,21 +1,23 @@
 ///|
+#derive(ToJson)
 pub(all) struct CaseReport {
   name : String
   expected : @suite.Outcome
   passed : Bool
   result : CheckResult?
   error : String?
-} derive(ToJson)
+}
 
 ///|
 pub extend CaseReport with ToJson::{to_json}
 
 ///|
+#derive(ToJson)
 pub(all) struct SuiteReport {
   version : Int32
   passed : Bool
   cases : Array[CaseReport]
-} derive(ToJson)
+}
 
 ///|
 pub extend SuiteReport with ToJson::{to_json}

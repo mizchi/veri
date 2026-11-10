@@ -1,4 +1,5 @@
 ///|
+#derive(@json.FromJson)
 struct Request[C] {
   version : Int32
   mode : String
@@ -6,15 +7,16 @@ struct Request[C] {
   property : @model_check.Property?
   justice : Array[Int32]
   witnesses : Array[@model_check.Witness]
-} derive(@json.FromJson)
+}
 
 ///|
 pub extend Request with @json.FromJson::{from_json}
 
 ///|
+#derive(Debug)
 suberror ProtocolError {
   InvalidRequest(String)
-} derive(Debug)
+}
 
 ///|
 pub extend ProtocolError with @debug.Debug::{to_repr}
