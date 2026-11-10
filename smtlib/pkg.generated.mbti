@@ -1,0 +1,278 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "mizchi/veri/smtlib"
+
+import {
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/debug",
+}
+
+// Values
+pub const MAX_WIDTH : Int32 = 64
+
+pub fn[T : Encode] array_value(ArrayView[T], default~ : T) -> Value raise SmtError
+
+pub fn decode_value(Sexp, Sort) -> Value raise SmtError
+
+pub fn[K : Encode, V : Encode] map_value(Map[K, V], default~ : V) -> Value raise SmtError
+
+pub fn parse_model(String) -> Model raise SmtError
+
+pub fn parse_sexps(String) -> Array[Sexp] raise SmtError
+
+pub fn parse_sort(Sexp) -> Sort raise SmtError
+
+pub fn[T : Encode] to_value(T) -> Value raise SmtError
+
+// Errors
+#derive(@debug.Debug)
+pub(all) suberror SmtError {
+  SortMismatch(String)
+  Unsupported(String)
+  Malformed(String)
+  Unspecified(String)
+}
+pub fn SmtError::to_repr(Self) -> @debug.Repr
+
+// Types and methods
+pub struct ArrayValue {
+  index : Sort
+  element : Sort
+  default : Value
+  // private fields
+}
+pub fn ArrayValue::constant(Sort, Value) -> Self
+pub fn ArrayValue::output(Self, &Logger) -> Unit
+pub fn ArrayValue::override_count(Self) -> Int32
+pub fn ArrayValue::overrides(Self) -> Iter[(Value, Value)]
+pub fn ArrayValue::select(Self, Value) -> Value
+pub fn ArrayValue::store(Self, Value, Value) -> Self
+pub fn ArrayValue::to_repr(Self) -> @debug.Repr
+pub fn ArrayValue::to_string(Self) -> String
+pub impl Show for ArrayValue
+pub impl @debug.Debug for ArrayValue
+
+pub struct Context {
+  // private fields
+}
+pub fn Context::all(Self, ArrayView[Term]) -> Term raise SmtError
+pub fn Context::and_(Self, Term, Term) -> Term raise SmtError
+pub fn Context::any(Self, ArrayView[Term]) -> Term raise SmtError
+pub fn Context::bool(Self, Bool) -> Term
+pub fn Context::bv(Self, Int32, UInt64) -> Term raise SmtError
+pub fn Context::bv_add(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_and(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_ashr(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_concat(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_extract(Self, Term, high~ : Int32, low~ : Int32) -> Term raise SmtError
+pub fn Context::bv_lshr(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_mul(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_neg(Self, Term) -> Term raise SmtError
+pub fn Context::bv_not(Self, Term) -> Term raise SmtError
+pub fn Context::bv_or(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_sdiv(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_shl(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_sign_extend(Self, Term, width~ : Int32) -> Term raise SmtError
+pub fn Context::bv_sle(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_slt(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_srem(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_sub(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_to_int(Self, Term) -> Term raise SmtError
+pub fn Context::bv_udiv(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_ule(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_ult(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_urem(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_xor(Self, Term, Term) -> Term raise SmtError
+pub fn Context::bv_zero_extend(Self, Term, width~ : Int32) -> Term raise SmtError
+pub fn Context::const_array(Self, Sort, Term) -> Term raise SmtError
+pub fn Context::constant(Self, String, Sort) -> Term raise SmtError
+pub fn Context::dag_size(Self, Term) -> Int32
+pub fn Context::distinct(Self, Term, Term) -> Term raise SmtError
+pub fn Context::eq(Self, Term, Term) -> Term raise SmtError
+pub fn Context::eval(Self, Term, Model) -> Value raise SmtError
+pub fn[T : Encode] Context::eval_as(Self, Term, Model) -> T raise SmtError
+pub fn Context::float32(Self, Float) -> Term
+pub fn Context::float64(Self, Double) -> Term
+pub fn Context::fp_abs(Self, Term) -> Term raise SmtError
+pub fn Context::fp_add(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_convert(Self, Term, to~ : Sort) -> Term raise SmtError
+pub fn Context::fp_div(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_eq(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_from_bits(Self, Term) -> Term raise SmtError
+pub fn Context::fp_is_infinite(Self, Term) -> Term raise SmtError
+pub fn Context::fp_is_nan(Self, Term) -> Term raise SmtError
+pub fn Context::fp_is_zero(Self, Term) -> Term raise SmtError
+pub fn Context::fp_le(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_lt(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_mul(Self, Term, Term) -> Term raise SmtError
+pub fn Context::fp_neg(Self, Term) -> Term raise SmtError
+pub fn Context::fp_sqrt(Self, Term) -> Term raise SmtError
+pub fn Context::fp_sub(Self, Term, Term) -> Term raise SmtError
+pub fn Context::free_constants(Self, Term) -> Array[Term]
+pub fn Context::implies(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int(Self, Int32) -> Term
+pub fn Context::int_abs(Self, Term) -> Term raise SmtError
+pub fn Context::int_add(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_div(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_ge(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_gt(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_le(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_lt(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_mod(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_mul(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_neg(Self, Term) -> Term raise SmtError
+pub fn Context::int_sub(Self, Term, Term) -> Term raise SmtError
+pub fn Context::int_to_bv(Self, Term, width~ : Int32) -> Term raise SmtError
+pub fn Context::integer(Self, @bigint.BigInt) -> Term
+pub fn Context::ite(Self, Term, Term, Term) -> Term raise SmtError
+pub fn[T : Encode] Context::literal(Self, T) -> Term raise SmtError
+pub fn Context::lookup(Self, String) -> Term?
+pub fn Context::name_of(Self, Term) -> String?
+pub fn Context::new() -> Self
+pub fn Context::not_(Self, Term) -> Term raise SmtError
+pub fn Context::or_(Self, Term, Term) -> Term raise SmtError
+pub fn Context::parse_values(Self, String, ArrayView[Term]) -> Array[Value] raise SmtError
+pub fn Context::select(Self, Term, Term) -> Term raise SmtError
+pub fn Context::sort_of(Self, Term) -> Sort
+pub fn Context::store(Self, Term, Term, Term) -> Term raise SmtError
+pub fn Context::str_at(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_concat(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_contains(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_from_int(Self, Term) -> Term raise SmtError
+pub fn Context::str_index_of(Self, Term, Term, Term) -> Term raise SmtError
+pub fn Context::str_le(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_length(Self, Term) -> Term raise SmtError
+pub fn Context::str_lt(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_prefix_of(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_replace(Self, Term, Term, Term) -> Term raise SmtError
+pub fn Context::str_substr(Self, Term, Term, Term) -> Term raise SmtError
+pub fn Context::str_suffix_of(Self, Term, Term) -> Term raise SmtError
+pub fn Context::str_to_int(Self, Term) -> Term raise SmtError
+pub fn Context::string(Self, String) -> Term raise SmtError
+pub fn Context::term_count(Self) -> Int32
+pub fn Context::to_smtlib(Self, Term) -> String
+pub fn[T : Encode] Context::typed(Self, String) -> Typed[T] raise SmtError
+pub fn Context::value(Self, Value) -> Term raise SmtError
+pub fn Context::write(Self, StringBuilder, Term) -> Unit
+pub fn Context::xor(Self, Term, Term) -> Term raise SmtError
+
+#derive(@debug.Debug)
+pub struct Model {
+  // private fields
+}
+pub fn[T : Encode] Model::bind(Self, Typed[T], T) -> Unit raise SmtError
+pub fn Model::get(Self, String) -> Value?
+pub fn Model::length(Self) -> Int32
+pub fn Model::names(Self) -> Array[String]
+pub fn Model::new() -> Self
+pub fn[T] Model::read(Self, Typed[T]) -> T?
+pub fn Model::set(Self, String, Value) -> Unit
+pub fn Model::to_repr(Self) -> @debug.Repr
+
+pub struct Script {
+  // private fields
+}
+pub fn Script::assert_term(Self, Term) -> Unit raise SmtError
+pub fn Script::check_sat(Self) -> Unit
+pub fn Script::declare_constants(Self, Term) -> Unit
+pub fn Script::define_constant(Self, Term, Term) -> Unit raise SmtError
+pub fn Script::echo(Self, String) -> Unit
+pub fn Script::exit(Self) -> Unit
+pub fn Script::get_model(Self) -> Unit
+pub fn Script::get_value(Self, ArrayView[Term]) -> Unit
+pub fn Script::new(Context, logic? : String) -> Self
+pub fn Script::pop(Self) -> Unit raise SmtError
+pub fn Script::push(Self) -> Unit
+pub fn Script::raw(Self, String) -> Unit
+pub fn Script::set_option(Self, String, String) -> Unit
+pub fn Script::take(Self) -> String
+pub fn Script::to_string(Self) -> String
+
+#derive(@debug.Debug)
+pub(all) enum Sexp {
+  Atom(StringView)
+  Str(String)
+  List(Array[Sexp])
+}
+pub fn Sexp::to_repr(Self) -> @debug.Repr
+
+#derive(Eq, Hash, @debug.Debug)
+pub(all) enum Sort {
+  Bool
+  Int
+  BitVec(Int32)
+  Array(Sort, Sort)
+  String
+  Float32
+  Float64
+}
+pub fn Sort::equal(Self, Self) -> Bool
+pub fn Sort::hash(Self) -> Int32
+pub fn Sort::hash_combine(Self, Hasher) -> Unit
+pub fn Sort::not_equal(Self, Self) -> Bool
+pub fn Sort::to_repr(Self) -> @debug.Repr
+pub fn Sort::to_smtlib(Self) -> String
+pub fn Sort::write(Self, StringBuilder) -> Unit
+
+#derive(Eq, Hash, @debug.Debug)
+pub struct Term {
+  // private fields
+}
+pub fn Term::equal(Self, Self) -> Bool
+pub fn Term::hash(Self) -> Int32
+pub fn Term::hash_combine(Self, Hasher) -> Unit
+pub fn Term::not_equal(Self, Self) -> Bool
+pub fn Term::to_repr(Self) -> @debug.Repr
+
+pub struct Typed[T] {
+  term : Term
+  name : String
+  // private fields
+}
+
+#derive(@debug.Debug)
+pub(all) enum Value {
+  Boolean(Bool)
+  Integer(@bigint.BigInt)
+  Bits(Int32, UInt64)
+  Text(String)
+  F32(UInt32)
+  F64(UInt64)
+  Table(ArrayValue)
+}
+pub fn Value::bits(Int32, UInt64) -> Self raise SmtError
+pub fn[T : Encode] Value::decode(Self) -> T?
+pub fn Value::equal(Self, Self) -> Bool
+pub fn Value::float32(Float) -> Self
+pub fn Value::float64(Double) -> Self
+pub fn Value::hash(Self) -> Int32
+pub fn Value::hash_combine(Self, Hasher) -> Unit
+pub fn[K : Encode, V : Encode] Value::lookup(Self, K) -> V?
+pub fn Value::not_equal(Self, Self) -> Bool
+pub fn Value::sort(Self) -> Sort
+pub fn Value::text(String) -> Self raise SmtError
+pub fn[T : Encode] Value::to_fixed_array(Self, Int32) -> FixedArray[T]?
+pub fn Value::to_repr(Self) -> @debug.Repr
+pub fn Value::to_smtlib(Self) -> String
+pub fn Value::write(Self, StringBuilder) -> Unit
+pub impl Eq for Value
+pub impl Hash for Value
+
+// Type aliases
+
+// Traits
+pub(open) trait Encode {
+  fn sort() -> Sort
+  fn to_value(Self) -> Value raise SmtError
+  fn from_value(Value) -> Self?
+}
+pub impl Encode for Bool
+pub impl Encode for Byte
+pub impl Encode for Int32
+pub impl Encode for Int64
+pub impl Encode for UInt32
+pub impl Encode for UInt16
+pub impl Encode for UInt64
+pub impl Encode for Float
+pub impl Encode for Double
+pub impl Encode for String
+pub impl Encode for @bigint.BigInt

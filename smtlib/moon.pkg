@@ -1,0 +1,16 @@
+import {
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/debug",
+  "moonbitlang/core/immut/hashmap" @immut_map,
+  "mizchi/veri/runtime/text",
+}
+
+import {
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/float",
+  "moonbitlang/core/double",
+  "moonbitlang/core/int",
+  "moonbitlang/core/int64",
+  "mizchi/veri/runtime/uint32",
+  "mizchi/veri/runtime/uint64",
+} for "test"

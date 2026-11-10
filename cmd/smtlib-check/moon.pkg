@@ -1,0 +1,12 @@
+import {
+  "mizchi/veri/smtlib",
+  "mizchi/veri/smtlib/solver",
+  "moonbitlang/async",
+  "moonbitlang/core/bigint",
+  "moonbitlang/core/env",
+  "moonbitlang/core/string",
+}
+
+pkgtype(kind: "executable")
+
+supported_targets = "wasm+native"
