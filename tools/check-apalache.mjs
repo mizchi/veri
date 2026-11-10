@@ -108,6 +108,6 @@ for (const {policy = 0, fault = 0, fair = false, kind = "response", ...check} of
     w => assert.deepEqual(replayTaskGroup([w], {policy, fault, fair, property: check.property}), [true]));
 }
 const asyncManifest = readFileSync(join(root, ".mooncakes/moonbitlang/async/moon.mod"), "utf8");
-assert.match(asyncManifest, /^version\s*=\s*"0\.21\.3"/m, "Recheck TaskGroup semantics after an async upgrade");
+assert.match(asyncManifest, /^version\s*=\s*"0\.22\.9"/m, "Recheck TaskGroup semantics after an async upgrade");
 save("complete");
 console.log(`Apalache ${version}: ${results.length} checks agree with Z3. Report: _build/apalache/report.json`);
