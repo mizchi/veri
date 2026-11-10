@@ -101,6 +101,10 @@ bench target="native":
 bench-check target="native" max_ratio="1.0":
     node tools/bench-collections.mjs {{target}} --max-ratio {{max_ratio}}
 
+# Reference and tuned SMT-LIB encoders, plus term printing, parsing and evaluation.
+bench-smtlib target="native":
+    node tools/bench-smtlib.mjs {{target}}
+
 # Keep targets sequential to avoid competition for CPU during measurement.
 bench-backends:
     just bench native
@@ -151,6 +155,10 @@ negative *packages: setup-solvers
 # UNSAT proofs and concrete SAT witnesses for FP, bitvectors, arrays, and strings.
 smt:
     node tools/check-smt.mjs
+
+# mizchi/veri/smtlib against Z3: random terms, solver models and solved queries.
+smtlib rounds="200" seed="2026":
+    moon run cmd/smtlib-check --target native -- {{rounds}} {{seed}}
 
 # Fixed job model: inductive safety and bounded liveness/fairness experiments.
 temporal:
@@ -240,7 +248,7 @@ vectors-check:
     node tools/generate-floats.mjs --check
     node tools/generate-runtime.mjs --check
 
-verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine negative smt temporal temporal-bridge task-group test-task-group test-model-check vectors-check test-backends test-release package-check
+verify: setup-solvers doctor check test-tools fp-capabilities conversion-capabilities core-capabilities array-capabilities graph-capabilities prove prove-machine prove-collections-machine prove-foundations-machine prove-temporal-machine prove-task-group-machine negative smt smtlib temporal temporal-bridge task-group test-task-group test-model-check vectors-check test-backends test-release package-check
 
 # Expected outcomes for CI, including deliberately failing models.
 model-suite:
@@ -259,7 +267,7 @@ ci-test target:
 # Avoid compiler lock contention between separate Node test files on small runners.
 ci-models:
     node --test --test-concurrency=1 tools/*.test.mjs
-    just smt temporal temporal-bridge task-group lease-clock model-suite
+    just smt smtlib temporal temporal-bridge task-group lease-clock model-suite
 
 ci-prove-mathematical: prove
 

@@ -56,6 +56,7 @@ This minimal proof uses bundled Why3 and Z3 on PATH.
 | [Verification guide](docs/verification.md) | Solver setup, moon prove, QuickCheck, and shrinking |
 | [Benchmarks](docs/benchmarks.md) | Core comparisons, measurement conditions, and tuning results |
 | [Proof architecture](docs/architecture.md) | Why3 / SMT-LIB bindings, runtime correspondence, and trusted boundaries |
+| [SMT-LIB terms and runtime values](docs/smtlib.md) | Term builder, runtime type encoding, interpreter, solver sessions, and Z3 differential checks |
 | [IEEE 754](docs/floating-point.md) | Float / Double APIs, reference checks, proof scope, and limitations |
 | [Temporal model checking](docs/temporal.md) | moonx, Z3 / Apalache, and TaskGroup / lease-clock examples |
 | [Practical verification workflows](docs/model-workflows.md) | CI suites, saved counterexamples, model builders, and implementation comparisons |

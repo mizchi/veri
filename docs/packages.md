@@ -42,6 +42,9 @@ Proof bindings cover finite sets, sequences, lists, bags, finite maps, binary tr
 | `graph` | Paths, reachability, weights and finite-set certificates | Composition/decomposition, closed sets, feasible-label shortest-path and BFS certificates |
 | `runtime/graph` | Immutable directed graphs, BFS, Dijkstra and topology | Complete shortest-path/topology checker proofs, independent models, graph/trace shrinking |
 | `examples/toolkit` | Checked allocation, binary headers, aggregation and routes | Cross-module contracts and runtime clients |
+| `smtlib` | SMT-LIB 2 terms, values, scripts, answer parsing and an interpreter | Evaluation compared with native operators on four backends and with Z3 on random terms; see the [SMT-LIB guide](smtlib.md) |
+| `smtlib/solver` / `cmd/smtlib-check` | Solver sessions (native, wasm) and the Z3 differential check | Closed terms proved equal to their values, solver models decoded and confirmed natively |
+| `examples/midpoint` | A term evaluated on runtime inputs, printed and decoded | Wrapping midpoint counterexample confirmed by the interpreter |
 | `checks/` | SMT-LIB 2 checks for FP, bitvectors, arrays, and strings | Properties over all inputs and counterexamples with fixed inputs |
 | `checks/negative` | Deliberately false lemmas | False claims must not be reported as successfully proved |
 
@@ -59,6 +62,7 @@ veri/
 ├── graph/
 ├── arrays/
 ├── strings/
+├── smtlib/                  # terms, values, interpreter; solver/ runs Z3
 ├── fset/
 ├── seq/
 ├── list/                    # laws, indexed, conversions
@@ -86,7 +90,7 @@ Proof reports are written under `_build/verif/`; workspaces nest reports by full
 
 `.mbt` files contain implementations, types, and contracts; `.mbtp` files contain logical models and lemmas.
 Public APIs are listed in `pkg.generated.mbti`.
-The abstract types in `fset`, `seq`, `list`, `bag`, `fmap`, `bintree`, `ieee754`, `ieee754/float32`, `bitvector`, `arrays`, and `strings` are **proof-only**. Runtime correspondence is provided separately by implementations under `runtime/` where stated.
+The abstract types in `fset`, `seq`, `list`, `bag`, `fmap`, `bintree`, `ieee754`, `ieee754/float32`, `bitvector`, `arrays`, and `strings` are **proof-only**. Runtime correspondence is provided separately by implementations under `runtime/` where stated. `smtlib` is the opposite: runtime-only terms and values of the same theories, with no proof-level meaning.
 
 A minimal example:
 

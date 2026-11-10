@@ -56,6 +56,7 @@ moon prove
 | [検証手順](docs/verification.ja.md) | ソルバーの設定、moon prove、QuickCheck と shrinking |
 | [ベンチマーク](docs/benchmarks.ja.md) | core との比較方法、計測条件、チューニング結果 |
 | [証明の仕組み](docs/architecture.ja.md) | Why3 / SMT-LIB との接続、実行時型との対応、信頼する境界 |
+| [SMT-LIB の項と実行時の値](docs/smtlib.ja.md) | 項の構築、実行時型の符号化、評価器、ソルバーのセッション、Z3 との差分検査 |
 | [IEEE 754](docs/floating-point.ja.md) | Float / Double の API、参照検査、証明範囲と未対応機能 |
 | [時相論理のモデル検査](docs/temporal.ja.md) | moonx、Z3 / Apalache、TaskGroup・lease-clock の例 |
 | [実用ワークフロー](docs/model-workflows.ja.md) | CI スイート、反例の保存、モデル構築、実装との比較 |

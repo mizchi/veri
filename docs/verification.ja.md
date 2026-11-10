@@ -58,6 +58,8 @@ just core-capabilities # core の関数を契約内から直接呼べるかを�
 just conversion-capabilities # ネイティブ変換と UInt16 の証明変換対応を検査
 just array-capabilities # 更新前の状態・snapshot の対応状況と共有参照の拒否を確認
 just smt          # FP・bitvector・array・string の UNSAT 証明と SAT の反例
+just smtlib       # smtlib の評価器・出力・復号を乱数生成した項で Z3 と比較
+just smtlib 1000 7 # ラウンド数とシードを変更
 just negative     # 各モデルで意図的な偽命題が証明成功にならないことを確認
 just negative bitvector runtime/uint32 runtime/uint64 # 関連する負例だけを選択
 just test js      # 実行時検査
@@ -65,6 +67,7 @@ just quickcheck js # QuickCheck の性質テストだけを実行
 just bench native # core とコレクションを比較し、時間と比率を保存
 just bench-backends # 全4バックエンドを順番に計測
 just bench-check native 1.0 # 両方の測定順で比率の上限を満たさなければ失敗
+just bench-smtlib native # SMT-LIB エンコーダの参照実装と調整後、出力・解析・評価を計測
 just test-backends # JS / wasm / wasm-gc / native
 just test-release # 最適化したビルドでも同じ検査
 just fp-capabilities # Float/Double の証明変換の対応状況を確認

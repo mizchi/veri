@@ -62,6 +62,8 @@ just core-capabilities # Probe direct calls to core from contracted functions
 just conversion-capabilities # Probe native numeric casts and UInt16 support
 just array-capabilities # Report old-state/snapshot support and mutable-alias rejection
 just smt           # UNSAT proofs and SAT witnesses for FP, bitvectors, arrays, and strings
+just smtlib        # Compare the smtlib interpreter, printer and decoder with Z3 on random terms
+just smtlib 1000 7 # More rounds with another seed
 just negative      # Check that deliberately false claims in each model are not proved
 just negative bitvector runtime/uint32 runtime/uint64 # Select affected negative controls
 just test js       # Run runtime checks
@@ -69,6 +71,7 @@ just quickcheck js # Run only the QuickCheck properties
 just bench native # Compare collections with core; save timings and ratios
 just bench-backends # Run the comparisons sequentially on all four backends
 just bench-check native 1.0 # Fail unless both measurement orders meet the ratio limit
+just bench-smtlib native # Reference vs tuned SMT-LIB encoders, printing, parsing and evaluation
 just test-backends # JS / wasm / wasm-gc / native
 just test-release  # Run the same checks in optimized builds
 just fp-capabilities # Report native Float/Double proof-lowering support
