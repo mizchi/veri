@@ -32,15 +32,18 @@ test "the same term becomes a solver query and its answer runtime values" {
   )
   script.check_sat()
   script.get_value([low.term, high.term])
-  inspect(script.to_string(), content=(
-    #|(set-logic QF_BV)
-    #|(declare-const low (_ BitVec 32))
-    #|(declare-const high (_ BitVec 32))
-    #|(assert (let (($t4 (bvudiv (bvadd low high) #x00000002))) (not (=> (bvule low high) (and (bvule low $t4) (bvule $t4 high))))))
-    #|(check-sat)
-    #|(get-value (low high))
-    #|
-  ))
+  inspect(
+    script.to_string(),
+    content=(
+      #|(set-logic QF_BV)
+      #|(declare-const low (_ BitVec 32))
+      #|(declare-const high (_ BitVec 32))
+      #|(assert (let (($t4 (bvudiv (bvadd low high) #x00000002))) (not (=> (bvule low high) (and (bvule low $t4) (bvule $t4 high))))))
+      #|(check-sat)
+      #|(get-value (low high))
+      #|
+    ),
+  )
   // A solver's answer decodes back into the runtime type of each constant.
   let answer = "((low #xf0000000)\n (high #xffffffff))"
   let values = ctx.parse_values(answer, [low.term, high.term])
