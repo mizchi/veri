@@ -657,7 +657,7 @@ pub fn Context::parse_values(
     guard pair is List([_, value]) else {
       raise Malformed("Expected a (term value) pair")
     }
-    values.push(decode_value(value, self.sorts[terms[position].id]))
+    values.push(decode_value(value, self.sorts[terms[position].0]))
   }
   values
 }

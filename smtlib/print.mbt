@@ -117,67 +117,113 @@ let heads : FixedArray[String] = {
 }
 
 ///|
-fn join_bits(low : Int32, high : Int32) -> UInt64 {
-  low.reinterpret_as_uint().to_uint64() |
-  (high.reinterpret_as_uint().to_uint64() << 32)
+/// `(` followed by the head: one append opens an application.
+let opened : FixedArray[String] = FixedArray::makei(heads.length(), op => {
+  "(" + heads[op]
+})
+
+///|
+/// Make every scratch buffer large enough for the current arena.
+fn Context::reserve(self : Context) -> Unit {
+  let count = self.count
+  if self.marks.length() < count {
+    let capacity = self.sorts.length()
+    // Stale stamps are harmless, so the buffers start over.
+    self.marks = FixedArray::make(capacity, 0)
+    self.refs = FixedArray::make(capacity, 0)
+    self.order = FixedArray::make(capacity, 0)
+    // Printing holds at most one entry per edge plus one closer per node.
+    self.stack = FixedArray::make(capacity * 4 + 4, 0)
+    self.generation = 0
+  }
 }
 
 ///|
-/// Collect the subgraph below `roots` into `self.order`, children first, and
-/// count in `self.refs` how often each node is used inside that subgraph.
+/// Collect the subgraph below `roots` into `self.order[..self.visited]`,
+/// children first, and count in `self.refs` how often each node is used
+/// inside that subgraph.
 fn Context::visit(self : Context, roots : ArrayView[Term]) -> Unit {
-  let count = self.ops.length()
-  while self.marks.length() < count {
-    self.marks.push(0)
-    self.refs.push(0)
-  }
+  self.reserve()
   self.generation += 1
   let generation = self.generation
+  let nodes = self.nodes
+  let marks = self.marks
+  let refs = self.refs
   let order = self.order
   let stack = self.stack
-  order.clear()
-  stack.clear()
+  let mut top = 0
+  let mut visited = 0
+  let mut lowest = self.count
+  let mut highest = -1
   for root in roots {
-    self.discover(root.id, generation)
+    let id = root.0
+    if marks.unsafe_get(id) == generation {
+      refs[id] += 1
+    } else {
+      marks[id] = generation
+      refs[id] = 1
+      stack[top] = id
+      top += 1
+    }
   }
-  while stack.pop() is Some(id) {
-    order.push(id)
-    let children = arity[self.ops[id]]
-    if children > 0 {
-      self.discover(self.arg0[id], generation)
-      if children > 1 {
-        self.discover(self.arg1[id], generation)
-        if children > 2 {
-          self.discover(self.arg2[id], generation)
-        }
+  while top > 0 {
+    top -= 1
+    let id = stack.unsafe_get(top)
+    order[visited] = id
+    visited += 1
+    if id < lowest {
+      lowest = id
+    }
+    if id > highest {
+      highest = id
+    }
+    let base = id * 4
+    let children = arity.unsafe_get(nodes.unsafe_get(base))
+    for slot in 1..<=children {
+      let child = nodes.unsafe_get(base + slot)
+      if marks.unsafe_get(child) == generation {
+        refs[child] += 1
+      } else {
+        marks[child] = generation
+        refs[child] = 1
+        stack[top] = child
+        top += 1
       }
     }
   }
-  // Ids increase from children to parents, so sorting is a topological order.
-  order.sort()
-}
-
-///|
-fn Context::discover(self : Context, id : Int32, generation : Int32) -> Unit {
-  if self.marks[id] == generation {
-    self.refs[id] += 1
-  } else {
-    self.marks[id] = generation
-    self.refs[id] = 1
-    self.stack.push(id)
+  self.visited = visited
+  // Ids increase from children to parents, so ascending ids are a
+  // topological order. A dense subgraph is read off the stamps in one
+  // sweep; a sparse one is sorted.
+  if visited > 1 {
+    if highest - lowest < visited * 4 {
+      let mut next = 0
+      for id in lowest..<=highest {
+        if marks.unsafe_get(id) == generation {
+          order[next] = id
+          next += 1
+        }
+      }
+    } else {
+      let sorted = Array::makei(visited, index => order[index])
+      sorted.sort()
+      for index, id in sorted {
+        order[index] = id
+      }
+    }
   }
 }
 
 ///|
 /// Whether a visited node is printed once and then referred to by name.
 fn Context::shared(self : Context, id : Int32) -> Bool {
-  self.refs[id] > 1 && self.ops[id] > LAST_LEAF
+  self.refs.unsafe_get(id) > 1 && self.op(id) > LAST_LEAF
 }
 
 ///|
 fn Context::write_leaf(self : Context, out : StringBuilder, id : Int32) -> Unit {
-  let a = self.arg0[id]
-  match self.ops[id] {
+  let a = self.a(id)
+  match self.op(id) {
     VAR => out.write_string(self.names[a])
     TRUE => out.write_string("true")
     FALSE => out.write_string("false")
@@ -185,121 +231,125 @@ fn Context::write_leaf(self : Context, out : StringBuilder, id : Int32) -> Unit 
       if a < 0 {
         out.write_string("(- ")
         write_int(out, -a)
-        out.write_char(')')
+        out.write_string(")")
       } else {
         write_int(out, a)
       }
     INT_BIG => write_integer(out, self.bigs[a])
-    BV_LIT => {
-      let width = self.sorts[id].width()
-      write_bits(out, width, join_bits(a, self.arg1[id]))
-    }
+    BV_LIT => write_bits(out, self.c(id), a, self.b(id))
     STR_LIT => write_string_literal(out, self.strings[a])
-    F32_LIT => write_f32(out, a.reinterpret_as_uint())
-    _ => write_f64(out, join_bits(a, self.arg1[id]))
+    F32_LIT => write_f32(out, a)
+    _ => write_f64(out, a, self.b(id))
   }
 }
 
 ///|
-/// Write a leaf, or `(head` and schedule the operands and the closing paren.
-fn Context::open(self : Context, out : StringBuilder, id : Int32) -> Unit {
-  let op = self.ops[id]
+/// Write a leaf, or `(head` and schedule the operands and the closing
+/// parenthesis on the work stack. Returns the new stack height.
+fn Context::open(
+  self : Context,
+  out : StringBuilder,
+  id : Int32,
+  top : Int32,
+) -> Int32 {
+  let op = self.op(id)
   if op <= LAST_LEAF {
     self.write_leaf(out, id)
-    return
+    return top
   }
   let stack = self.stack
-  out.write_char('(')
-  stack.push(-1)
+  let mut top = top
+  stack[top] = -1
+  top += 1
   match op {
     AND | OR | INT_ADD | INT_MUL | STR_CONCAT => {
       // These are n-ary in SMT-LIB: print an unshared left spine flat.
+      out.write_string("(")
       out.write_string(heads[op])
       let mut current = id
       while true {
-        stack.push(self.arg1[current])
-        let left = self.arg0[current]
-        if self.ops[left] == op && self.refs[left] < 2 {
+        stack[top] = self.b(current)
+        top += 1
+        let left = self.a(current)
+        if self.op(left) == op && self.refs.unsafe_get(left) < 2 {
           current = left
         } else {
-          stack.push(left)
+          stack[top] = left
+          top += 1
           break
         }
       }
-      return
+      return top
     }
     BV_EXTRACT => {
-      out.write_string("(_ extract ")
-      write_int(out, self.arg1[id])
-      out.write_char(' ')
-      write_int(out, self.arg2[id])
-      out.write_char(')')
+      out.write_string("((_ extract ")
+      write_int(out, self.b(id))
+      out.write_string(" ")
+      write_int(out, self.c(id))
+      out.write_string(")")
     }
     BV_ZERO_EXTEND => {
-      out.write_string("(_ zero_extend ")
-      write_int(out, self.arg1[id])
-      out.write_char(')')
+      out.write_string("((_ zero_extend ")
+      write_int(out, self.b(id))
+      out.write_string(")")
     }
     BV_SIGN_EXTEND => {
-      out.write_string("(_ sign_extend ")
-      write_int(out, self.arg1[id])
-      out.write_char(')')
+      out.write_string("((_ sign_extend ")
+      write_int(out, self.b(id))
+      out.write_string(")")
     }
     INT_TO_BV => {
-      out.write_string("(_ int2bv ")
-      write_int(out, self.arg1[id])
-      out.write_char(')')
+      out.write_string("((_ int2bv ")
+      write_int(out, self.b(id))
+      out.write_string(")")
     }
     CONST_ARRAY => {
-      out.write_string("(as const ")
+      out.write_string("((as const ")
       self.sorts[id].write(out)
-      out.write_char(')')
+      out.write_string(")")
     }
     FP_FROM_BITS =>
       out.write_string(
         if self.sorts[id] == Float32 {
-          "(_ to_fp 8 24)"
+          "((_ to_fp 8 24)"
         } else {
-          "(_ to_fp 11 53)"
+          "((_ to_fp 11 53)"
         },
       )
     FP_CONVERT =>
       out.write_string(
         if self.sorts[id] == Float32 {
-          "(_ to_fp 8 24) RNE"
+          "((_ to_fp 8 24) RNE"
         } else {
-          "(_ to_fp 11 53) RNE"
+          "((_ to_fp 11 53) RNE"
         },
       )
-    _ => out.write_string(heads[op])
+    _ => out.write_string(opened[op])
   }
-  let children = arity[op]
-  if children > 2 {
-    stack.push(self.arg2[id])
+  let base = id * 4
+  for slot = arity[op]; slot >= 1; slot = slot - 1 {
+    stack[top] = self.nodes.unsafe_get(base + slot)
+    top += 1
   }
-  if children > 1 {
-    stack.push(self.arg1[id])
-  }
-  stack.push(self.arg0[id])
+  top
 }
 
 ///|
 /// Print one visited node as an expression, naming shared operands.
-fn Context::emit(self : Context, out : StringBuilder, top : Int32) -> Unit {
+fn Context::emit(self : Context, out : StringBuilder, root : Int32) -> Unit {
   let stack = self.stack
-  stack.clear()
-  self.open(out, top)
-  while stack.pop() is Some(item) {
+  let mut top = self.open(out, root, 0)
+  while top > 0 {
+    top -= 1
+    let item = stack.unsafe_get(top)
     if item < 0 {
-      out.write_char(')')
+      out.write_string(")")
+    } else if self.shared(item) {
+      out.write_string(" $t")
+      write_int(out, item)
     } else {
-      out.write_char(' ')
-      if self.shared(item) {
-        out.write_string("$t")
-        write_int(out, item)
-      } else {
-        self.open(out, item)
-      }
+      out.write_string(" ")
+      top = self.open(out, item, top)
     }
   }
 }
@@ -316,12 +366,12 @@ fn Context::write_visited(
   root : Int32,
 ) -> Unit {
   let mut bindings = 0
-  for index in 0..<self.order.length() {
-    let id = self.order[index]
+  for index in 0..<self.visited {
+    let id = self.order.unsafe_get(index)
     if id != root && self.shared(id) {
       out.write_string("(let (($t")
       write_int(out, id)
-      out.write_char(' ')
+      out.write_string(" ")
       self.emit(out, id)
       out.write_string(")) ")
       bindings += 1
@@ -329,7 +379,7 @@ fn Context::write_visited(
   }
   self.emit(out, root)
   for _ in 0..<bindings {
-    out.write_char(')')
+    out.write_string(")")
   }
 }
 
@@ -337,7 +387,7 @@ fn Context::write_visited(
 /// Append the SMT-LIB 2 text of `term`.
 pub fn Context::write(self : Context, out : StringBuilder, term : Term) -> Unit {
   self.visit([term])
-  self.write_visited(out, term.id)
+  self.write_visited(out, term.0)
 }
 
 ///|
@@ -352,7 +402,7 @@ pub fn Context::to_smtlib(self : Context, term : Term) -> String {
 /// Number of distinct subterms of `term`, including itself.
 pub fn Context::dag_size(self : Context, term : Term) -> Int32 {
   self.visit([term])
-  self.order.length()
+  self.visited
 }
 
 ///|
@@ -360,9 +410,10 @@ pub fn Context::dag_size(self : Context, term : Term) -> Int32 {
 pub fn Context::free_constants(self : Context, term : Term) -> Array[Term] {
   self.visit([term])
   let result = []
-  for id in self.order {
-    if self.ops[id] == VAR {
-      result.push({ id, })
+  for index in 0..<self.visited {
+    let id = self.order.unsafe_get(index)
+    if self.op(id) == VAR {
+      result.push(Term(id))
     }
   }
   result

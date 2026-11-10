@@ -174,16 +174,16 @@ fn Context::eval_node(
   id : Int32,
   model : Model,
 ) -> Value raise SmtError {
-  let op = self.ops[id]
-  let a = self.arg0[id]
-  let b = self.arg1[id]
+  let op = self.op(id)
+  let a = self.a(id)
+  let b = self.b(id)
   let values = self.values
   match op {
     VAR => {
       let name = self.names[a]
       match model.values.get(name) {
         Some(value) => {
-          guard value.sort() == self.sorts[id] else {
+          guard value.has_sort(self.sorts[id]) else {
             raise SortMismatch(
               "\{name} is assigned a value of sort " + value.sort().to_smtlib(),
             )
@@ -197,10 +197,7 @@ fn Context::eval_node(
     FALSE => Boolean(false)
     INT_SMALL => Integer(@bigint.BigInt::from_int(a))
     INT_BIG => Integer(self.bigs[a])
-    BV_LIT => {
-      let width = self.sorts[id].width()
-      Bits(width, join_bits(a, b))
-    }
+    BV_LIT => Bits(self.c(id), join_bits(a, b))
     STR_LIT => Text(self.strings[a])
     F32_LIT => F32(a.reinterpret_as_uint())
     F64_LIT => F64(join_bits(a, b))
@@ -228,7 +225,7 @@ fn Context::eval_node(
       if condition {
         values[b]
       } else {
-        values[self.arg2[id]]
+        values[self.c(id)]
       }
     }
     INT_ADD | INT_SUB | INT_MUL | INT_DIV | INT_MOD | INT_LE | INT_LT => {
@@ -289,7 +286,7 @@ fn Context::eval_node(
     }
     BV_EXTRACT => {
       guard values[a] is Bits(_, x) else { raise internal(id) }
-      let low = self.arg2[id]
+      let low = self.c(id)
       let width = b - low + 1
       Bits(width, (x >> low) & mask(width))
     }
@@ -318,7 +315,7 @@ fn Context::eval_node(
     }
     STORE => {
       guard values[a] is Table(table) else { raise internal(id) }
-      Table(table.store(values[b], values[self.arg2[id]]))
+      Table(table.store(values[b], values[self.c(id)]))
     }
     CONST_ARRAY => {
       guard self.sorts[id] is Array(index, _) else { raise internal(id) }
@@ -355,7 +352,7 @@ fn Context::eval_node(
     STR_SUBSTR => {
       guard values[a] is Text(x) &&
         values[b] is Integer(start) &&
-        values[self.arg2[id]] is Integer(count) else {
+        values[self.c(id)] is Integer(count) else {
         raise internal(id)
       }
       Text(str_substr(x, clamp(start), clamp(count)))
@@ -363,7 +360,7 @@ fn Context::eval_node(
     STR_INDEX_OF => {
       guard values[a] is Text(x) &&
         values[b] is Text(part) &&
-        values[self.arg2[id]] is Integer(start) else {
+        values[self.c(id)] is Integer(start) else {
         raise internal(id)
       }
       Integer(@bigint.BigInt::from_int(str_index_of(x, part, clamp(start))))
@@ -371,7 +368,7 @@ fn Context::eval_node(
     STR_REPLACE => {
       guard values[a] is Text(x) &&
         values[b] is Text(from) &&
-        values[self.arg2[id]] is Text(to) else {
+        values[self.c(id)] is Text(to) else {
         raise internal(id)
       }
       Text(str_replace(x, from, to))
@@ -479,26 +476,26 @@ pub fn Context::eval(
 ) -> Value raise SmtError {
   self.visit([term])
   let generation = self.generation
-  let values = self.values
   let filler = Boolean(false)
-  while values.length() < self.ops.length() {
-    values.push(filler)
+  if self.values.length() < self.count {
+    self.values = FixedArray::make(self.sorts.length(), filler)
   }
+  let values = self.values
   // Reuse the reference counts as "this node has no specified value" flags:
   // printing is finished with them, and -generation cannot be a count.
   let open = self.refs
   let mut reason = ""
-  for index in 0..<self.order.length() {
+  for index in 0..<self.visited {
     let id = self.order[index]
-    let op = self.ops[id]
-    let a = self.arg0[id]
-    let b = self.arg1[id]
+    let op = self.op(id)
+    let a = self.a(id)
+    let b = self.b(id)
     let children = arity[op]
     let pending = children > 0 &&
       (
         open[a] == -generation ||
         (children > 1 && open[b] == -generation) ||
-        (children > 2 && open[self.arg2[id]] == -generation)
+        (children > 2 && open[self.c(id)] == -generation)
       )
     if pending {
       // Only the connectives that ignore an operand can still be decided.
@@ -526,7 +523,7 @@ pub fn Context::eval(
           }
         ITE =>
           if open[a] != -generation && values[a] is Boolean(condition) {
-            let chosen = if condition { b } else { self.arg2[id] }
+            let chosen = if condition { b } else { self.c(id) }
             if open[chosen] != -generation {
               Some(values[chosen])
             } else {
@@ -554,8 +551,8 @@ pub fn Context::eval(
       error => raise error
     }
   }
-  guard open[term.id] != -generation else { raise Unspecified(reason) }
-  values[term.id]
+  guard open[term.0] != -generation else { raise Unspecified(reason) }
+  values[term.0]
 }
 
 ///|

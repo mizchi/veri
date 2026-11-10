@@ -70,14 +70,14 @@ pub fn Sort::write(self : Sort, out : StringBuilder) -> Unit {
     BitVec(width) => {
       out.write_string("(_ BitVec ")
       write_int(out, width)
-      out.write_char(')')
+      out.write_string(")")
     }
     Array(index, element) => {
       out.write_string("(Array ")
       index.write(out)
-      out.write_char(' ')
+      out.write_string(" ")
       element.write(out)
-      out.write_char(')')
+      out.write_string(")")
     }
   }
 }
@@ -88,27 +88,4 @@ pub fn Sort::to_smtlib(self : Sort) -> String {
   let out = StringBuilder()
   self.write(out)
   out.to_string()
-}
-
-///|
-/// Decimal digits without the intermediate string of `Int::to_string`.
-fn write_int(out : StringBuilder, value : Int32) -> Unit {
-  if value < 0 {
-    // Only nonnegative sizes and indices are written by this package.
-    out.write_string(value.to_string())
-  } else if value < 10 {
-    out.write_char((value + 48).unsafe_to_char())
-  } else {
-    write_int(out, value / 10)
-    out.write_char((value % 10 + 48).unsafe_to_char())
-  }
-}
-
-///|
-/// Width of a bitvector sort; 0 for every other sort.
-fn Sort::width(self : Sort) -> Int32 {
-  match self {
-    BitVec(width) => width
-    _ => 0
-  }
 }

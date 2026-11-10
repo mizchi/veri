@@ -24,9 +24,9 @@ pub fn Script::new(ctx : Context, logic? : String) -> Script {
 
 ///|
 fn Script::command(self : Script, name : String, argument : String) -> Unit {
-  self.out.write_char('(')
+  self.out.write_string("(")
   self.out.write_string(name)
-  self.out.write_char(' ')
+  self.out.write_string(" ")
   self.out.write_string(argument)
   self.out.write_string(")\n")
 }
@@ -36,7 +36,7 @@ fn Script::command(self : Script, name : String, argument : String) -> Unit {
 pub fn Script::set_option(self : Script, name : String, value : String) -> Unit {
   self.out.write_string("(set-option :")
   self.out.write_string(name)
-  self.out.write_char(' ')
+  self.out.write_string(" ")
   self.out.write_string(value)
   self.out.write_string(")\n")
 }
@@ -45,12 +45,12 @@ pub fn Script::set_option(self : Script, name : String, value : String) -> Unit 
 /// Declare the constants among the nodes most recently visited.
 fn Script::declare_visited(self : Script) -> Unit {
   let ctx = self.ctx
-  for index in 0..<ctx.order.length() {
+  for index in 0..<ctx.visited {
     let id = ctx.order[index]
-    if ctx.ops[id] != VAR {
+    if ctx.op(id) != VAR {
       continue
     }
-    let name = ctx.arg0[id]
+    let name = ctx.a(id)
     while self.declared.length() <= name {
       self.declared.push(false)
     }
@@ -59,7 +59,7 @@ fn Script::declare_visited(self : Script) -> Unit {
       self.log.push(name)
       self.out.write_string("(declare-const ")
       self.out.write_string(ctx.names[name])
-      self.out.write_char(' ')
+      self.out.write_string(" ")
       ctx.sorts[id].write(self.out)
       self.out.write_string(")\n")
     }
@@ -83,13 +83,13 @@ pub fn Script::define_constant(
   definition : Term,
 ) -> Unit raise SmtError {
   let ctx = self.ctx
-  guard ctx.ops[constant.id] == VAR else {
+  guard ctx.op(constant.0) == VAR else {
     raise Unsupported("Only a declared constant can be defined")
   }
-  guard ctx.sorts[definition.id] == ctx.sorts[constant.id] else {
-    raise mismatch("define-fun", ctx.sorts[definition.id])
+  guard ctx.sorts[definition.0] == ctx.sorts[constant.0] else {
+    raise mismatch("define-fun", ctx.sorts[definition.0])
   }
-  let name = ctx.arg0[constant.id]
+  let name = ctx.a(constant.0)
   while self.declared.length() <= name {
     self.declared.push(false)
   }
@@ -106,9 +106,9 @@ pub fn Script::define_constant(
   self.out.write_string("(define-fun ")
   self.out.write_string(ctx.names[name])
   self.out.write_string(" () ")
-  ctx.sorts[constant.id].write(self.out)
-  self.out.write_char(' ')
-  ctx.write_visited(self.out, definition.id)
+  ctx.sorts[constant.0].write(self.out)
+  self.out.write_string(" ")
+  ctx.write_visited(self.out, definition.0)
   self.out.write_string(")\n")
 }
 
@@ -116,13 +116,13 @@ pub fn Script::define_constant(
 /// `(assert term)`; `term` must be Boolean.
 pub fn Script::assert_term(self : Script, term : Term) -> Unit raise SmtError {
   let ctx = self.ctx
-  guard ctx.sorts[term.id] == Bool else {
-    raise mismatch("assert", ctx.sorts[term.id])
+  guard ctx.sorts[term.0] == Bool else {
+    raise mismatch("assert", ctx.sorts[term.0])
   }
   ctx.visit([term])
   self.declare_visited()
   self.out.write_string("(assert ")
-  ctx.write_visited(self.out, term.id)
+  ctx.write_visited(self.out, term.0)
   self.out.write_string(")\n")
 }
 
@@ -158,11 +158,11 @@ pub fn Script::get_value(self : Script, terms : ArrayView[Term]) -> Unit {
   self.out.write_string("(get-value (")
   for index, term in terms {
     if index > 0 {
-      self.out.write_char(' ')
+      self.out.write_string(" ")
     }
     // One traversal per term keeps `let` bindings local to that term.
     ctx.visit([term])
-    ctx.write_visited(self.out, term.id)
+    ctx.write_visited(self.out, term.0)
   }
   self.out.write_string("))\n")
 }

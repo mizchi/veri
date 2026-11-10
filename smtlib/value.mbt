@@ -69,6 +69,22 @@ pub fn Value::sort(self : Value) -> Sort {
 }
 
 ///|
+/// `self.sort() == sort` without building the sort.
+fn Value::has_sort(self : Value, sort : Sort) -> Bool {
+  match (self, sort) {
+    (Boolean(_), Bool) => true
+    (Integer(_), Int) => true
+    (Bits(width, _), BitVec(expected)) => width == expected
+    (Text(_), String) => true
+    (F32(_), Float32) => true
+    (F64(_), Float64) => true
+    (Table(table), Array(index, element)) =>
+      table.index == index && table.element == element
+    _ => false
+  }
+}
+
+///|
 pub impl Eq for Value with fn equal(self, other) {
   match (self, other) {
     (Boolean(a), Boolean(b)) => a == b
@@ -256,139 +272,16 @@ fn canonical64(bits : UInt64) -> UInt64 {
 }
 
 ///|
-const HEX : String = "0123456789abcdef"
-
-///|
-fn write_hex(out : StringBuilder, bits : UInt64, digits : Int32) -> Unit {
-  for i = digits - 1; i >= 0; i = i - 1 {
-    let nibble = ((bits >> (i * 4)) & 0xfUL).to_int()
-    out.write_char(HEX.unsafe_get(nibble).unsafe_to_char())
-  }
-}
-
-///|
-fn write_binary(out : StringBuilder, bits : UInt64, digits : Int32) -> Unit {
-  for i = digits - 1; i >= 0; i = i - 1 {
-    out.write_char(if ((bits >> i) & 1UL) == 0UL { '0' } else { '1' })
-  }
-}
-
-///|
-fn write_bits(out : StringBuilder, width : Int32, bits : UInt64) -> Unit {
-  if width % 4 == 0 {
-    out.write_string("#x")
-    write_hex(out, bits, width / 4)
-  } else {
-    out.write_string("#b")
-    write_binary(out, bits, width)
-  }
-}
-
-///|
-fn write_integer(out : StringBuilder, value : @bigint.BigInt) -> Unit {
-  if value < 0N {
-    out.write_string("(- ")
-    out.write_string((-value).to_string())
-    out.write_char(')')
-  } else {
-    out.write_string(value.to_string())
-  }
-}
-
-///|
-/// SMT-LIB 2.6 string literal: `"` doubles, and everything outside printable
-/// ASCII (and the backslash that would start an escape) becomes `\u{..}`.
-fn write_string_literal(out : StringBuilder, value : String) -> Unit {
-  out.write_char('"')
-  let length = value.length()
-  let mut start = 0
-  let mut index = 0
-  while index < length {
-    let unit = value.unsafe_get(index).to_int()
-    if unit >= 0x20 && unit <= 0x7e && unit != 0x22 && unit != 0x5c {
-      index += 1
-      continue
-    }
-    // Flush the plain run, then write one escaped scalar value.
-    if start < index {
-      out.write_substring(value, start, index - start)
-    }
-    if unit == 0x22 {
-      out.write_string("\"\"")
-      index += 1
-    } else {
-      let mut code = unit
-      index += 1
-      if unit >= 0xd800 && unit <= 0xdbff && index < length {
-        let low = value.unsafe_get(index).to_int()
-        code = 0x10000 + ((unit - 0xd800) << 10) + (low - 0xdc00)
-        index += 1
-      }
-      out.write_string("\\u{")
-      let digits = if code > 0xffff {
-        5
-      } else if code > 0xfff {
-        4
-      } else if code > 0xff {
-        3
-      } else if code > 0xf {
-        2
-      } else {
-        1
-      }
-      write_hex(out, code.to_uint64(), digits)
-      out.write_char('}')
-    }
-    start = index
-  }
-  if start < length {
-    out.write_substring(value, start, length - start)
-  }
-  out.write_char('"')
-}
-
-///|
-fn write_f32(out : StringBuilder, bits : UInt32) -> Unit {
-  if bits == NAN32 {
-    out.write_string("(_ NaN 8 24)")
-    return
-  }
-  let bits = bits.to_uint64()
-  out.write_string("(fp #b")
-  write_binary(out, bits >> 31, 1)
-  out.write_string(" #x")
-  write_hex(out, (bits >> 23) & 0xffUL, 2)
-  out.write_string(" #b")
-  write_binary(out, bits & 0x7f_ffffUL, 23)
-  out.write_char(')')
-}
-
-///|
-fn write_f64(out : StringBuilder, bits : UInt64) -> Unit {
-  if bits == NAN64 {
-    out.write_string("(_ NaN 11 53)")
-    return
-  }
-  out.write_string("(fp #b")
-  write_binary(out, bits >> 63, 1)
-  out.write_string(" #b")
-  write_binary(out, (bits >> 52) & 0x7ffUL, 11)
-  out.write_string(" #x")
-  write_hex(out, bits & 0x000f_ffff_ffff_ffffUL, 13)
-  out.write_char(')')
-}
-
-///|
 /// Write the value as an SMT-LIB 2 term. Tables become a store chain over a
 /// constant array, with keys in an unspecified order.
 pub fn Value::write(self : Value, out : StringBuilder) -> Unit {
   match self {
     Boolean(value) => out.write_string(if value { "true" } else { "false" })
     Integer(value) => write_integer(out, value)
-    Bits(width, bits) => write_bits(out, width, bits)
+    Bits(width, bits) => write_bits(out, width, low_half(bits), high_half(bits))
     Text(value) => write_string_literal(out, value)
-    F32(bits) => write_f32(out, bits)
-    F64(bits) => write_f64(out, bits)
+    F32(bits) => write_f32(out, bits.reinterpret_as_int())
+    F64(bits) => write_f64(out, low_half(bits), high_half(bits))
     Table(table) => {
       let cells = table.entries.to_array()
       for _ in cells {
@@ -398,13 +291,13 @@ pub fn Value::write(self : Value, out : StringBuilder) -> Unit {
       Array(table.index, table.element).write(out)
       out.write_string(") ")
       table.default.write(out)
-      out.write_char(')')
+      out.write_string(")")
       for cell in cells {
-        out.write_char(' ')
+        out.write_string(" ")
         cell.0.write(out)
-        out.write_char(' ')
+        out.write_string(" ")
         cell.1.write(out)
-        out.write_char(')')
+        out.write_string(")")
       }
     }
   }

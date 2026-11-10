@@ -257,9 +257,7 @@ const LAST_LEAF : Int32 = 8
 /// `Context` are the same handle, so `==` is a constant-time comparison.
 /// A handle is only meaningful for the context that created it.
 #derive(Eq, Hash, Debug)
-pub struct Term {
-  priv id : Int32
-}
+pub struct Term(Int32)
 
 ///|
 pub extend Term with Eq::{not_equal, equal}
@@ -273,44 +271,44 @@ pub extend Term with @debug.Debug::{to_repr}
 ///|
 /// An append-only term arena.
 ///
-/// Children always have smaller ids than their parents, so the node order is
-/// a topological order. Traversals use explicit stacks and generation stamps:
-/// their cost is proportional to the visited subgraph, not to the arena, and
-/// deep terms cannot overflow the call stack.
+/// A node is four integers in one flat buffer: operator and three argument
+/// slots. Children always have smaller ids than their parents, so the node
+/// order is a topological order. Traversals use explicit stacks and
+/// generation stamps: their cost is proportional to the visited subgraph,
+/// not to the arena, and deep terms cannot overflow the call stack.
 pub struct Context {
-  priv ops : Array[Int32]
-  priv arg0 : Array[Int32]
-  priv arg1 : Array[Int32]
-  priv arg2 : Array[Int32]
-  priv sorts : Array[Sort]
-  priv hashes : Array[Int32]
+  /// `nodes[4 * id ..]` is `op, a, b, c`; unused slots hold -1.
+  priv mut nodes : FixedArray[Int32]
+  priv mut sorts : FixedArray[Sort]
+  priv mut count : Int32
   /// Open addressing; a slot holds `id + 1`, and 0 marks an empty slot.
   priv mut table : FixedArray[Int32]
+  /// `BitVec(width)` for each width, shared by every node of that sort.
+  priv bitvecs : FixedArray[Sort]
   priv names : Array[String]
   priv vars : Map[String, Int32]
   priv strings : Array[String]
   priv string_ids : Map[String, Int32]
   priv bigs : Array[@bigint.BigInt]
   priv big_ids : Map[@bigint.BigInt, Int32]
-  // Traversal scratch, indexed by node id.
-  priv marks : Array[Int32]
-  priv refs : Array[Int32]
+  // Traversal scratch, indexed by node id and reused between traversals.
+  priv mut marks : FixedArray[Int32]
+  priv mut refs : FixedArray[Int32]
   priv mut generation : Int32
-  priv order : Array[Int32]
-  priv stack : Array[Int32]
-  priv values : Array[Value]
+  priv mut order : FixedArray[Int32]
+  priv mut visited : Int32
+  priv mut stack : FixedArray[Int32]
+  priv mut values : FixedArray[Value]
 }
 
 ///|
 pub fn Context::new() -> Context {
   {
-    ops: [],
-    arg0: [],
-    arg1: [],
-    arg2: [],
-    sorts: [],
-    hashes: [],
-    table: FixedArray::make(256, 0),
+    nodes: FixedArray::make(4 * 256, -1),
+    sorts: FixedArray::make(256, Bool),
+    count: 0,
+    table: FixedArray::make(512, 0),
+    bitvecs: FixedArray::makei(MAX_WIDTH + 1, width => BitVec(width)),
     names: [],
     vars: Map([]),
     strings: [],
@@ -321,6 +319,7 @@ pub fn Context::new() -> Context {
     refs: [],
     generation: 0,
     order: [],
+    visited: 0,
     stack: [],
     values: [],
   }
@@ -329,12 +328,38 @@ pub fn Context::new() -> Context {
 ///|
 /// Number of distinct terms created so far.
 pub fn Context::term_count(self : Context) -> Int32 {
-  self.ops.length()
+  self.count
 }
 
 ///|
 pub fn Context::sort_of(self : Context, term : Term) -> Sort {
-  self.sorts[term.id]
+  self.sorts[term.0]
+}
+
+///|
+fn Context::op(self : Context, id : Int32) -> Int32 {
+  self.nodes.unsafe_get(id * 4)
+}
+
+///|
+fn Context::a(self : Context, id : Int32) -> Int32 {
+  self.nodes.unsafe_get(id * 4 + 1)
+}
+
+///|
+fn Context::b(self : Context, id : Int32) -> Int32 {
+  self.nodes.unsafe_get(id * 4 + 2)
+}
+
+///|
+fn Context::c(self : Context, id : Int32) -> Int32 {
+  self.nodes.unsafe_get(id * 4 + 3)
+}
+
+///|
+/// The shared `BitVec(width)` sort object; `width` must be in 1..=64.
+fn Context::bitvec(self : Context, width : Int32) -> Sort {
+  self.bitvecs[width]
 }
 
 ///|
@@ -347,11 +372,33 @@ fn mix(op : Int32, a : Int32, b : Int32, c : Int32) -> Int32 {
 }
 
 ///|
-fn Context::grow(self : Context) -> Unit {
-  let size = self.table.length() * 2
+/// Growth factor for a buffer of `size` entries. Small arenas quadruple:
+/// allocating and refilling a buffer is the dominant cost of building a
+/// fresh context, and quadrupling halves the total volume allocated.
+fn growth(size : Int32) -> Int32 {
+  if size < 0x10000 {
+    4
+  } else {
+    2
+  }
+}
+
+///|
+/// Enlarge the hash table. Hashes are recomputed from the nodes, which is
+/// cheaper than keeping a fifth word per node.
+fn Context::rehash(self : Context) -> Unit {
+  let size = self.table.length() * growth(self.table.length())
   let table = FixedArray::make(size, 0)
   let slot_mask = size - 1
-  for id, hash in self.hashes {
+  let nodes = self.nodes
+  for id in 0..<self.count {
+    let base = id * 4
+    let hash = mix(
+      nodes[base],
+      nodes[base + 1],
+      nodes[base + 2],
+      nodes[base + 3],
+    )
     let mut slot = hash & slot_mask
     while table[slot] != 0 {
       slot = (slot + 1) & slot_mask
@@ -362,7 +409,21 @@ fn Context::grow(self : Context) -> Unit {
 }
 
 ///|
+fn Context::grow_nodes(self : Context) -> Unit {
+  let capacity = self.sorts.length() * growth(self.sorts.length())
+  let nodes = FixedArray::make(capacity * 4, -1)
+  self.nodes.blit_to(nodes, len=self.count * 4)
+  self.nodes = nodes
+  let sorts = FixedArray::make(capacity, Sort::Bool)
+  self.sorts.blit_to(sorts, len=self.count)
+  self.sorts = sorts
+}
+
+///|
 /// Return the existing node with this shape, or append it.
+///
+/// The operator and argument slots determine the sort for every operator
+/// except the constant array, whose index sort appears nowhere else.
 fn Context::intern(
   self : Context,
   op : Int32,
@@ -371,38 +432,43 @@ fn Context::intern(
   c : Int32,
   sort : Sort,
 ) -> Term {
-  let hash = mix(op, a, b, c)
-  let slot_mask = self.table.length() - 1
-  let mut slot = hash & slot_mask
+  let table = self.table
+  let nodes = self.nodes
+  let slot_mask = table.length() - 1
+  let mut slot = mix(op, a, b, c) & slot_mask
   while true {
-    let entry = self.table[slot]
+    let entry = table.unsafe_get(slot)
     if entry == 0 {
       break
     }
-    let id = entry - 1
-    if self.hashes[id] == hash &&
-      self.arg0[id] == a &&
-      self.arg1[id] == b &&
-      self.arg2[id] == c &&
-      self.ops[id] == op &&
-      self.sorts[id] == sort {
-      return { id, }
+    let base = (entry - 1) * 4
+    if nodes.unsafe_get(base) == op &&
+      nodes.unsafe_get(base + 1) == a &&
+      nodes.unsafe_get(base + 2) == b &&
+      nodes.unsafe_get(base + 3) == c &&
+      (op != CONST_ARRAY || self.sorts[entry - 1] == sort) {
+      return Term(entry - 1)
     }
     slot = (slot + 1) & slot_mask
   }
-  let id = self.ops.length()
-  self.ops.push(op)
-  self.arg0.push(a)
-  self.arg1.push(b)
-  self.arg2.push(c)
-  self.sorts.push(sort)
-  self.hashes.push(hash)
-  self.table[slot] = id + 1
-  // Keep the load factor at most one half.
-  if (id + 1) * 2 > self.table.length() {
-    self.grow()
+  let id = self.count
+  if id == self.sorts.length() {
+    self.grow_nodes()
   }
-  { id, }
+  let nodes = self.nodes
+  let base = id * 4
+  nodes[base] = op
+  nodes[base + 1] = a
+  nodes[base + 2] = b
+  nodes[base + 3] = c
+  self.sorts[id] = sort
+  table[slot] = id + 1
+  self.count = id + 1
+  // Keep the load factor at most one half.
+  if (id + 1) * 2 > table.length() {
+    self.rehash()
+  }
+  Term(id)
 }
 
 ///|
@@ -436,8 +502,8 @@ fn check_name(name : String) -> Unit raise SmtError {
   guard !(first >= '0' && first <= '9') && first != '.' && first != '@' else {
     raise Unsupported("Invalid constant name: " + name)
   }
-  for unit in name.to_array() {
-    guard valid_symbol_char(unit.to_int()) else {
+  for index in 0..<name.length() {
+    guard valid_symbol_char(name.unsafe_get(index).to_int()) else {
       raise Unsupported("Invalid constant name: " + name)
     }
   }
@@ -497,14 +563,14 @@ pub fn Context::constant(
           "\{name} is already declared as " + self.sorts[id].to_smtlib(),
         )
       }
-      { id, }
+      Term(id)
     }
     None => {
       check_name(name)
       check_sort(sort)
       let term = self.intern(VAR, self.names.length(), -1, -1, sort)
       self.names.push(name)
-      self.vars.set(name, term.id)
+      self.vars.set(name, term.0)
       term
     }
   }
@@ -532,7 +598,7 @@ pub fn[T : Encode] Context::typed(
 /// The declared constant named `name`, if any.
 pub fn Context::lookup(self : Context, name : String) -> Term? {
   match self.vars.get(name) {
-    Some(id) => Some({ id, })
+    Some(id) => Some(Term(id))
     None => None
   }
 }
@@ -540,8 +606,8 @@ pub fn Context::lookup(self : Context, name : String) -> Term? {
 ///|
 /// The name of a declared constant; `None` for any other term.
 pub fn Context::name_of(self : Context, term : Term) -> String? {
-  if self.ops[term.id] == VAR {
-    Some(self.names[self.arg0[term.id]])
+  if self.op(term.0) == VAR {
+    Some(self.names[self.a(term.0)])
   } else {
     None
   }
@@ -577,13 +643,15 @@ pub fn Context::integer(self : Context, value : @bigint.BigInt) -> Term {
 }
 
 ///|
-fn Context::bits(self : Context, sort : Sort, bits : UInt64) -> Term {
+/// A bitvector literal node: the bits as two 32-bit halves and the width.
+/// `bits` must already be reduced to `width` bits.
+fn Context::bits(self : Context, width : Int32, bits : UInt64) -> Term {
   self.intern(
     BV_LIT,
     bits.to_uint().reinterpret_as_int(),
     (bits >> 32).to_uint().reinterpret_as_int(),
-    -1,
-    sort,
+    width,
+    self.bitvec(width),
   )
 }
 
@@ -595,7 +663,7 @@ pub fn Context::bv(
   bits : UInt64,
 ) -> Term raise SmtError {
   check_width(width)
-  self.bits(BitVec(width), bits & mask(width))
+  self.bits(width, bits & mask(width))
 }
 
 ///|

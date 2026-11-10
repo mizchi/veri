@@ -214,9 +214,7 @@ pub fn Sort::to_smtlib(Self) -> String
 pub fn Sort::write(Self, StringBuilder) -> Unit
 
 #derive(Eq, Hash, @debug.Debug)
-pub struct Term {
-  // private fields
-}
+pub struct Term(Int32)
 pub fn Term::equal(Self, Self) -> Bool
 pub fn Term::hash(Self) -> Int32
 pub fn Term::hash_combine(Self, Hasher) -> Unit

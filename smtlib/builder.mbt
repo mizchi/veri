@@ -10,9 +10,9 @@ fn Context::unary(
   result : Sort,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort == expected else { raise mismatch(name, sort) }
-  self.intern(op, x.id, -1, -1, result)
+  self.intern(op, x.0, -1, -1, result)
 }
 
 ///|
@@ -25,11 +25,11 @@ fn Context::binary(
   result : Sort,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort == expected else { raise mismatch(name, sort) }
-  let other = self.sorts[y.id]
+  let other = self.sorts[y.0]
   guard other == expected else { raise mismatch(name, other) }
-  self.intern(op, x.id, y.id, -1, result)
+  self.intern(op, x.0, y.0, -1, result)
 }
 
 // Core
@@ -71,8 +71,8 @@ pub fn Context::all(
 ) -> Term raise SmtError {
   guard terms.length() > 0 else { return self.bool(true) }
   let mut result = terms[0]
-  guard self.sorts[result.id] == Bool else {
-    raise mismatch("and", self.sorts[result.id])
+  guard self.sorts[result.0] == Bool else {
+    raise mismatch("and", self.sorts[result.0])
   }
   for term in terms[1:] {
     result = self.and_(result, term)
@@ -88,8 +88,8 @@ pub fn Context::any(
 ) -> Term raise SmtError {
   guard terms.length() > 0 else { return self.bool(false) }
   let mut result = terms[0]
-  guard self.sorts[result.id] == Bool else {
-    raise mismatch("or", self.sorts[result.id])
+  guard self.sorts[result.0] == Bool else {
+    raise mismatch("or", self.sorts[result.0])
   }
   for term in terms[1:] {
     result = self.or_(result, term)
@@ -101,9 +101,9 @@ pub fn Context::any(
 /// `=` at any sort. Arrays compare extensionally; floating-point values
 /// compare as SMT values (`NaN = NaN`, `+0 ≠ -0`), unlike `fp_eq`.
 pub fn Context::eq(self : Context, x : Term, y : Term) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
-  guard self.sorts[y.id] == sort else { raise mismatch("=", self.sorts[y.id]) }
-  self.intern(EQUAL, x.id, y.id, -1, Bool)
+  let sort = self.sorts[x.0]
+  guard self.sorts[y.0] == sort else { raise mismatch("=", self.sorts[y.0]) }
+  self.intern(EQUAL, x.0, y.0, -1, Bool)
 }
 
 ///|
@@ -112,11 +112,11 @@ pub fn Context::distinct(
   x : Term,
   y : Term,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
-  guard self.sorts[y.id] == sort else {
-    raise mismatch("distinct", self.sorts[y.id])
+  let sort = self.sorts[x.0]
+  guard self.sorts[y.0] == sort else {
+    raise mismatch("distinct", self.sorts[y.0])
   }
-  self.intern(DISTINCT, x.id, y.id, -1, Bool)
+  self.intern(DISTINCT, x.0, y.0, -1, Bool)
 }
 
 ///|
@@ -126,14 +126,14 @@ pub fn Context::ite(
   then : Term,
   otherwise : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[condition.id] == Bool else {
-    raise mismatch("ite", self.sorts[condition.id])
+  guard self.sorts[condition.0] == Bool else {
+    raise mismatch("ite", self.sorts[condition.0])
   }
-  let sort = self.sorts[then.id]
-  guard self.sorts[otherwise.id] == sort else {
-    raise mismatch("ite", self.sorts[otherwise.id])
+  let sort = self.sorts[then.0]
+  guard self.sorts[otherwise.0] == sort else {
+    raise mismatch("ite", self.sorts[otherwise.0])
   }
-  self.intern(ITE, condition.id, then.id, otherwise.id, sort)
+  self.intern(ITE, condition.0, then.0, otherwise.0, sort)
 }
 
 // Ints: unbounded mathematical integers.
@@ -241,11 +241,11 @@ fn Context::bv_binary(
   y : Term,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is BitVec(_) else { raise mismatch(name, sort) }
-  let other = self.sorts[y.id]
+  let other = self.sorts[y.0]
   guard other == sort else { raise mismatch(name, other) }
-  self.intern(op, x.id, y.id, -1, sort)
+  self.intern(op, x.0, y.0, -1, sort)
 }
 
 ///|
@@ -256,11 +256,11 @@ fn Context::bv_compare(
   y : Term,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is BitVec(_) else { raise mismatch(name, sort) }
-  let other = self.sorts[y.id]
+  let other = self.sorts[y.0]
   guard other == sort else { raise mismatch(name, other) }
-  self.intern(op, x.id, y.id, -1, Bool)
+  self.intern(op, x.0, y.0, -1, Bool)
 }
 
 ///|
@@ -270,9 +270,9 @@ fn Context::bv_unary(
   x : Term,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is BitVec(_) else { raise mismatch(name, sort) }
-  self.intern(op, x.id, -1, -1, sort)
+  self.intern(op, x.0, -1, -1, sort)
 }
 
 ///|
@@ -452,14 +452,14 @@ pub fn Context::bv_concat(
   x : Term,
   y : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] is BitVec(high) else {
-    raise mismatch("concat", self.sorts[x.id])
+  guard self.sorts[x.0] is BitVec(high) else {
+    raise mismatch("concat", self.sorts[x.0])
   }
-  guard self.sorts[y.id] is BitVec(low) else {
-    raise mismatch("concat", self.sorts[y.id])
+  guard self.sorts[y.0] is BitVec(low) else {
+    raise mismatch("concat", self.sorts[y.0])
   }
   check_width(high + low)
-  self.intern(BV_CONCAT, x.id, y.id, -1, BitVec(high + low))
+  self.intern(BV_CONCAT, x.0, y.0, -1, self.bitvec(high + low))
 }
 
 ///|
@@ -470,13 +470,13 @@ pub fn Context::bv_extract(
   high~ : Int32,
   low~ : Int32,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] is BitVec(width) else {
-    raise mismatch("extract", self.sorts[x.id])
+  guard self.sorts[x.0] is BitVec(width) else {
+    raise mismatch("extract", self.sorts[x.0])
   }
   guard 0 <= low && low <= high && high < width else {
     raise Unsupported("extract \{high} \{low} from \{width} bits")
   }
-  self.intern(BV_EXTRACT, x.id, high, low, BitVec(high - low + 1))
+  self.intern(BV_EXTRACT, x.0, high, low, self.bitvec(high - low + 1))
 }
 
 ///|
@@ -486,14 +486,14 @@ pub fn Context::bv_zero_extend(
   x : Term,
   width~ : Int32,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] is BitVec(from) else {
-    raise mismatch("zero_extend", self.sorts[x.id])
+  guard self.sorts[x.0] is BitVec(from) else {
+    raise mismatch("zero_extend", self.sorts[x.0])
   }
   check_width(width)
   guard width >= from else {
     raise Unsupported("zero_extend from \{from} to \{width} bits")
   }
-  self.intern(BV_ZERO_EXTEND, x.id, width - from, -1, BitVec(width))
+  self.intern(BV_ZERO_EXTEND, x.0, width - from, -1, self.bitvec(width))
 }
 
 ///|
@@ -503,23 +503,23 @@ pub fn Context::bv_sign_extend(
   x : Term,
   width~ : Int32,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] is BitVec(from) else {
-    raise mismatch("sign_extend", self.sorts[x.id])
+  guard self.sorts[x.0] is BitVec(from) else {
+    raise mismatch("sign_extend", self.sorts[x.0])
   }
   check_width(width)
   guard width >= from else {
     raise Unsupported("sign_extend from \{from} to \{width} bits")
   }
-  self.intern(BV_SIGN_EXTEND, x.id, width - from, -1, BitVec(width))
+  self.intern(BV_SIGN_EXTEND, x.0, width - from, -1, self.bitvec(width))
 }
 
 ///|
 /// The unsigned value as a mathematical integer (`bv2nat`).
 pub fn Context::bv_to_int(self : Context, x : Term) -> Term raise SmtError {
-  guard self.sorts[x.id] is BitVec(_) else {
-    raise mismatch("bv2nat", self.sorts[x.id])
+  guard self.sorts[x.0] is BitVec(_) else {
+    raise mismatch("bv2nat", self.sorts[x.0])
   }
-  self.intern(BV_TO_NAT, x.id, -1, -1, Int)
+  self.intern(BV_TO_NAT, x.0, -1, -1, Int)
 }
 
 ///|
@@ -530,11 +530,11 @@ pub fn Context::int_to_bv(
   x : Term,
   width~ : Int32,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] == Int else {
-    raise mismatch("int2bv", self.sorts[x.id])
+  guard self.sorts[x.0] == Int else {
+    raise mismatch("int2bv", self.sorts[x.0])
   }
   check_width(width)
-  self.intern(INT_TO_BV, x.id, width, -1, BitVec(width))
+  self.intern(INT_TO_BV, x.0, width, -1, self.bitvec(width))
 }
 
 // ArraysEx. Names follow `mizchi/veri/arrays`.
@@ -545,13 +545,13 @@ pub fn Context::select(
   array : Term,
   index : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[array.id] is Array(key, element) else {
-    raise mismatch("select", self.sorts[array.id])
+  guard self.sorts[array.0] is Array(key, element) else {
+    raise mismatch("select", self.sorts[array.0])
   }
-  guard self.sorts[index.id] == key else {
-    raise mismatch("select", self.sorts[index.id])
+  guard self.sorts[index.0] == key else {
+    raise mismatch("select", self.sorts[index.0])
   }
-  self.intern(SELECT, array.id, index.id, -1, element)
+  self.intern(SELECT, array.0, index.0, -1, element)
 }
 
 ///|
@@ -561,15 +561,15 @@ pub fn Context::store(
   index : Term,
   value : Term,
 ) -> Term raise SmtError {
-  let sort = self.sorts[array.id]
+  let sort = self.sorts[array.0]
   guard sort is Array(key, element) else { raise mismatch("store", sort) }
-  guard self.sorts[index.id] == key else {
-    raise mismatch("store", self.sorts[index.id])
+  guard self.sorts[index.0] == key else {
+    raise mismatch("store", self.sorts[index.0])
   }
-  guard self.sorts[value.id] == element else {
-    raise mismatch("store", self.sorts[value.id])
+  guard self.sorts[value.0] == element else {
+    raise mismatch("store", self.sorts[value.0])
   }
-  self.intern(STORE, array.id, index.id, value.id, sort)
+  self.intern(STORE, array.0, index.0, value.0, sort)
 }
 
 ///|
@@ -580,7 +580,7 @@ pub fn Context::const_array(
   value : Term,
 ) -> Term raise SmtError {
   check_sort(index)
-  self.intern(CONST_ARRAY, value.id, -1, -1, Array(index, self.sorts[value.id]))
+  self.intern(CONST_ARRAY, value.0, -1, -1, Array(index, self.sorts[value.0]))
 }
 
 // Strings. Names follow `mizchi/veri/strings`; positions count code points.
@@ -606,13 +606,13 @@ pub fn Context::str_at(
   x : Term,
   index : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] == String else {
-    raise mismatch("str.at", self.sorts[x.id])
+  guard self.sorts[x.0] == String else {
+    raise mismatch("str.at", self.sorts[x.0])
   }
-  guard self.sorts[index.id] == Int else {
-    raise mismatch("str.at", self.sorts[index.id])
+  guard self.sorts[index.0] == Int else {
+    raise mismatch("str.at", self.sorts[index.0])
   }
-  self.intern(STR_AT, x.id, index.id, -1, String)
+  self.intern(STR_AT, x.0, index.0, -1, String)
 }
 
 ///|
@@ -623,16 +623,16 @@ pub fn Context::str_substr(
   start : Term,
   count : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] == String else {
-    raise mismatch("str.substr", self.sorts[x.id])
+  guard self.sorts[x.0] == String else {
+    raise mismatch("str.substr", self.sorts[x.0])
   }
-  guard self.sorts[start.id] == Int else {
-    raise mismatch("str.substr", self.sorts[start.id])
+  guard self.sorts[start.0] == Int else {
+    raise mismatch("str.substr", self.sorts[start.0])
   }
-  guard self.sorts[count.id] == Int else {
-    raise mismatch("str.substr", self.sorts[count.id])
+  guard self.sorts[count.0] == Int else {
+    raise mismatch("str.substr", self.sorts[count.0])
   }
-  self.intern(STR_SUBSTR, x.id, start.id, count.id, String)
+  self.intern(STR_SUBSTR, x.0, start.0, count.0, String)
 }
 
 ///|
@@ -672,16 +672,16 @@ pub fn Context::str_index_of(
   part : Term,
   start : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] == String else {
-    raise mismatch("str.indexof", self.sorts[x.id])
+  guard self.sorts[x.0] == String else {
+    raise mismatch("str.indexof", self.sorts[x.0])
   }
-  guard self.sorts[part.id] == String else {
-    raise mismatch("str.indexof", self.sorts[part.id])
+  guard self.sorts[part.0] == String else {
+    raise mismatch("str.indexof", self.sorts[part.0])
   }
-  guard self.sorts[start.id] == Int else {
-    raise mismatch("str.indexof", self.sorts[start.id])
+  guard self.sorts[start.0] == Int else {
+    raise mismatch("str.indexof", self.sorts[start.0])
   }
-  self.intern(STR_INDEX_OF, x.id, part.id, start.id, Int)
+  self.intern(STR_INDEX_OF, x.0, part.0, start.0, Int)
 }
 
 ///|
@@ -692,16 +692,16 @@ pub fn Context::str_replace(
   from : Term,
   to : Term,
 ) -> Term raise SmtError {
-  guard self.sorts[x.id] == String else {
-    raise mismatch("str.replace", self.sorts[x.id])
+  guard self.sorts[x.0] == String else {
+    raise mismatch("str.replace", self.sorts[x.0])
   }
-  guard self.sorts[from.id] == String else {
-    raise mismatch("str.replace", self.sorts[from.id])
+  guard self.sorts[from.0] == String else {
+    raise mismatch("str.replace", self.sorts[from.0])
   }
-  guard self.sorts[to.id] == String else {
-    raise mismatch("str.replace", self.sorts[to.id])
+  guard self.sorts[to.0] == String else {
+    raise mismatch("str.replace", self.sorts[to.0])
   }
-  self.intern(STR_REPLACE, x.id, from.id, to.id, String)
+  self.intern(STR_REPLACE, x.0, from.0, to.0, String)
 }
 
 ///|
@@ -746,11 +746,11 @@ fn Context::fp_binary(
   y : Term,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is (Float32 | Float64) else { raise mismatch(name, sort) }
-  let other = self.sorts[y.id]
+  let other = self.sorts[y.0]
   guard other == sort else { raise mismatch(name, other) }
-  self.intern(op, x.id, y.id, -1, sort)
+  self.intern(op, x.0, y.0, -1, sort)
 }
 
 ///|
@@ -761,11 +761,11 @@ fn Context::fp_compare(
   y : Term,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is (Float32 | Float64) else { raise mismatch(name, sort) }
-  let other = self.sorts[y.id]
+  let other = self.sorts[y.0]
   guard other == sort else { raise mismatch(name, other) }
-  self.intern(op, x.id, y.id, -1, Bool)
+  self.intern(op, x.0, y.0, -1, Bool)
 }
 
 ///|
@@ -776,9 +776,9 @@ fn Context::fp_unary(
   result : Sort?,
   name : String,
 ) -> Term raise SmtError {
-  let sort = self.sorts[x.id]
+  let sort = self.sorts[x.0]
   guard sort is (Float32 | Float64) else { raise mismatch(name, sort) }
-  self.intern(op, x.id, -1, -1, result.unwrap_or(sort))
+  self.intern(op, x.0, -1, -1, result.unwrap_or(sort))
 }
 
 ///|
@@ -879,12 +879,12 @@ pub fn Context::fp_is_zero(self : Context, x : Term) -> Term raise SmtError {
 /// Reinterpret 32 or 64 bits in IEEE interchange format. Every NaN pattern
 /// denotes the single SMT NaN.
 pub fn Context::fp_from_bits(self : Context, x : Term) -> Term raise SmtError {
-  let sort = match self.sorts[x.id] {
+  let sort = match self.sorts[x.0] {
     BitVec(32) => Float32
     BitVec(64) => Float64
     other => raise mismatch("to_fp", other)
   }
-  self.intern(FP_FROM_BITS, x.id, -1, -1, sort)
+  self.intern(FP_FROM_BITS, x.0, -1, -1, sort)
 }
 
 ///|
@@ -895,8 +895,9 @@ pub fn Context::fp_convert(
   to~ : Sort,
 ) -> Term raise SmtError {
   guard to is (Float32 | Float64) else { raise mismatch("to_fp", to) }
-  guard self.sorts[x.id] is (Float32 | Float64) else {
-    raise mismatch("to_fp", self.sorts[x.id])
+  guard self.sorts[x.0] is (Float32 | Float64) else {
+    raise mismatch("to_fp", self.sorts[x.0])
   }
-  self.intern(FP_CONVERT, x.id, -1, -1, to)
+  // The target format is part of the node's identity.
+  self.intern(FP_CONVERT, x.0, if to == Float32 { 32 } else { 64 }, -1, to)
 }
