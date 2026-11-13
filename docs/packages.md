@@ -74,7 +74,7 @@ veri/
 ├── runtime/                 # numeric/text bridges and collection implementations
 ├── testing/commands/
 └── examples/
-    ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.2.1
+    ├── moon.mod             # mizchi/veri-examples; imports mizchi/veri@0.3.0
     ├── models/
     ├── bridges/
     ├── floating/

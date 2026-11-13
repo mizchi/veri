@@ -74,7 +74,7 @@ veri/
 ├── runtime/                 # 数値・文字列の対応とコレクション実装
 ├── testing/commands/
 └── examples/
-    ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.2.1 に依存
+    ├── moon.mod             # mizchi/veri-examples; mizchi/veri@0.3.0 に依存
     ├── models/
     ├── bridges/
     ├── floating/
