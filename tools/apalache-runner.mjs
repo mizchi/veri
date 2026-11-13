@@ -5,6 +5,9 @@ import {join, relative} from "node:path";
 import {fileURLToPath} from "node:url";
 import {classifyApalache} from "./apalache.mjs";
 
+const smtTimeoutSeconds = 360;
+const processTimeoutMs = 900000;
+
 const root = fileURLToPath(new URL("../", import.meta.url));
 const binary = join(root, "_build/apalache-bin/bin/apalache-mc");
 
@@ -22,13 +25,16 @@ export function runApalache({runDirectory, name, source, options, bound = 8, nex
   const args = ["check", `--config-file=${config}`, `--out-dir=${join(dir, "out")}`,
     `--run-dir=${join(dir, "artifacts")}`, `--length=${bound}`, "--init=Init", `--next=${next}`,
     "--smt-solver=z3", "--smt-encoding=oopsla19", "--algo=incremental", `--no-deadlock=${!checkDeadlocks}`,
-    "--discard-disabled=false", "--tuning-options=search.invariant.mode=after", "--timeout-smt=120",
+    "--discard-disabled=false", "--tuning-options=search.invariant.mode=after",
+    // The last step of a fair TaskGroup check takes about two minutes on a CI runner, and
+    // solver time varies between runs. A timeout is still a failure, never "no counterexample".
+    `--timeout-smt=${smtTimeoutSeconds}`,
     ...options, source];
   console.log(`${name}: Apalache checking up to ${bound} transitions...`);
   const fd = openSync(join(dir, "output.log"), "w");
   let completed;
   try {
-    completed = spawnSync(binary, args, {cwd: root, stdio: ["ignore", fd, fd], timeout: 300000});
+    completed = spawnSync(binary, args, {cwd: root, stdio: ["ignore", fd, fd], timeout: processTimeoutMs});
   } finally { closeSync(fd); }
   assert.ifError(completed.error);
   assert.equal(completed.signal, null);
